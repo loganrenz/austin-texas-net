@@ -21,6 +21,12 @@
 - **Use `useAsyncData` or `useFetch`** for all data fetching — never raw `fetch()` in components.
 - **Follow Nuxt 4 directory structure** — app code in `app/`, server code in `server/`.
 
+## Styling
+
+- **Tailwind utility classes only.** Do not add `<style>` or `<style scoped>` blocks to components or pages. All styling must use Tailwind utility classes directly in template markup.
+- **No custom CSS in Vue files.** If a utility class doesn't exist, compose Tailwind classes or extend the theme in `app/assets/css/main.css` — never write one-off CSS in a component.
+- **Exception: `app/assets/css/main.css`** is the only place custom CSS is allowed (global resets, theme extensions, Tailwind `@layer` directives).
+
 ## Cloudflare Workers / D1
 
 - **All server utils must be edge-compatible.** No Node.js-only APIs (`fs`, `path`, `crypto` from Node). Use Web APIs and `h3` utilities.
