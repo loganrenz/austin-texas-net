@@ -168,7 +168,7 @@ function severityColor(level: string): string {
       <div class="flex items-center gap-2 text-sm text-muted">
         <NuxtLink to="/" class="hover:text-primary transition-colors">Home</NuxtLink>
         <UIcon name="i-lucide-chevron-right" class="size-3" />
-        <span class="text-default font-medium">Pollen</span>
+        <span class="text-default font-medium">Cedar Pollen</span>
       </div>
       <div class="flex items-center gap-1">
         <NuxtLink
@@ -187,28 +187,40 @@ function severityColor(level: string): string {
     </div>
 
     <!-- Combined Hero + Chart -->
-    <section class="hero" :style="hydrated ? { background: severityGradient } : undefined">
-      <div class="hero-top">
-        <div class="hero-live">
-          <span class="live-dot" />
-          <span class="live-text">Live Data</span>
+    <section
+      class="rounded-[20px] max-sm:rounded-2xl p-8 max-sm:py-6 max-sm:px-4 mb-6 border border-default overflow-hidden"
+      :style="hydrated ? { background: severityGradient } : undefined"
+    >
+      <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center gap-2">
+          <span class="size-2 bg-success rounded-full animate-pulse-dot" />
+          <span class="text-[0.7rem] font-semibold text-success uppercase tracking-wider"
+            >Live Data</span
+          >
         </div>
         <ClientOnly>
-          <span v-if="lastUpdatedFormatted" class="meta-item"
+          <span v-if="lastUpdatedFormatted" class="text-[0.65rem] text-muted"
             >Updated {{ lastUpdatedFormatted }}</span
           >
         </ClientOnly>
       </div>
 
-      <div v-if="currentData" class="hero-body">
+      <div
+        v-if="currentData"
+        class="grid grid-cols-[auto_1fr] max-lg:grid-cols-1 gap-10 max-lg:gap-6 items-center min-h-[260px]"
+      >
         <!-- Left: Ring + Description -->
-        <div class="hero-left">
+        <div
+          class="flex flex-col items-center text-center gap-3 shrink-0 min-w-[220px] max-lg:min-w-0"
+        >
           <PollenSeverityRing :count="(currentData as any).current.count" :size="200" />
-          <p class="hero-description">{{ (currentData as any).current.description }}</p>
+          <p class="text-[0.85rem] text-muted leading-relaxed max-w-[240px]">
+            {{ (currentData as any).current.description }}
+          </p>
         </div>
 
         <!-- Right: Chart integrated inline -->
-        <div class="hero-chart">
+        <div class="min-w-0 flex-1">
           <PollenChart
             :data="historyData"
             :loading="historyPending"
@@ -216,14 +228,17 @@ function severityColor(level: string): string {
           />
         </div>
       </div>
-      <div v-else class="hero-loading">
+      <div v-else class="text-center py-[60px] flex flex-col items-center gap-3">
         <UIcon name="i-lucide-loader-2" class="size-6 animate-spin text-muted" />
         <p class="text-muted text-sm">Loading pollen data...</p>
       </div>
     </section>
 
     <!-- Stats Row -->
-    <section v-if="currentData" class="stats-grid">
+    <section
+      v-if="currentData"
+      class="grid grid-cols-4 max-lg:grid-cols-2 max-sm:grid-cols-2 gap-3 mb-6"
+    >
       <PollenStatCard
         label="Current (Cedar)"
         :value="(currentData as any).current?.count ?? 0"
@@ -251,42 +266,46 @@ function severityColor(level: string): string {
     </section>
 
     <!-- Allergen Breakdown -->
-    <section v-if="allergenData" class="allergen-section">
-      <h2 class="section-title">Allergen Breakdown</h2>
-      <p class="section-subtitle">Current grains/m³ by type</p>
-      <div class="allergen-grid">
-        <div class="allergen-card">
-          <div class="allergen-bar" style="background: #ef4444" />
-          <div class="allergen-name">Cedar</div>
-          <div class="allergen-count" style="color: #ef4444">
+    <section v-if="allergenData" class="mb-6">
+      <h2 class="text-[0.85rem] font-semibold text-muted uppercase tracking-[0.06em] mb-1">
+        Allergen Breakdown
+      </h2>
+      <p class="text-[0.7rem] text-muted mb-4">Current grains/m³ by type</p>
+      <div class="grid grid-cols-3 max-sm:grid-cols-1 gap-3">
+        <div class="bg-elevated border border-default rounded-xl py-4.5 px-4">
+          <div class="w-1 h-4 rounded-sm mb-2.5 opacity-70 bg-error" />
+          <div class="text-[0.7rem] text-muted uppercase tracking-[0.06em] mb-1">Cedar</div>
+          <div class="text-2xl font-bold tabular-nums text-error">
             {{ allergenData.cedar?.toLocaleString() ?? '—' }}
           </div>
-          <div class="allergen-unit">grains/m³</div>
+          <div class="text-[0.6rem] text-dimmed uppercase tracking-[0.06em]">grains/m³</div>
         </div>
-        <div class="allergen-card">
-          <div class="allergen-bar" style="background: #60a5fa" />
-          <div class="allergen-name">Elm</div>
-          <div class="allergen-count" style="color: #60a5fa">
+        <div class="bg-elevated border border-default rounded-xl py-4.5 px-4">
+          <div class="w-1 h-4 rounded-sm mb-2.5 opacity-70 bg-info" />
+          <div class="text-[0.7rem] text-muted uppercase tracking-[0.06em] mb-1">Elm</div>
+          <div class="text-2xl font-bold tabular-nums text-info">
             {{ allergenData.elm?.toLocaleString() ?? '—' }}
           </div>
-          <div class="allergen-unit">grains/m³</div>
+          <div class="text-[0.6rem] text-dimmed uppercase tracking-[0.06em]">grains/m³</div>
         </div>
-        <div class="allergen-card">
-          <div class="allergen-bar" style="background: #a855f7" />
-          <div class="allergen-name">Mold</div>
-          <div class="allergen-count" style="color: #a855f7">
+        <div class="bg-elevated border border-default rounded-xl py-4.5 px-4">
+          <div class="w-1 h-4 rounded-sm mb-2.5 opacity-70 bg-primary" />
+          <div class="text-[0.7rem] text-muted uppercase tracking-[0.06em] mb-1">Mold</div>
+          <div class="text-2xl font-bold tabular-nums text-primary">
             {{ allergenData.mold?.toLocaleString() ?? '—' }}
           </div>
-          <div class="allergen-unit">grains/m³</div>
+          <div class="text-[0.6rem] text-dimmed uppercase tracking-[0.06em]">grains/m³</div>
         </div>
       </div>
     </section>
 
     <!-- 5-Day Forecast -->
-    <section v-if="forecastDays.length > 0" class="forecast-section">
-      <h2 class="section-title">5-Day Forecast</h2>
-      <p class="section-subtitle">Projected pollen levels based on recent trends</p>
-      <div class="forecast-grid">
+    <section v-if="forecastDays.length > 0" class="mb-6">
+      <h2 class="text-[0.85rem] font-semibold text-muted uppercase tracking-[0.06em] mb-1">
+        5-Day Forecast
+      </h2>
+      <p class="text-[0.7rem] text-muted mb-4">Projected pollen levels based on recent trends</p>
+      <div class="grid grid-cols-5 max-lg:grid-cols-3 max-sm:grid-cols-2 gap-3">
         <PollenForecastCard
           v-for="day in forecastDays"
           :key="day.date"
@@ -303,288 +322,31 @@ function severityColor(level: string): string {
     </section>
 
     <!-- Quick Tips -->
-    <section v-if="healthTips.length > 0" class="tips-section">
-      <h2 class="section-title">Quick Protection Tips</h2>
-      <div class="tips-grid">
-        <div v-for="(tip, i) in healthTips" :key="i" class="tip-card">
-          <div class="tip-icon-wrap">
+    <section v-if="healthTips.length > 0" class="mb-6">
+      <h2 class="text-[0.85rem] font-semibold text-muted uppercase tracking-[0.06em] mb-1">
+        Quick Protection Tips
+      </h2>
+      <div class="grid grid-cols-4 max-lg:grid-cols-2 max-sm:grid-cols-1 gap-3 mt-4">
+        <div
+          v-for="(tip, i) in healthTips"
+          :key="i"
+          class="bg-elevated border border-default rounded-xl py-5 px-4 transition-colors duration-200 hover:border-[var(--color-border-hover)]"
+        >
+          <div
+            class="size-9 bg-primary/10 rounded-[10px] flex items-center justify-center text-primary mb-3"
+          >
             <UIcon name="i-lucide-shield-check" class="size-5" />
           </div>
-          <p class="tip-text">{{ tip }}</p>
+          <p class="text-xs text-muted leading-normal">{{ tip }}</p>
         </div>
       </div>
     </section>
 
     <!-- Data source attribution -->
     <ClientOnly>
-      <div class="data-source">Data from KXAN &amp; Google Pollen API</div>
+      <div class="text-center text-[0.65rem] text-dimmed pt-2">
+        Data from KXAN &amp; Google Pollen API
+      </div>
     </ClientOnly>
   </div>
 </template>
-
-<style scoped>
-/* Hero */
-.hero {
-  border-radius: 20px;
-  padding: 32px;
-  margin-bottom: 24px;
-  border: 1px solid var(--color-border);
-  overflow: hidden;
-}
-
-.hero-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.hero-live {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.live-dot {
-  width: 8px;
-  height: 8px;
-  background: #22c55e;
-  border-radius: 50%;
-  animation: pulse-dot 2s infinite;
-}
-
-@keyframes pulse-dot {
-  0%,
-  100% {
-    opacity: 1;
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
-  }
-  50% {
-    opacity: 0.8;
-    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
-  }
-}
-
-.live-text {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: #22c55e;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.meta-item {
-  font-size: 0.65rem;
-  color: var(--color-text-muted);
-}
-
-/* Hero body — ring left, chart right */
-.hero-body {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 40px;
-  align-items: center;
-  min-height: 260px;
-}
-
-.hero-left {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 12px;
-  flex-shrink: 0;
-  min-width: 220px;
-}
-
-.hero-description {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-  line-height: 1.6;
-  max-width: 240px;
-}
-
-.hero-chart {
-  min-width: 0;
-  flex: 1;
-}
-
-.hero-loading {
-  text-align: center;
-  padding: 60px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-/* Stats grid */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-/* Allergen section */
-.allergen-section {
-  margin-bottom: 24px;
-}
-
-.section-title {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 4px;
-}
-
-.section-subtitle {
-  font-size: 0.7rem;
-  color: var(--color-text-muted);
-  margin-bottom: 16px;
-}
-
-.allergen-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-.allergen-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: 18px 16px;
-}
-
-.allergen-bar {
-  width: 4px;
-  height: 16px;
-  border-radius: 2px;
-  margin-bottom: 10px;
-  opacity: 0.7;
-}
-
-.allergen-name {
-  font-size: 0.7rem;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 4px;
-}
-
-.allergen-count {
-  font-size: 1.5rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-.allergen-unit {
-  font-size: 0.6rem;
-  color: var(--color-text-faint);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-/* Forecast */
-.forecast-section {
-  margin-bottom: 24px;
-}
-
-.forecast-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-}
-
-/* Tips */
-.tips-section {
-  margin-bottom: 24px;
-}
-
-.tips-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.tip-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: 20px 16px;
-  transition: border-color 0.2s ease;
-}
-
-.tip-card:hover {
-  border-color: var(--color-border-hover);
-}
-
-.tip-icon-wrap {
-  width: 36px;
-  height: 36px;
-  background: rgba(16, 185, 129, 0.1);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-primary);
-  margin-bottom: 12px;
-}
-
-.tip-text {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-  line-height: 1.5;
-}
-
-/* Source attribution */
-.data-source {
-  text-align: center;
-  font-size: 0.65rem;
-  color: var(--color-text-faint);
-  padding: 8px 0 0;
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-  .hero-body {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-  .hero-left {
-    min-width: unset;
-  }
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .forecast-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  .tips-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 640px) {
-  .hero {
-    padding: 24px 16px;
-    border-radius: 16px;
-  }
-  .stats-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-  .allergen-grid {
-    grid-template-columns: 1fr;
-  }
-  .forecast-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-  .tips-grid {
-    grid-template-columns: 1fr;
-  }
-}
-</style>

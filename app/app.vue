@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type { NavigationMenuItem, FooterColumn } from '@nuxt/ui'
-import type { Category, SubApp } from '~/composables/useSiteData'
+import type { NavigationMenuItem } from '@nuxt/ui'
 
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
@@ -23,27 +22,12 @@ useHead({
   link: [{ rel: 'canonical', href: canonicalUrl }],
 })
 
-const { categories } = useSiteData()
-
 /* ── Header nav items ─────────────────────────────────────── */
 const navItems = computed<NavigationMenuItem[]>(() => [
   { label: 'Search', icon: 'i-lucide-search', to: '/search/' },
   { label: 'Categories', icon: 'i-lucide-layout-grid', to: '/food/' },
   { label: 'About', icon: 'i-lucide-info', to: '/about/' },
 ])
-
-/* ── Footer columns ───────────────────────────────────────── */
-const footerColumns = computed<FooterColumn[]>(() =>
-  categories.map((cat: Category) => ({
-    label: cat.title,
-    children: cat.subApps.map((app: SubApp) => ({
-      label: app.title,
-      to: app.status === 'live' ? `/${cat.slug}/${app.slug}/` : app.standaloneUrl || undefined,
-      target: app.status !== 'live' && app.standaloneUrl ? '_blank' : undefined,
-      disabled: app.status !== 'live' && !app.standaloneUrl,
-    })),
-  })),
-)
 
 const footerLinks = [
   { label: 'About', to: '/about/' },
@@ -76,12 +60,6 @@ const adminLinks = [{ label: 'Admin', to: '/admin/radar' }]
 
     <!-- Footer -->
     <UFooter>
-      <template #top>
-        <UContainer>
-          <UFooterColumns :columns="footerColumns" />
-        </UContainer>
-      </template>
-
       <template #left>
         <span class="text-xs text-muted"
           >&copy; {{ new Date().getFullYear() }} Austin-Texas.net</span

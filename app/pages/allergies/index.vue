@@ -95,7 +95,7 @@ const faqItems = [
         <h2
           class="text-xs font-bold uppercase tracking-widest text-muted mb-3 flex items-center gap-2"
         >
-          <span class="live-dot size-[7px] bg-success rounded-full" />
+          <span class="animate-pulse-dot size-[7px] bg-success rounded-full" />
           Live Now
         </h2>
         <NuxtLink
@@ -143,21 +143,3 @@ const faqItems = [
     </template>
   </CategoryPage>
 </template>
-
-<style scoped>
-.live-dot {
-  animation: pulse-dot 2s infinite;
-}
-
-@keyframes pulse-dot {
-  0%,
-  100% {
-    opacity: 1;
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
-  }
-  50% {
-    opacity: 0.8;
-    box-shadow: 0 0 0 5px rgba(34, 197, 94, 0);
-  }
-}
-</style>

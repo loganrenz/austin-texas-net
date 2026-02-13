@@ -117,9 +117,9 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
 </script>
 
 <template>
-  <div class="radar-page">
+  <div class="max-w-[1200px] mx-auto py-8 px-4 flex flex-col gap-6">
     <!-- Header -->
-    <div class="radar-header">
+    <div class="flex justify-between items-center flex-wrap gap-4">
       <div class="flex items-center gap-3">
         <UIcon name="i-lucide-radar" class="size-7 text-primary" />
         <h1 class="text-2xl font-bold">Search Radar</h1>
@@ -135,7 +135,7 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
     </div>
 
     <!-- Ingest result banner -->
-    <UCard v-if="ingestResult" class="ingest-banner">
+    <UCard v-if="ingestResult" class="border-success/25">
       <div class="flex items-center gap-3">
         <UIcon name="i-lucide-check-circle" class="size-5 text-success" />
         <span
@@ -146,35 +146,47 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
     </UCard>
 
     <!-- KPI Cards -->
-    <div v-if="stats" class="kpi-grid">
+    <div v-if="stats" class="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
       <UCard>
-        <div class="kpi">
-          <span class="kpi-value">{{ stats.kpi.total }}</span>
-          <span class="kpi-label">Total Keywords</span>
+        <div class="flex flex-col items-center gap-1">
+          <span class="text-[2rem] font-extrabold leading-none tabular-nums">{{
+            stats.kpi.total
+          }}</span>
+          <span class="text-xs font-medium text-dimmed uppercase tracking-wider"
+            >Total Keywords</span
+          >
         </div>
       </UCard>
       <UCard>
-        <div class="kpi">
-          <span class="kpi-value text-error">{{ stats.kpi.gaps }}</span>
-          <span class="kpi-label">Content Gaps</span>
+        <div class="flex flex-col items-center gap-1">
+          <span class="text-[2rem] font-extrabold leading-none tabular-nums text-error">{{
+            stats.kpi.gaps
+          }}</span>
+          <span class="text-xs font-medium text-dimmed uppercase tracking-wider">Content Gaps</span>
         </div>
       </UCard>
       <UCard>
-        <div class="kpi">
-          <span class="kpi-value text-success">{{ stats.kpi.coveragePct }}%</span>
-          <span class="kpi-label">Coverage</span>
+        <div class="flex flex-col items-center gap-1">
+          <span class="text-[2rem] font-extrabold leading-none tabular-nums text-success"
+            >{{ stats.kpi.coveragePct }}%</span
+          >
+          <span class="text-xs font-medium text-dimmed uppercase tracking-wider">Coverage</span>
         </div>
       </UCard>
       <UCard>
-        <div class="kpi">
-          <span class="kpi-value text-warning">{{ stats.kpi.avgDifficulty }}</span>
-          <span class="kpi-label">Avg Difficulty</span>
+        <div class="flex flex-col items-center gap-1">
+          <span class="text-[2rem] font-extrabold leading-none tabular-nums text-warning">{{
+            stats.kpi.avgDifficulty
+          }}</span>
+          <span class="text-xs font-medium text-dimmed uppercase tracking-wider"
+            >Avg Difficulty</span
+          >
         </div>
       </UCard>
     </div>
 
     <!-- Bucket + Intent breakdown -->
-    <div v-if="stats" class="breakdown-grid">
+    <div v-if="stats" class="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-4">
       <UCard>
         <template #header>
           <span class="font-semibold text-sm">By Bucket</span>
@@ -204,7 +216,7 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
 
     <!-- Filters -->
     <UCard>
-      <div class="filter-row">
+      <div class="flex gap-3 flex-wrap">
         <UInput
           v-model="search"
           icon="i-lucide-search"
@@ -245,7 +257,7 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
         </div>
       </template>
 
-      <div class="table-wrapper">
+      <div class="overflow-x-auto">
         <!-- eslint-disable-next-line atx/no-native-table -->
         <table v-if="keywords?.data?.length" class="radar-table">
           <thead>
@@ -316,7 +328,7 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
           <UButton size="xs" variant="ghost" icon="i-lucide-x" @click="briefResult = null" />
         </div>
       </template>
-      <div class="brief-content">
+      <div class="flex flex-col gap-4 text-sm">
         <div class="brief-meta">
           <p><strong>Title:</strong> {{ briefResult.suggestedTitle }}</p>
           <p><strong>Meta:</strong> {{ briefResult.metaDescription }}</p>
@@ -339,7 +351,10 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
             </UBadge>
           </div>
         </div>
-        <pre class="brief-outline">{{ briefResult.outline }}</pre>
+        <pre
+          class="bg-default border border-default rounded-lg p-4 text-[0.8rem] whitespace-pre-wrap overflow-x-auto"
+          >{{ briefResult.outline }}</pre
+        >
       </div>
     </UCard>
 
@@ -348,9 +363,13 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
       <template #header>
         <span class="font-semibold">Content Queue (Top {{ queue.data.length }})</span>
       </template>
-      <div class="queue-list">
-        <div v-for="(kw, i) in queue.data" :key="kw.id" class="queue-item">
-          <span class="queue-rank">{{ i + 1 }}</span>
+      <div class="flex flex-col">
+        <div
+          v-for="(kw, i) in queue.data"
+          :key="kw.id"
+          class="flex items-center gap-3 py-2 border-b border-default last:border-b-0"
+        >
+          <span class="text-xs font-bold text-dimmed min-w-6 text-center">{{ i + 1 }}</span>
           <span class="flex-1 font-medium">{{ kw.keyword }}</span>
           <UBadge variant="subtle" color="neutral" size="xs">{{ kw.bucket }}</UBadge>
           <span class="tabular-nums font-semibold">{{ kw.strategicScore }}</span>
@@ -367,78 +386,12 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
   </div>
 </template>
 
-<style scoped>
-.radar-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.radar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.ingest-banner {
-  border-color: #22c55e40;
-}
-
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
-}
-
-.kpi {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.kpi-value {
-  font-size: 2rem;
-  font-weight: 800;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-
-.kpi-label {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--ui-text-dimmed);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.breakdown-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1rem;
-}
-
-.filter-row {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.table-wrapper {
-  overflow-x: auto;
-}
-
+<style>
 .radar-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.875rem;
 }
-
 .radar-table th {
   text-align: left;
   padding: 0.5rem 0.75rem;
@@ -449,64 +402,12 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
   letter-spacing: 0.05em;
   border-bottom: 1px solid var(--ui-border);
 }
-
 .radar-table td {
   padding: 0.5rem 0.75rem;
   border-bottom: 1px solid var(--ui-border);
   white-space: nowrap;
 }
-
 .radar-table tr:hover td {
   background: var(--ui-bg-elevated);
-}
-
-.brief-content {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  font-size: 0.875rem;
-}
-
-.brief-outline {
-  background: var(--ui-bg);
-  border: 1px solid var(--ui-border);
-  border-radius: 8px;
-  padding: 1rem;
-  font-size: 0.8rem;
-  white-space: pre-wrap;
-  overflow-x: auto;
-}
-
-.queue-list {
-  display: flex;
-  flex-direction: column;
-}
-
-.queue-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--ui-border);
-}
-
-.queue-item:last-child {
-  border-bottom: none;
-}
-
-.queue-rank {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--ui-text-dimmed);
-  min-width: 1.5rem;
-  text-align: center;
-}
-
-.tabular-nums {
-  font-variant-numeric: tabular-nums;
-}
-
-.text-dimmed {
-  color: var(--ui-text-dimmed);
 }
 </style>

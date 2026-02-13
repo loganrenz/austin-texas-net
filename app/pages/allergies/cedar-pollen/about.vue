@@ -84,329 +84,138 @@ const facts = [
 
 <template>
   <div>
-    <div class="page-header">
-      <h1 class="page-title">What is Cedar Fever?</h1>
-      <p class="page-subtitle">Understanding mountain cedar allergies in Central Texas</p>
+    <div class="mb-6">
+      <h1 class="text-[1.75rem] font-bold tracking-tight mb-1.5">What is Cedar Fever?</h1>
+      <p class="text-[0.85rem] text-muted">
+        Understanding mountain cedar allergies in Central Texas
+      </p>
     </div>
 
     <!-- Cedar tree hero image -->
-    <div class="cedar-banner">
+    <div class="relative rounded-2xl overflow-hidden mb-6 max-h-[280px]">
       <img
         src="/images/cedar-tree-pollen.png"
         alt="Ashe Juniper (mountain cedar) tree releasing pollen in the Texas Hill Country"
-        class="cedar-banner-img"
+        class="w-full h-full object-cover block"
       />
-      <div class="cedar-banner-overlay" />
-      <div class="cedar-banner-caption">
+      <div
+        class="absolute inset-0 bg-[linear-gradient(to_top,var(--color-bg)_0%,transparent_60%)]"
+      />
+      <div class="absolute bottom-4 left-5 text-[0.7rem] text-muted italic">
         Ashe Juniper releasing pollen in the Texas Hill Country
       </div>
     </div>
 
     <!-- Overview -->
-    <section class="content-card">
-      <h2 class="card-heading">About Mountain Cedar</h2>
-      <div class="card-body">
-        <p>
+    <section
+      class="bg-elevated border border-default rounded-2xl py-7 px-6 max-sm:py-5 max-sm:px-4 mb-4"
+    >
+      <h2 class="text-[0.85rem] font-semibold text-muted uppercase tracking-[0.06em] mb-4">
+        About Mountain Cedar
+      </h2>
+      <div>
+        <p class="text-[0.85rem] leading-relaxed text-muted mb-3 last:mb-0">
           "Cedar fever" is the colloquial name for the allergic reaction caused by
-          <strong>Ashe Juniper (Juniperus ashei)</strong>
+          <strong class="text-default">Ashe Juniper (Juniperus ashei)</strong>
           pollen. Despite the name, it's not caused by true cedar — it's a juniper species native to
           the Texas Hill Country.
         </p>
-        <p>
+        <p class="text-[0.85rem] leading-relaxed text-muted mb-3 last:mb-0">
           Central Texas is one of the worst places in the world for cedar allergies. Austin sits
           directly downwind of the Hill Country, where millions of Ashe Juniper trees release
           enormous quantities of pollen during winter months.
         </p>
-        <p>
-          Pollen counts in Austin regularly surge past <strong>5,000 grains/m³</strong> during peak
-          periods, with some days exceeding <strong>8,000–10,000 grains/m³</strong>. For context,
-          most allergy sufferers begin experiencing symptoms at just 50 grains/m³.
+        <p class="text-[0.85rem] leading-relaxed text-muted mb-3 last:mb-0">
+          Pollen counts in Austin regularly surge past
+          <strong class="text-default">5,000 grains/m³</strong> during peak periods, with some days
+          exceeding <strong class="text-default">8,000–10,000 grains/m³</strong>. For context, most
+          allergy sufferers begin experiencing symptoms at just 50 grains/m³.
         </p>
       </div>
     </section>
 
     <!-- Why Austin -->
-    <section class="content-card">
-      <h2 class="card-heading">Why Austin Is a Hotspot</h2>
-      <div class="facts-grid">
-        <div v-for="fact in facts" :key="fact.title" class="fact-item">
-          <div class="fact-icon">
+    <section
+      class="bg-elevated border border-default rounded-2xl py-7 px-6 max-sm:py-5 max-sm:px-4 mb-4"
+    >
+      <h2 class="text-[0.85rem] font-semibold text-muted uppercase tracking-[0.06em] mb-4">
+        Why Austin Is a Hotspot
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        <div
+          v-for="fact in facts"
+          :key="fact.title"
+          class="flex gap-3.5 p-4 bg-elevated rounded-xl border border-default"
+        >
+          <div
+            class="size-9 min-w-9 bg-primary/10 rounded-[10px] flex items-center justify-center text-primary"
+          >
             <UIcon :name="fact.icon" class="size-5" />
           </div>
           <div>
-            <h3 class="fact-title">{{ fact.title }}</h3>
-            <p class="fact-text">{{ fact.text }}</p>
+            <h3 class="text-[0.8rem] font-semibold mb-1 text-default">
+              {{ fact.title }}
+            </h3>
+            <p class="text-xs text-muted leading-normal">
+              {{ fact.text }}
+            </p>
           </div>
         </div>
       </div>
     </section>
 
     <!-- Seasonal Timeline -->
-    <section class="content-card">
-      <h2 class="card-heading">Seasonal Timeline</h2>
-      <div class="timeline">
-        <div v-for="(item, i) in timeline" :key="i" class="timeline-item">
-          <div class="timeline-marker" />
-          <div class="timeline-content">
-            <h3 class="timeline-period">{{ item.period }}</h3>
-            <p class="timeline-detail">{{ item.detail }}</p>
+    <section
+      class="bg-elevated border border-default rounded-2xl py-7 px-6 max-sm:py-5 max-sm:px-4 mb-4"
+    >
+      <h2 class="text-[0.85rem] font-semibold text-muted uppercase tracking-[0.06em] mb-4">
+        Seasonal Timeline
+      </h2>
+      <div
+        class="relative pl-6 before:content-[''] before:absolute before:left-[6px] before:top-2 before:bottom-2 before:w-px before:bg-(--color-border)"
+      >
+        <div v-for="(item, i) in timeline" :key="i" class="relative pb-5 last:pb-0">
+          <div
+            class="absolute -left-[21px] top-1.5 size-[9px] rounded-full bg-primary border-2 border-(--color-bg)"
+          />
+          <div>
+            <h3 class="text-[0.8rem] font-semibold text-default mb-1">
+              {{ item.period }}
+            </h3>
+            <p class="text-xs text-muted leading-normal">
+              {{ item.detail }}
+            </p>
           </div>
         </div>
       </div>
     </section>
 
     <!-- Severity Scale -->
-    <section class="content-card">
-      <h2 class="card-heading">Severity Scale Guide</h2>
-      <p class="card-subheading">Pollen counts measured in grains per cubic meter (grains/m³)</p>
-      <div class="severity-table">
-        <div v-for="s in severityScale" :key="s.level" class="severity-row">
-          <div class="severity-color" :style="{ backgroundColor: s.color }" />
-          <div class="severity-level" :style="{ color: s.color }">{{ s.level }}</div>
-          <div class="severity-range">{{ s.range }} gr/m³</div>
-          <div class="severity-desc">{{ s.description }}</div>
+    <section
+      class="bg-elevated border border-default rounded-2xl py-7 px-6 max-sm:py-5 max-sm:px-4 mb-4"
+    >
+      <h2 class="text-[0.85rem] font-semibold text-muted uppercase tracking-[0.06em] mb-4">
+        Severity Scale Guide
+      </h2>
+      <p class="text-[0.7rem] text-muted -mt-3 mb-4">
+        Pollen counts measured in grains per cubic meter (grains/m³)
+      </p>
+      <div class="flex flex-col gap-2">
+        <div
+          v-for="s in severityScale"
+          :key="s.level"
+          class="grid grid-cols-[4px_100px_120px_1fr] max-md:grid-cols-[4px_80px_90px_1fr] max-sm:grid-cols-[4px_1fr] gap-3.5 max-md:gap-2.5 items-center py-3 px-4 bg-elevated rounded-[10px]"
+        >
+          <div class="w-1 h-6 rounded-sm" :style="{ backgroundColor: s.color }" />
+          <div class="text-[0.8rem] font-semibold" :style="{ color: s.color }">
+            {{ s.level }}
+          </div>
+          <div class="text-xs text-muted tabular-nums max-sm:col-start-2">{{ s.range }} gr/m³</div>
+          <div class="text-xs text-muted max-sm:col-start-2">
+            {{ s.description }}
+          </div>
         </div>
       </div>
     </section>
   </div>
 </template>
-
-<style scoped>
-.page-header {
-  margin-bottom: 24px;
-}
-
-/* Cedar banner */
-.cedar-banner {
-  position: relative;
-  border-radius: 16px;
-  overflow: hidden;
-  margin-bottom: 24px;
-  max-height: 280px;
-}
-
-.cedar-banner-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.cedar-banner-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, var(--color-bg) 0%, transparent 60%);
-}
-
-.cedar-banner-caption {
-  position: absolute;
-  bottom: 16px;
-  left: 20px;
-  font-size: 0.7rem;
-  color: var(--color-text-muted);
-  font-style: italic;
-}
-
-.page-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  margin-bottom: 6px;
-}
-
-.page-subtitle {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-}
-
-.content-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  padding: 28px 24px;
-  margin-bottom: 16px;
-}
-
-.card-heading {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 16px;
-}
-
-.card-subheading {
-  font-size: 0.7rem;
-  color: var(--color-text-muted);
-  margin-top: -12px;
-  margin-bottom: 16px;
-}
-
-.card-body p {
-  font-size: 0.85rem;
-  line-height: 1.7;
-  color: var(--color-text-secondary);
-  margin-bottom: 12px;
-}
-
-.card-body p:last-child {
-  margin-bottom: 0;
-}
-
-.card-body strong {
-  color: var(--color-text);
-}
-
-/* Facts grid */
-.facts-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-
-.fact-item {
-  display: flex;
-  gap: 14px;
-  padding: 16px;
-  background: var(--color-surface);
-  border-radius: 12px;
-  border: 1px solid var(--color-border);
-}
-
-.fact-icon {
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  background: rgba(16, 185, 129, 0.1);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-primary);
-}
-
-.fact-title {
-  font-size: 0.8rem;
-  font-weight: 600;
-  margin-bottom: 4px;
-  color: var(--color-text);
-}
-
-.fact-text {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-  line-height: 1.5;
-}
-
-/* Timeline */
-.timeline {
-  position: relative;
-  padding-left: 24px;
-}
-
-.timeline::before {
-  content: '';
-  position: absolute;
-  left: 6px;
-  top: 8px;
-  bottom: 8px;
-  width: 1px;
-  background: var(--color-border);
-}
-
-.timeline-item {
-  position: relative;
-  padding-bottom: 20px;
-}
-
-.timeline-item:last-child {
-  padding-bottom: 0;
-}
-
-.timeline-marker {
-  position: absolute;
-  left: -21px;
-  top: 6px;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--color-primary);
-  border: 2px solid var(--color-bg);
-}
-
-.timeline-period {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--color-text);
-  margin-bottom: 4px;
-}
-
-.timeline-detail {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-  line-height: 1.5;
-}
-
-/* Severity scale */
-.severity-table {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.severity-row {
-  display: grid;
-  grid-template-columns: 4px 100px 120px 1fr;
-  gap: 14px;
-  align-items: center;
-  padding: 12px 16px;
-  background: var(--color-surface);
-  border-radius: 10px;
-}
-
-.severity-color {
-  width: 4px;
-  height: 24px;
-  border-radius: 2px;
-}
-
-.severity-level {
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.severity-range {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.severity-desc {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-}
-
-@media (max-width: 768px) {
-  .facts-grid {
-    grid-template-columns: 1fr;
-  }
-  .severity-row {
-    grid-template-columns: 4px 80px 90px 1fr;
-    gap: 10px;
-  }
-}
-
-@media (max-width: 480px) {
-  .severity-row {
-    grid-template-columns: 4px 1fr;
-  }
-  .severity-range,
-  .severity-desc {
-    grid-column: 2;
-  }
-  .content-card {
-    padding: 20px 16px;
-  }
-}
-</style>

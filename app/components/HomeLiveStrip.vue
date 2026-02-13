@@ -17,7 +17,7 @@ function minutesAgo(iso: string | null): string {
 </script>
 
 <template>
-  <section class="-mt-2 relative z-10 pb-2">
+  <section class="pt-6 pb-2">
     <UContainer>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <!-- Cedar Pollen -->

@@ -6,11 +6,20 @@
 const { categories } = useSiteData()
 
 const footerSlugs = ['food', 'events', 'real-estate', 'culture']
-const footerCategories = computed(() =>
-  footerSlugs
-    .map(slug => categories.find(c => c.slug === slug))
-    .filter(Boolean) as typeof categories
+const footerCategories = computed(
+  () =>
+    footerSlugs
+      .map((slug) => categories.find((c) => c.slug === slug))
+      .filter(Boolean) as typeof categories,
 )
+
+/** Per-category accent colors */
+const footerColors: Record<string, string> = {
+  food: 'text-amber-600 dark:text-amber-400',
+  events: 'text-violet-600 dark:text-violet-400',
+  'real-estate': 'text-sky-600 dark:text-sky-400',
+  culture: 'text-rose-600 dark:text-rose-400',
+}
 
 /** Override link labels to match mock exactly */
 const footerLinkOverrides: Record<string, Array<{ title: string; slug: string }>> = {
@@ -42,48 +51,38 @@ const footerLinkOverrides: Record<string, Array<{ title: string; slug: string }>
 </script>
 
 <template>
-  <section class="border-t border-default pt-10 pb-6">
+  <section class="bg-elevated/50 border-t border-default py-12">
     <UContainer>
-    <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight font-display mb-6">
-      Austin, <span class="italic font-normal text-muted">Texas</span>
-    </h2>
+      <h2 class="text-xl font-extrabold tracking-tight font-display mb-6 text-muted">
+        Austin, <span class="italic font-normal">Texas</span>
+      </h2>
 
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-6">
-      <div
-        v-for="cat in footerCategories"
-        :key="cat.slug"
-      >
-        <NuxtLink
-          :to="`/${cat.slug}/`"
-          class="flex items-center gap-1.5 mb-3 group"
-        >
-          <UIcon
-            :name="cat.icon"
-            class="size-4"
-            :class="cat.color"
-          />
-          <span
-            class="text-sm font-bold group-hover:text-primary transition-colors"
-            :class="cat.color"
-          >
-            {{ cat.title }}
-          </span>
-        </NuxtLink>
-        <ul class="space-y-1">
-          <li
-            v-for="link in (footerLinkOverrides[cat.slug] || cat.subApps.slice(0, 4))"
-            :key="link.slug"
-          >
-            <NuxtLink
-              :to="`/${cat.slug}/${link.slug}/`"
-              class="text-sm text-muted hover:text-default transition-colors"
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-6">
+        <div v-for="cat in footerCategories" :key="cat.slug">
+          <NuxtLink :to="`/${cat.slug}/`" class="flex items-center gap-1.5 mb-2 group">
+            <UIcon :name="cat.icon" class="size-3.5" :class="footerColors[cat.slug] || cat.color" />
+            <span
+              class="text-xs font-bold uppercase tracking-wider group-hover:underline underline-offset-2 transition-colors"
+              :class="footerColors[cat.slug] || cat.color"
             >
-              {{ link.title }}
-            </NuxtLink>
-          </li>
-        </ul>
+              {{ cat.title }}
+            </span>
+          </NuxtLink>
+          <ul class="space-y-1">
+            <li
+              v-for="link in footerLinkOverrides[cat.slug] || cat.subApps.slice(0, 4)"
+              :key="link.slug"
+            >
+              <NuxtLink
+                :to="`/${cat.slug}/${link.slug}/`"
+                class="text-sm text-muted hover:text-default transition-colors"
+              >
+                {{ link.title }}
+              </NuxtLink>
+            </li>
+          </ul>
+        </div>
       </div>
-    </div>
     </UContainer>
   </section>
 </template>

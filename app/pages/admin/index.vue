@@ -25,7 +25,7 @@ async function handleLogout() {
 
       <div class="flex flex-col gap-3">
         <div
-          class="flex justify-between items-center px-3.5 py-2.5 bg-default border border-default rounded-xl text-sm"
+          class="flex justify-between items-center px-3.5 py-2.5 bg-default border border-default rounded-[10px] text-sm"
         >
           <span class="font-medium text-dimmed">Authenticated</span>
           <span class="font-semibold" :class="loggedIn ? 'text-success' : 'text-error'">
@@ -33,7 +33,7 @@ async function handleLogout() {
           </span>
         </div>
         <div
-          class="flex justify-between items-center px-3.5 py-2.5 bg-default border border-default rounded-xl text-sm"
+          class="flex justify-between items-center px-3.5 py-2.5 bg-default border border-default rounded-[10px] text-sm"
         >
           <span class="font-medium text-dimmed">Admin</span>
           <span class="font-semibold" :class="isAdmin ? 'text-success' : 'text-warning'">
@@ -41,19 +41,19 @@ async function handleLogout() {
           </span>
         </div>
         <div
-          class="flex justify-between items-center px-3.5 py-2.5 bg-default border border-default rounded-xl text-sm"
+          class="flex justify-between items-center px-3.5 py-2.5 bg-default border border-default rounded-[10px] text-sm"
         >
           <span class="font-medium text-dimmed">Email</span>
           <span class="font-semibold">{{ user?.email || '—' }}</span>
         </div>
         <div
-          class="flex justify-between items-center px-3.5 py-2.5 bg-default border border-default rounded-xl text-sm"
+          class="flex justify-between items-center px-3.5 py-2.5 bg-default border border-default rounded-[10px] text-sm"
         >
           <span class="font-medium text-dimmed">Name</span>
           <span class="font-semibold">{{ user?.name || '—' }}</span>
         </div>
         <div
-          class="flex justify-between items-center px-3.5 py-2.5 bg-default border border-default rounded-xl text-sm"
+          class="flex justify-between items-center px-3.5 py-2.5 bg-default border border-default rounded-[10px] text-sm"
         >
           <span class="font-medium text-dimmed">User ID</span>
           <span
