@@ -20,9 +20,7 @@ const canonicalUrl = computed(() => `${siteUrl}${route.path}`)
 
 useHead({
   htmlAttrs: { lang: 'en' },
-  link: [
-    { rel: 'canonical', href: canonicalUrl },
-  ],
+  link: [{ rel: 'canonical', href: canonicalUrl }],
 })
 
 const { categories } = useSiteData()
@@ -40,26 +38,20 @@ const footerColumns = computed<FooterColumn[]>(() =>
     label: cat.title,
     children: cat.subApps.map((app: SubApp) => ({
       label: app.title,
-      to: app.status === 'live'
-        ? `/${cat.slug}/${app.slug}/`
-        : app.standaloneUrl || undefined,
+      to: app.status === 'live' ? `/${cat.slug}/${app.slug}/` : app.standaloneUrl || undefined,
       target: app.status !== 'live' && app.standaloneUrl ? '_blank' : undefined,
       disabled: app.status !== 'live' && !app.standaloneUrl,
     })),
   })),
 )
 
-const footerLinks = computed<NavigationMenuItem[]>(() => {
-  const items: NavigationMenuItem[] = [
-    { label: 'About', to: '/about/' },
-    { label: 'Contact', to: '/contact/' },
-    { label: 'Privacy', to: '/privacy/' },
-  ]
-  if (loggedIn.value && isAdmin.value) {
-    items.push({ label: 'Admin', to: '/admin/radar' })
-  }
-  return items
-})
+const footerLinks = [
+  { label: 'About', to: '/about/' },
+  { label: 'Contact', to: '/contact/' },
+  { label: 'Privacy', to: '/privacy/' },
+]
+
+const adminLinks = [{ label: 'Admin', to: '/admin/radar' }]
 </script>
 
 <template>
@@ -91,10 +83,17 @@ const footerLinks = computed<NavigationMenuItem[]>(() => {
       </template>
 
       <template #left>
-        <span class="text-xs text-muted">&copy; {{ new Date().getFullYear() }} Austin-Texas.net</span>
+        <span class="text-xs text-muted"
+          >&copy; {{ new Date().getFullYear() }} Austin-Texas.net</span
+        >
       </template>
 
-      <UNavigationMenu :items="footerLinks" variant="link" />
+      <div class="flex items-center gap-x-3">
+        <UNavigationMenu :items="footerLinks" variant="link" />
+        <ClientOnly>
+          <UNavigationMenu v-if="loggedIn && isAdmin" :items="adminLinks" variant="link" />
+        </ClientOnly>
+      </div>
 
       <template #right>
         <UColorModeButton />

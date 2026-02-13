@@ -1,10 +1,21 @@
 <script setup lang="ts">
 definePageMeta({ title: 'Sign In' })
 
-const { user, loggedIn, ensureLoaded, login: doLogin, signup: doSignup, logout: doLogout } = useAuth()
+const {
+  user,
+  loggedIn,
+  ensureLoaded,
+  login: doLogin,
+  signup: doSignup,
+  logout: doLogout,
+} = useAuth()
 await ensureLoaded()
 
-const form = reactive({ name: '', email: '', password: '' })
+const form = reactive({
+  name: '',
+  email: import.meta.dev ? 'admin@austin-texas.net' : '',
+  password: import.meta.dev ? 'testpassword123' : '',
+})
 const error = ref('')
 const loading = ref(false)
 const emailOpen = ref(false)
@@ -39,10 +50,19 @@ async function handleSubmit() {
     } else {
       await doSignup(form.email, form.password, form.name)
     }
-  } catch (e: any) {
-    error.value = mode.value === 'signin'
-      ? (e.data?.message || 'Invalid email or password')
-      : (e.data?.message || 'Failed to create account')
+
+    const redirect = route.query.redirect as string
+    if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
+      await navigateTo(redirect)
+    } else {
+      await navigateTo('/')
+    }
+  } catch (e: unknown) {
+    const msg = (e as { data?: { message?: string } })?.data?.message
+    error.value =
+      mode.value === 'signin'
+        ? msg || 'Invalid email or password'
+        : msg || 'Failed to create account'
   } finally {
     loading.value = false
   }
@@ -55,7 +75,7 @@ function handleApple() {
     response_type: 'code id_token',
     response_mode: 'form_post',
     scope: 'name email',
-    state: route.query.redirect as string || '/',
+    state: (route.query.redirect as string) || '/',
   })
   window.location.href = `https://appleid.apple.com/auth/authorize?${params.toString()}`
 }
@@ -115,7 +135,9 @@ async function handleLogout() {
           variant="outline"
           color="neutral"
           :icon="emailOpen ? 'i-lucide-chevron-up' : 'i-lucide-mail'"
-          :label="emailOpen ? 'Hide' : (mode === 'signin' ? 'Sign in with email' : 'Sign up with email')"
+          :label="
+            emailOpen ? 'Hide' : mode === 'signin' ? 'Sign in with email' : 'Sign up with email'
+          "
           @click="emailOpen = !emailOpen"
         />
 
@@ -156,11 +178,27 @@ async function handleLogout() {
               </Transition>
 
               <UFormField label="Email" name="email">
-                <UInput v-model="form.email" type="email" placeholder="you@example.com" required class="w-full" />
+                <UInput
+                  v-model="form.email"
+                  type="email"
+                  placeholder="you@example.com"
+                  required
+                  class="w-full"
+                />
               </UFormField>
 
-              <UFormField label="Password" name="password" :hint="mode === 'signup' ? 'Min. 8 characters' : undefined">
-                <UInput v-model="form.password" type="password" placeholder="••••••••" required class="w-full" />
+              <UFormField
+                label="Password"
+                name="password"
+                :hint="mode === 'signup' ? 'Min. 8 characters' : undefined"
+              >
+                <UInput
+                  v-model="form.password"
+                  type="password"
+                  placeholder="••••••••"
+                  required
+                  class="w-full"
+                />
               </UFormField>
 
               <UButton
@@ -295,7 +333,11 @@ async function handleLogout() {
   font-size: 0.875rem;
 }
 
-.error-icon { width: 16px; height: 16px; flex-shrink: 0; }
+.error-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
 
 /* Form Fields */
 .form-fields {

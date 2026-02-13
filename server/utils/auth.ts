@@ -29,8 +29,12 @@ export async function hashPassword(password: string): Promise<string> {
     keyMaterial,
     256,
   )
-  const saltHex = Array.from(salt).map(b => b.toString(16).padStart(2, '0')).join('')
-  const hashHex = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('')
+  const saltHex = Array.from(salt)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+  const hashHex = Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
   return `${saltHex}:${hashHex}`
 }
 
@@ -38,7 +42,7 @@ export async function verifyPassword(stored: string, password: string): Promise<
   const [saltHex, hashHex] = stored.split(':')
   if (!saltHex || !hashHex) return false
 
-  const salt = new Uint8Array(saltHex.match(/.{2}/g)!.map(byte => parseInt(byte, 16)))
+  const salt = new Uint8Array(saltHex.match(/.{2}/g)!.map((byte) => parseInt(byte, 16)))
   const keyMaterial = await crypto.subtle.importKey(
     'raw',
     new TextEncoder().encode(password),
@@ -56,16 +60,14 @@ export async function verifyPassword(stored: string, password: string): Promise<
     keyMaterial,
     256,
   )
-  const computedHex = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('')
+  const computedHex = Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
   return computedHex === hashHex
 }
 
 // ─── User Operations ────────────────────────────────────────
-export async function createUser(
-  email: string,
-  password: string,
-  name?: string,
-): Promise<User> {
+export async function createUser(email: string, password: string, name?: string): Promise<User> {
   const db = useDatabase()
   const passwordHash = await hashPassword(password)
   const [user] = await db
@@ -168,17 +170,14 @@ export async function verifyJwt(token: string): Promise<JwtPayload | null> {
 export async function createSession(userId: string): Promise<string> {
   const db = useDatabase()
   const expiresAt = Math.floor(Date.now() / 1000) + SESSION_DURATION_DAYS * 24 * 60 * 60
-  const [session] = await db
-    .insert(sessions)
-    .values({ userId, expiresAt })
-    .returning()
+  const [session] = await db.insert(sessions).values({ userId, expiresAt }).returning()
   return session!.id
 }
 
 // ─── Cookie Helpers ─────────────────────────────────────────
 export function setAuthCookie(event: H3Event, jwt: string) {
   const config = useRuntimeConfig()
-  const isProd = config.public.appUrl.startsWith('https')
+  const isProd = process.env.NODE_ENV === 'production' && config.public.appUrl.startsWith('https')
 
   setCookie(event, COOKIE_NAME, jwt, {
     httpOnly: true,
