@@ -91,33 +91,47 @@ const faqItems = [
   <CategoryPage :category="category" :overview="overview" :faq-items="faqItems">
     <!-- Live Now module (item 4) -->
     <template #live-now>
-      <section class="live-now">
-        <h2 class="live-label">
-          <span class="live-dot" />
+      <section class="mb-6">
+        <h2
+          class="text-xs font-bold uppercase tracking-widest text-muted mb-3 flex items-center gap-2"
+        >
+          <span class="live-dot size-[7px] bg-success rounded-full" />
           Live Now
         </h2>
-        <NuxtLink to="/allergies/cedar-pollen/" class="live-card group">
-          <div class="live-icon" :style="{ background: severityColor(cedarLevel) }">
+        <NuxtLink
+          to="/allergies/cedar-pollen/"
+          class="group flex items-center gap-4 bg-elevated border border-default rounded-2xl p-5 no-underline text-inherit transition-all hover:border-(--color-border-hover) hover:shadow-[0_4px_20px_rgba(0,0,0,0.04)] max-sm:flex-col max-sm:items-start"
+        >
+          <div
+            class="size-12 rounded-xl flex items-center justify-center shrink-0"
+            :style="{ background: severityColor(cedarLevel) }"
+          >
             <UIcon name="i-lucide-flower-2" class="size-6 text-white" />
           </div>
-          <div class="live-body">
-            <div class="live-title">Cedar Pollen Tracker</div>
+          <div class="flex-1 min-w-0">
+            <div class="text-[0.9rem] font-bold mb-0.5">Cedar Pollen Tracker</div>
             <ClientOnly>
               <div
                 v-if="cedarLevel"
-                class="live-value"
+                class="text-[0.85rem] font-semibold"
                 :style="{ color: severityColor(cedarLevel) }"
               >
                 {{ cedarLevel }} — {{ cedarCount?.toLocaleString() }} gr/m³
               </div>
-              <div v-else class="live-value live-loading">Loading current levels…</div>
+              <div v-else class="text-[0.85rem] text-muted font-medium">
+                Loading current levels…
+              </div>
               <template #fallback>
-                <div class="live-value live-loading">—</div>
+                <div class="text-[0.85rem] text-muted font-medium">—</div>
               </template>
             </ClientOnly>
-            <div v-if="lastUpdated" class="live-updated">Updated {{ lastUpdated }}</div>
+            <div v-if="lastUpdated" class="text-[0.65rem] text-dimmed mt-0.5">
+              Updated {{ lastUpdated }}
+            </div>
           </div>
-          <div class="live-cta group-hover:text-primary transition-colors">
+          <div
+            class="text-xs font-semibold text-muted flex items-center whitespace-nowrap shrink-0 max-sm:mt-2 group-hover:text-primary transition-colors"
+          >
             Open tracker
             <UIcon
               name="i-lucide-arrow-right"
@@ -131,27 +145,7 @@ const faqItems = [
 </template>
 
 <style scoped>
-.live-now {
-  margin-bottom: 24px;
-}
-
-.live-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-muted);
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .live-dot {
-  width: 7px;
-  height: 7px;
-  background: #22c55e;
-  border-radius: 50%;
   animation: pulse-dot 2s infinite;
 }
 
@@ -164,81 +158,6 @@ const faqItems = [
   50% {
     opacity: 0.8;
     box-shadow: 0 0 0 5px rgba(34, 197, 94, 0);
-  }
-}
-
-.live-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  padding: 20px;
-  text-decoration: none;
-  color: inherit;
-  transition: all 0.2s ease;
-}
-
-.live-card:hover {
-  border-color: var(--color-border-hover);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-}
-
-.live-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.live-body {
-  flex: 1;
-  min-width: 0;
-}
-
-.live-title {
-  font-size: 0.9rem;
-  font-weight: 700;
-  margin-bottom: 2px;
-}
-
-.live-value {
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.live-loading {
-  color: var(--color-text-muted);
-  font-weight: 500;
-}
-
-.live-updated {
-  font-size: 0.65rem;
-  color: var(--color-text-faint);
-  margin-top: 2px;
-}
-
-.live-cta {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  display: flex;
-  align-items: center;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-@media (max-width: 640px) {
-  .live-card {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .live-cta {
-    margin-top: 8px;
   }
 }
 </style>
