@@ -156,18 +156,10 @@ function trackAppClick(appTitle: string, destination: string) {
         <h2 class="text-xs font-bold uppercase tracking-[0.08em] text-muted mb-3.5">
           Frequently Asked Questions
         </h2>
-        <div class="flex flex-col gap-2">
-          <details
-            v-for="(item, i) in faqItems"
-            :key="i"
-            class="bg-elevated border border-default rounded-xl overflow-hidden"
-          >
-            <summary class="faq-q py-4 px-5 text-[0.85rem] font-semibold cursor-pointer list-none">
-              {{ item.question }}
-            </summary>
-            <p class="px-5 pb-4 pt-0 text-[0.82rem] text-muted leading-[1.7]">{{ item.answer }}</p>
-          </details>
-        </div>
+        <UAccordion
+          type="multiple"
+          :items="faqItems.map((item) => ({ label: item.question, content: item.answer }))"
+        />
       </section>
 
       <!-- Cross-links -->
@@ -217,9 +209,5 @@ function trackAppClick(appTitle: string, destination: string) {
   color: var(--color-primary);
   text-decoration: underline;
   text-underline-offset: 2px;
-}
-.faq-q::marker,
-.faq-q::-webkit-details-marker {
-  display: none;
 }
 </style>

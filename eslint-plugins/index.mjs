@@ -23,6 +23,11 @@ import noNativeTable from './rules/no-native-table.mjs'
 import preferULink from './rules/prefer-ulink.mjs'
 import noNativeLayout from './rules/no-native-layout.mjs'
 import noSelectEmptyValue from './rules/no-select-empty-value.mjs'
+import noNativeDetails from './rules/no-native-details.mjs'
+import noNativeHr from './rules/no-native-hr.mjs'
+import noNativeProgress from './rules/no-native-progress.mjs'
+import noNativeDialog from './rules/no-native-dialog.mjs'
+import noNativeKbd from './rules/no-native-kbd.mjs'
 
 const plugin = {
   meta: {
@@ -44,6 +49,11 @@ const plugin = {
     'prefer-ulink': preferULink,
     'no-native-layout': noNativeLayout,
     'no-select-empty-value': noSelectEmptyValue,
+    'no-native-details': noNativeDetails,
+    'no-native-hr': noNativeHr,
+    'no-native-progress': noNativeProgress,
+    'no-native-dialog': noNativeDialog,
+    'no-native-kbd': noNativeKbd,
   },
 }
 
@@ -68,6 +78,11 @@ plugin.configs = {
         'atx/prefer-ulink': 'warn',
         'atx/no-native-layout': 'warn',
         'atx/no-select-empty-value': 'error',
+        'atx/no-native-details': 'warn',
+        'atx/no-native-hr': 'warn',
+        'atx/no-native-progress': 'warn',
+        'atx/no-native-dialog': 'warn',
+        'atx/no-native-kbd': 'warn',
       },
     },
   ],
