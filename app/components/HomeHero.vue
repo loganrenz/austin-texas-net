@@ -9,6 +9,7 @@
 </script>
 
 <template>
+  <!-- eslint-disable atx/no-raw-tailwind-colors -- dark hero overlay requires specific shade-level colors for legibility -->
   <section class="relative overflow-hidden bg-neutral-900">
     <!-- Background image — decorative only, cropped tight -->
     <img
