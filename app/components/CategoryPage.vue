@@ -80,8 +80,9 @@ function trackAppClick(appTitle: string, destination: string) {
       <!-- Live Now module slot (item 4) -->
       <slot name="live-now" />
 
-      <!-- Overview (SEO content) -->
+      <!-- Overview (SEO content) — app-controlled prop, not user input -->
       <section class="content-block">
+        <!-- eslint-disable-next-line vue/no-v-html -->
         <div class="prose-content" v-html="overview" />
       </section>
 

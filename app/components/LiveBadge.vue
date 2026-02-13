@@ -17,23 +17,16 @@ const timeAgo = computed(() => {
 
 <template>
   <div class="flex items-center gap-1.5">
-    <span
-      v-if="label"
-      class="relative flex size-1.5"
-    >
-      <span class="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-      <span class="relative inline-flex size-1.5 rounded-full bg-emerald-500" />
+    <span v-if="label" class="relative flex size-1.5">
+      <span
+        class="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-75"
+      />
+      <span class="relative inline-flex size-1.5 rounded-full bg-success" />
     </span>
-    <span
-      v-if="label"
-      class="text-[10px] font-semibold uppercase tracking-widest text-emerald-600"
-    >
+    <span v-if="label" class="text-[10px] font-semibold uppercase tracking-widest text-success">
       {{ label }}
     </span>
-    <span
-      v-if="timeAgo"
-      class="text-[10px] text-muted"
-    >
+    <span v-if="timeAgo" class="text-[10px] text-muted">
       {{ timeAgo }}
     </span>
   </div>

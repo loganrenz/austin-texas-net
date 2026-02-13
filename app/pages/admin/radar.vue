@@ -137,7 +137,7 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
     <!-- Ingest result banner -->
     <UCard v-if="ingestResult" class="ingest-banner">
       <div class="flex items-center gap-3">
-        <UIcon name="i-lucide-check-circle" class="size-5 text-green-500" />
+        <UIcon name="i-lucide-check-circle" class="size-5 text-success" />
         <span
           >Ingestion complete: <strong>{{ ingestResult.seeded }}</strong> seeds,
           <strong>{{ ingestResult.expanded }}</strong> expanded keywords</span
@@ -155,19 +155,19 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
       </UCard>
       <UCard>
         <div class="kpi">
-          <span class="kpi-value text-red-500">{{ stats.kpi.gaps }}</span>
+          <span class="kpi-value text-error">{{ stats.kpi.gaps }}</span>
           <span class="kpi-label">Content Gaps</span>
         </div>
       </UCard>
       <UCard>
         <div class="kpi">
-          <span class="kpi-value text-green-500">{{ stats.kpi.coveragePct }}%</span>
+          <span class="kpi-value text-success">{{ stats.kpi.coveragePct }}%</span>
           <span class="kpi-label">Coverage</span>
         </div>
       </UCard>
       <UCard>
         <div class="kpi">
-          <span class="kpi-value text-yellow-500">{{ stats.kpi.avgDifficulty }}</span>
+          <span class="kpi-value text-warning">{{ stats.kpi.avgDifficulty }}</span>
           <span class="kpi-label">Avg Difficulty</span>
         </div>
       </UCard>
