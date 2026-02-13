@@ -29,7 +29,7 @@ const { data: keywords, refresh: refreshKeywords, status: keywordsStatus } = awa
 })
 
 const bucketOptions = [
-  { label: 'All Buckets', value: '' },
+  { label: 'All Buckets', value: undefined },
   { label: 'Food', value: 'food' },
   { label: 'Outdoors', value: 'outdoors' },
   { label: 'Places', value: 'places' },

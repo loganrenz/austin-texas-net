@@ -22,6 +22,7 @@ import noNativeForm from './rules/no-native-form.mjs'
 import noNativeTable from './rules/no-native-table.mjs'
 import preferULink from './rules/prefer-ulink.mjs'
 import noNativeLayout from './rules/no-native-layout.mjs'
+import noSelectEmptyValue from './rules/no-select-empty-value.mjs'
 
 const plugin = {
   meta: {
@@ -42,6 +43,7 @@ const plugin = {
     'no-native-table': noNativeTable,
     'prefer-ulink': preferULink,
     'no-native-layout': noNativeLayout,
+    'no-select-empty-value': noSelectEmptyValue,
   },
 }
 
@@ -65,6 +67,7 @@ plugin.configs = {
         'atx/no-native-table': 'warn',
         'atx/prefer-ulink': 'warn',
         'atx/no-native-layout': 'warn',
+        'atx/no-select-empty-value': 'error',
       },
     },
   ],
