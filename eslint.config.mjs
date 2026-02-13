@@ -19,6 +19,11 @@ export default withNuxt(
 
       // No console in production code
       'no-console': ['warn', { allow: ['warn', 'error'] }],
+
+      // Align void element self-closing with prettier (prettier adds />)
+      'vue/html-self-closing': ['warn', {
+        html: { void: 'always', normal: 'always', component: 'always' },
+      }],
     },
   }
 )
