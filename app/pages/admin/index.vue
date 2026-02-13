@@ -14,41 +14,56 @@ async function handleLogout() {
 </script>
 
 <template>
-  <div class="admin-page">
-    <div class="admin-card">
-      <div class="admin-header">
+  <div class="flex items-center justify-center min-h-[calc(100vh-200px)] px-4 py-8">
+    <div
+      class="w-full max-w-[480px] bg-elevated border border-default rounded-2xl p-8 flex flex-col gap-6"
+    >
+      <div class="flex items-center gap-3">
         <UIcon name="i-lucide-shield-check" class="size-8 text-primary" />
-        <h1>Admin Dashboard</h1>
+        <h1 class="text-2xl font-bold m-0">Admin Dashboard</h1>
       </div>
 
-      <div class="status-grid">
-        <div class="status-item">
-          <span class="status-label">Authenticated</span>
-          <span class="status-value" :class="loggedIn ? 'text-green' : 'text-red'">
+      <div class="flex flex-col gap-3">
+        <div
+          class="flex justify-between items-center px-3.5 py-2.5 bg-default border border-default rounded-xl text-sm"
+        >
+          <span class="font-medium text-dimmed">Authenticated</span>
+          <span class="font-semibold" :class="loggedIn ? 'text-success' : 'text-error'">
             {{ loggedIn ? '✓ Yes' : '✗ No' }}
           </span>
         </div>
-        <div class="status-item">
-          <span class="status-label">Admin</span>
-          <span class="status-value" :class="isAdmin ? 'text-green' : 'text-orange'">
+        <div
+          class="flex justify-between items-center px-3.5 py-2.5 bg-default border border-default rounded-xl text-sm"
+        >
+          <span class="font-medium text-dimmed">Admin</span>
+          <span class="font-semibold" :class="isAdmin ? 'text-success' : 'text-warning'">
             {{ isAdmin ? '✓ Yes' : '✗ No' }}
           </span>
         </div>
-        <div class="status-item">
-          <span class="status-label">Email</span>
-          <span class="status-value">{{ user?.email || '—' }}</span>
+        <div
+          class="flex justify-between items-center px-3.5 py-2.5 bg-default border border-default rounded-xl text-sm"
+        >
+          <span class="font-medium text-dimmed">Email</span>
+          <span class="font-semibold">{{ user?.email || '—' }}</span>
         </div>
-        <div class="status-item">
-          <span class="status-label">Name</span>
-          <span class="status-value">{{ user?.name || '—' }}</span>
+        <div
+          class="flex justify-between items-center px-3.5 py-2.5 bg-default border border-default rounded-xl text-sm"
+        >
+          <span class="font-medium text-dimmed">Name</span>
+          <span class="font-semibold">{{ user?.name || '—' }}</span>
         </div>
-        <div class="status-item">
-          <span class="status-label">User ID</span>
-          <span class="status-value mono">{{ user?.id || '—' }}</span>
+        <div
+          class="flex justify-between items-center px-3.5 py-2.5 bg-default border border-default rounded-xl text-sm"
+        >
+          <span class="font-medium text-dimmed">User ID</span>
+          <span
+            class="font-semibold font-mono text-xs max-w-[200px] overflow-hidden text-ellipsis"
+            >{{ user?.id || '—' }}</span
+          >
         </div>
       </div>
 
-      <div class="admin-actions">
+      <div class="flex gap-3 justify-between">
         <UButton color="neutral" variant="outline" to="/" icon="i-lucide-arrow-left">
           Back to site
         </UButton>
@@ -62,81 +77,3 @@ async function handleLogout() {
     </div>
   </div>
 </template>
-
-<style scoped>
-.admin-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: calc(100vh - 200px);
-  padding: 2rem 1rem;
-}
-
-.admin-card {
-  width: 100%;
-  max-width: 480px;
-  background: var(--ui-bg-elevated);
-  border: 1px solid var(--ui-border);
-  border-radius: 16px;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.admin-header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.admin-header h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.status-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.status-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.625rem 0.875rem;
-  background: var(--ui-bg);
-  border: 1px solid var(--ui-border);
-  border-radius: 10px;
-  font-size: 0.875rem;
-}
-
-.status-label {
-  font-weight: 500;
-  color: var(--ui-text-dimmed);
-}
-
-.status-value {
-  font-weight: 600;
-}
-
-.status-value.mono {
-  font-family: ui-monospace, monospace;
-  font-size: 0.75rem;
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.text-green { color: #22c55e; }
-.text-red { color: #ef4444; }
-.text-orange { color: #f59e0b; }
-
-.admin-actions {
-  display: flex;
-  gap: 0.75rem;
-  justify-content: space-between;
-}
-</style>
