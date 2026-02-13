@@ -1,13 +1,7 @@
 <script setup lang="ts">
 const route = useRoute()
-const colorMode = useColorMode()
 const runtimeConfig = useRuntimeConfig()
 const { loggedIn, isAdmin } = useAuth()
-
-const isDark = computed({
-  get: () => colorMode.value === 'dark',
-  set: (val: boolean) => { colorMode.preference = val ? 'dark' : 'light' }
-})
 
 const siteName = runtimeConfig.public.appName || 'Austin Texas'
 const siteUrl = (runtimeConfig.public.appUrl || 'https://austin-texas.net').replace(/\/$/, '')
@@ -40,50 +34,37 @@ watch(route, () => {
 <template>
   <UApp>
     <div class="min-h-screen flex flex-col">
-      <!-- Header -->
+      <!-- Header — editorial wordmark + right links -->
       <header class="sticky top-0 z-50 bg-default/85 backdrop-blur-xl border-b border-default">
         <div class="max-w-[1200px] mx-auto px-4 sm:px-6 h-[60px] flex items-center justify-between">
-          <!-- Logo -->
-          <NuxtLink to="/" class="flex items-center gap-2.5 no-underline text-inherit">
-            <div class="size-9 rounded-xl bg-primary/12 flex items-center justify-center text-primary">
-              <UIcon name="i-lucide-map-pin" class="size-5" />
-            </div>
-            <div class="flex flex-col leading-tight">
-              <span class="font-display font-bold text-base tracking-tight">Austin Texas</span>
-              <span class="text-[10px] text-dimmed tracking-wider uppercase hidden sm:block">.net</span>
-            </div>
+          <!-- Wordmark -->
+          <NuxtLink to="/" class="no-underline text-inherit">
+            <span class="font-display text-lg font-bold tracking-tight italic">Austin-Texas.net</span>
           </NuxtLink>
 
-          <!-- Desktop nav — category links -->
-          <nav class="hidden lg:flex gap-0.5">
-            <NuxtLink
-              v-for="cat in categories"
-              :key="cat.slug"
-              :to="`/${cat.slug}/`"
-              class="px-3 py-1.5 text-xs font-medium text-muted rounded-lg transition-colors duration-200 hover:text-default hover:bg-elevated flex items-center gap-1.5"
-              :class="{ 'text-primary bg-primary/8': route.path.startsWith(`/${cat.slug}`) }"
-            >
-              <UIcon :name="cat.icon" class="size-3.5" />
-              {{ cat.title }}
-            </NuxtLink>
-          </nav>
-
-          <div class="flex items-center gap-3">
-            <ClientOnly>
-              <USwitch
-                v-model="isDark"
-                size="sm"
-                unchecked-icon="i-lucide-sun"
-                checked-icon="i-lucide-moon"
-              />
-              <template #fallback>
-                <span class="inline-block w-10 h-5" />
-              </template>
-            </ClientOnly>
-
-            <!-- Mobile hamburger -->
+          <!-- Desktop nav — Search / Categories / About + hamburger -->
+          <div class="flex items-center gap-1">
+            <nav class="hidden sm:flex items-center gap-0.5">
+              <NuxtLink
+                to="/search/"
+                class="px-3 py-1.5 text-sm font-medium text-muted rounded-lg transition-colors hover:text-default"
+              >
+                Search
+              </NuxtLink>
+              <NuxtLink
+                to="/food/"
+                class="px-3 py-1.5 text-sm font-medium text-muted rounded-lg transition-colors hover:text-default"
+              >
+                Categories
+              </NuxtLink>
+              <NuxtLink
+                to="/about/"
+                class="px-3 py-1.5 text-sm font-medium text-muted rounded-lg transition-colors hover:text-default"
+              >
+                About
+              </NuxtLink>
+            </nav>
             <UButton
-              class="lg:hidden"
               variant="ghost"
               color="neutral"
               size="sm"
@@ -96,7 +77,7 @@ watch(route, () => {
 
         <!-- Mobile nav -->
         <Transition name="slide-down">
-          <nav v-if="mobileMenuOpen" class="lg:hidden flex flex-col gap-0.5 px-4 sm:px-6 pb-4">
+          <nav v-if="mobileMenuOpen" class="flex flex-col gap-0.5 px-4 sm:px-6 pb-4">
             <NuxtLink
               to="/"
               class="px-3.5 py-2.5 text-sm font-medium text-muted no-underline rounded-lg transition-colors hover:text-primary hover:bg-primary/6 flex items-center gap-2.5"
