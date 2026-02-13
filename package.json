@@ -13,7 +13,8 @@
     "deploy": "nuxt build && node scripts/patch-cf-process-proxy.mjs && wrangler pages deploy dist",
     "lint": "eslint app/ server/ --no-error-on-unmatched-pattern",
     "prepare": "husky",
-    "postbuild": "node scripts/patch-cf-process-proxy.mjs"
+    "postbuild": "node scripts/patch-cf-process-proxy.mjs",
+    "dev:kill": "pkill -f 'nuxt.*austin-texas-net' ; pkill -f 'pnpm.*austin-texas-net.*dev' ; echo 'Killed all austin-texas-net dev processes'"
   },
   "dependencies": {
     "@nuxt/ui": "^4.3.0",

@@ -16,6 +16,7 @@ import noInlineSvg from './rules/no-inline-svg.mjs'
 import lucideIconsOnly from './rules/lucide-icons-only.mjs'
 import noStyleBlockLayout from './rules/no-style-block-layout.mjs'
 import requireClientOnlySwitch from './rules/require-client-only-switch.mjs'
+import noAttrsOnFragment from './rules/no-attrs-on-fragment.mjs'
 
 const plugin = {
   meta: {
@@ -30,6 +31,7 @@ const plugin = {
     'lucide-icons-only': lucideIconsOnly,
     'no-style-block-layout': noStyleBlockLayout,
     'require-client-only-switch': requireClientOnlySwitch,
+    'no-attrs-on-fragment': noAttrsOnFragment,
   },
 }
 
@@ -47,6 +49,7 @@ plugin.configs = {
         'atx/lucide-icons-only': 'warn',
         'atx/no-style-block-layout': ['warn', { max: 50 }],
         'atx/require-client-only-switch': 'warn',
+        'atx/no-attrs-on-fragment': 'warn',
       },
     },
   ],
