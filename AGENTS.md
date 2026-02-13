@@ -10,6 +10,7 @@
 
 - **Run `pnpm typecheck` before committing.** All TypeScript errors must be resolved — never commit code with type errors.
 - **Run `pnpm lint` before committing.** Fix all lint issues before pushing.
+- **Zero errors, zero warnings.** A task is not complete until `pnpm lint` reports 0 errors and 0 warnings. No exceptions.
 - **No `any` types unless absolutely necessary.** If `any` is unavoidable (e.g. third-party lib mismatch), add a comment explaining why.
 - **No `console.log` in committed code.** Use proper logging or remove debug statements.
 
