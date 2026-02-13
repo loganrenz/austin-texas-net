@@ -11,8 +11,9 @@
     "postinstall": "nuxt prepare",
     "typecheck": "npx nuxt typecheck",
     "deploy": "nuxt build && node scripts/patch-cf-process-proxy.mjs && wrangler pages deploy dist",
-    "lint": "eslint app/ --no-error-on-unmatched-pattern",
-    "prepare": "husky"
+    "lint": "eslint app/ server/ --no-error-on-unmatched-pattern",
+    "prepare": "husky",
+    "postbuild": "node scripts/patch-cf-process-proxy.mjs"
   },
   "dependencies": {
     "@nuxt/ui": "^4.3.0",
