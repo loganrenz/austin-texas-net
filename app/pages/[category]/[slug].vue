@@ -11,39 +11,39 @@ const { getCategoryBySlug, categories } = useSiteData()
 const categorySlug = computed(() => route.params.category as string)
 const slug = computed(() => route.params.slug as string)
 const category = computed(() => getCategoryBySlug(categorySlug.value))
-const subApp = computed(() =>
-  category.value?.subApps.find(a => a.slug === slug.value)
-)
+const subApp = computed(() => category.value?.subApps.find((a) => a.slug === slug.value))
 
-// 404 if category or sub-app not found
+// 404 if category or sub-app not found — fatal: true ensures Nuxt shows the error page
 if (!category.value || !subApp.value) {
-  throw createError({ statusCode: 404, statusMessage: 'Page not found' })
+  throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true })
 }
 
-const displayName = computed(() =>
-  subApp.value?.title ?? slug.value.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())
+const displayName = computed(
+  () =>
+    subApp.value?.title ??
+    slug.value.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
 )
 
 usePageSeo({
   title: `${displayName.value} — Coming Soon`,
-  description: subApp.value?.description ?? `${displayName.value} is coming soon to Austin-Texas.net.`,
+  description:
+    subApp.value?.description ?? `${displayName.value} is coming soon to Austin-Texas.net.`,
 })
 
 useSchemaOrg([
   defineWebPage({
     name: `${displayName.value} — Coming Soon`,
-    description: subApp.value?.description ?? `${displayName.value} is coming soon to Austin-Texas.net.`,
+    description:
+      subApp.value?.description ?? `${displayName.value} is coming soon to Austin-Texas.net.`,
   }),
 ])
 
 // Sibling sub-apps in the same category
-const siblings = computed(() =>
-  category.value?.subApps.filter(a => a.slug !== slug.value) ?? []
-)
+const siblings = computed(() => category.value?.subApps.filter((a) => a.slug !== slug.value) ?? [])
 
 // Cross-link categories
 const crossLinks = computed(() =>
-  categories.filter(c => c.slug !== categorySlug.value).slice(0, 4)
+  categories.filter((c) => c.slug !== categorySlug.value).slice(0, 4),
 )
 </script>
 
@@ -65,23 +65,35 @@ const crossLinks = computed(() =>
       <!-- Icon -->
       <div
         class="inline-flex items-center justify-center size-20 rounded-3xl mb-6 animate-fade-up"
-        style="background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-700));"
+        style="
+          background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-700));
+        "
       >
         <UIcon :name="category!.icon" class="size-10 text-white" />
       </div>
 
       <!-- Title -->
-      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-display mb-4 animate-fade-up-delay-1">
+      <h1
+        class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-display mb-4 animate-fade-up-delay-1"
+      >
         {{ displayName }}
       </h1>
 
       <!-- Badge -->
       <div class="flex justify-center mb-5 animate-fade-up-delay-1">
-        <UBadge color="warning" variant="subtle" size="md" label="Coming Soon" icon="i-lucide-clock" />
+        <UBadge
+          color="warning"
+          variant="subtle"
+          size="md"
+          label="Coming Soon"
+          icon="i-lucide-clock"
+        />
       </div>
 
       <!-- Description -->
-      <p class="text-base sm:text-lg text-muted max-w-xl mx-auto leading-relaxed animate-fade-up-delay-2">
+      <p
+        class="text-base sm:text-lg text-muted max-w-xl mx-auto leading-relaxed animate-fade-up-delay-2"
+      >
         {{ subApp?.description }}
       </p>
 
@@ -109,20 +121,22 @@ const crossLinks = computed(() =>
     </section>
 
     <!-- What to expect -->
-    <section class="rounded-2xl border border-default bg-default p-6 sm:p-8 mb-8 animate-fade-up-delay-3">
-      <h2 class="text-sm font-bold uppercase tracking-widest text-muted mb-4">
-        What to Expect
-      </h2>
+    <section
+      class="rounded-2xl border border-default bg-default p-6 sm:p-8 mb-8 animate-fade-up-delay-3"
+    >
+      <h2 class="text-sm font-bold uppercase tracking-widest text-muted mb-4">What to Expect</h2>
       <div class="text-sm text-muted leading-relaxed space-y-3">
         <p>
           We're building <strong class="text-default">{{ displayName }}</strong> as part of
-          <NuxtLink :to="`/${categorySlug}/`" class="text-primary hover:underline">{{ category?.title }}</NuxtLink>
+          <NuxtLink :to="`/${categorySlug}/`" class="text-primary hover:underline">{{
+            category?.title
+          }}</NuxtLink>
           on Austin-Texas.net — a set of free, fast, locally-focused tools powered by live data.
         </p>
         <p>
-          When this page goes live, you'll get real-time information, mobile-friendly design, and zero
-          ads — just useful Austin data. We build each tool with public APIs, local sensors, and
-          community-sourced information.
+          When this page goes live, you'll get real-time information, mobile-friendly design, and
+          zero ads — just useful Austin data. We build each tool with public APIs, local sensors,
+          and community-sourced information.
         </p>
       </div>
     </section>
@@ -161,9 +175,7 @@ const crossLinks = computed(() =>
 
     <!-- Cross-links -->
     <section class="mb-6">
-      <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-4">
-        Explore More
-      </h2>
+      <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-4">Explore More</h2>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <NuxtLink
           v-for="c in crossLinks"

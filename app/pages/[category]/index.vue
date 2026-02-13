@@ -10,9 +10,10 @@ const { getCategoryBySlug, categories } = useSiteData()
 const categorySlug = computed(() => route.params.category as string)
 const category = computed(() => getCategoryBySlug(categorySlug.value))
 
-// 404 if category not found
+// 404 if category not found — fatal: true ensures Nuxt shows the error page
+// instead of an unhandled promise rejection during client-side navigation / HMR
 if (!category.value) {
-  throw createError({ statusCode: 404, statusMessage: 'Category not found' })
+  throw createError({ statusCode: 404, statusMessage: 'Category not found', fatal: true })
 }
 
 usePageSeo({
@@ -29,7 +30,7 @@ useSchemaOrg([
 
 // Cross-link categories
 const crossLinks = computed(() =>
-  categories.filter(c => c.slug !== categorySlug.value).slice(0, 4)
+  categories.filter((c) => c.slug !== categorySlug.value).slice(0, 4),
 )
 </script>
 
@@ -37,9 +38,7 @@ const crossLinks = computed(() =>
   <div v-if="category">
     <!-- Breadcrumb -->
     <div class="flex items-center gap-2 text-sm text-muted mb-6">
-      <NuxtLink to="/" class="hover:text-primary transition-colors">
-        Home
-      </NuxtLink>
+      <NuxtLink to="/" class="hover:text-primary transition-colors"> Home </NuxtLink>
       <UIcon name="i-lucide-chevron-right" class="size-3" />
       <span class="text-default font-medium">{{ category.title }}</span>
     </div>
@@ -49,7 +48,7 @@ const crossLinks = computed(() =>
       <div
         class="inline-flex items-center justify-center size-16 rounded-2xl mb-4"
         :class="category.color"
-        style="background: currentColor;"
+        style="background: currentColor"
       >
         <UIcon :name="category.icon" class="size-8 text-white" />
       </div>
@@ -65,21 +64,23 @@ const crossLinks = computed(() =>
     <section class="rounded-2xl border border-default bg-default p-6 sm:p-8 mb-8">
       <div class="text-sm text-muted leading-relaxed space-y-4">
         <p>
-          Austin, Texas is one of the most vibrant cities in the American South, known for its live music scene,
-          incredible food, outdoor recreation, and a unique culture that locals call "Keep Austin Weird." Whether
-          you're a longtime resident or visiting for the first time, having access to real-time, locally-sourced
-          data makes all the difference in planning your days.
+          Austin, Texas is one of the most vibrant cities in the American South, known for its live
+          music scene, incredible food, outdoor recreation, and a unique culture that locals call
+          "Keep Austin Weird." Whether you're a longtime resident or visiting for the first time,
+          having access to real-time, locally-sourced data makes all the difference in planning your
+          days.
         </p>
         <p>
-          This {{ category.title.toLowerCase() }} hub brings together the best tools and guides for exploring
-          {{ category.title.toLowerCase() }} in Austin. Each tool below is built with live data integrations,
-          pulling from public APIs, local sensors, and community-sourced information to give you the most
-          accurate and up-to-date picture possible.
+          This {{ category.title.toLowerCase() }} hub brings together the best tools and guides for
+          exploring {{ category.title.toLowerCase() }} in Austin. Each tool below is built with live
+          data integrations, pulling from public APIs, local sensors, and community-sourced
+          information to give you the most accurate and up-to-date picture possible.
         </p>
         <p>
-          Browse the tools below to find exactly what you need, or explore our other category hubs for more
-          ways to experience Austin. Every page is designed to load fast, work on mobile, and deliver the
-          specific information you're looking for — no filler, no ads, just useful Austin data.
+          Browse the tools below to find exactly what you need, or explore our other category hubs
+          for more ways to experience Austin. Every page is designed to load fast, work on mobile,
+          and deliver the specific information you're looking for — no filler, no ads, just useful
+          Austin data.
         </p>
       </div>
     </section>
@@ -118,9 +119,7 @@ const crossLinks = computed(() =>
 
     <!-- Cross-links -->
     <section class="mb-6">
-      <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-4">
-        More from Austin
-      </h2>
+      <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-4">More from Austin</h2>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <NuxtLink
           v-for="c in crossLinks"
