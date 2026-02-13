@@ -113,6 +113,7 @@ export default defineNuxtConfig({
         { name: 'geo.placename', content: 'Austin' },
         { name: 'geo.position', content: '30.2672;-97.7431' },
         { name: 'ICBM', content: '30.2672, -97.7431' },
+        { name: 'build-time', content: new Date().toISOString() },
       ],
       link: [
         { rel: 'icon', type: 'image/png', href: '/favicon.png' },
