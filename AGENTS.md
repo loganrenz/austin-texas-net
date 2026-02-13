@@ -1,0 +1,32 @@
+# Agent Rules
+
+## Git Discipline
+
+- **Commit often.** After every meaningful change (new feature, bug fix, refactor), stage and commit with a clear message. Do not batch unrelated changes into a single commit.
+- **Use conventional commits.** Format: `type: short description` — e.g. `fix: resolve pollen chart type error`, `feat: add radar keyword filters`, `chore: update deps`.
+- **Never commit secrets, `.env` files, or API keys.** Verify `.gitignore` covers all sensitive files before committing.
+
+## Code Quality
+
+- **Run `pnpm typecheck` before committing.** All TypeScript errors must be resolved — never commit code with type errors.
+- **Run `pnpm lint` before committing.** Fix all lint issues before pushing.
+- **No `any` types unless absolutely necessary.** If `any` is unavoidable (e.g. third-party lib mismatch), add a comment explaining why.
+- **No `console.log` in committed code.** Use proper logging or remove debug statements.
+
+## Nuxt 4 & Nuxt UI 4
+
+- **Use Nuxt UI 4 semantic colors** — `primary`, `secondary`, `success`, `warning`, `error`, `info`, `neutral`. Never use raw CSS colors like `red`, `green`, `blue` in component props.
+- **Use `items` not `options`** on `USelect`, `URadioGroup`, and similar Nuxt UI 4 components.
+- **Use `useAsyncData` or `useFetch`** for all data fetching — never raw `fetch()` in components.
+- **Follow Nuxt 4 directory structure** — app code in `app/`, server code in `server/`.
+
+## Cloudflare Workers / D1
+
+- **All server utils must be edge-compatible.** No Node.js-only APIs (`fs`, `path`, `crypto` from Node). Use Web APIs and `h3` utilities.
+- **Use drizzle-orm for all database queries.** No raw SQL strings outside of migration files.
+
+## File Hygiene
+
+- **No placeholder content.** If you need an image, generate one. If you need data, use realistic mock data.
+- **Keep files focused.** One component per file, one API route per file. Extract shared logic into `server/utils/` or `app/composables/`.
+- **Delete dead code.** Don't leave commented-out blocks or unused imports.
