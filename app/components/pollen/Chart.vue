@@ -184,10 +184,18 @@ const chartOptions = computed(() => {
 </script>
 
 <template>
-  <div class="chart-container" :class="{ embedded }">
-    <div class="chart-header">
-      <h3 class="chart-title">Pollen Trend</h3>
-      <div class="period-selector">
+  <div
+    :class="
+      embedded
+        ? 'bg-transparent border-0 rounded-none p-0'
+        : 'bg-elevated border border-default rounded-2xl p-5'
+    "
+  >
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-[0.85rem] font-semibold text-muted uppercase tracking-[0.06em]">
+        Pollen Trend
+      </h3>
+      <div class="flex gap-0.5 bg-muted rounded-lg p-[3px]">
         <UButton
           v-for="p in periods"
           :key="p.days"
@@ -201,135 +209,26 @@ const chartOptions = computed(() => {
     </div>
 
     <!-- Loading state -->
-    <div v-if="loading" class="chart-loading">
-      <div class="loading-spinner" />
-      <p class="loading-text">Loading pollen data...</p>
+    <div v-if="loading" class="h-[280px] flex flex-col items-center justify-center gap-3">
+      <div
+        class="size-8 border-[3px] border-primary/15 border-t-primary rounded-full animate-spin"
+      />
+      <p class="text-[0.8rem] text-muted">Loading pollen data...</p>
     </div>
 
-    <div v-else class="chart-wrapper" :class="{ 'chart-wrapper--embedded': embedded }">
+    <div v-else :class="embedded ? 'h-[220px]' : 'h-[280px]'">
       <Line v-if="data.length > 0" :data="chartData" :options="chartOptions as any" />
-      <div v-else class="chart-empty">
+      <div v-else class="h-full flex items-center justify-center text-muted text-[0.85rem]">
         <p>No pollen data available for this period</p>
       </div>
     </div>
 
     <!-- Aggregation notice -->
-    <p v-if="activePeriod > 90 && !loading && data.length > 0" class="agg-notice">
+    <p
+      v-if="activePeriod > 90 && !loading && data.length > 0"
+      class="mt-2 text-[0.7rem] text-muted text-center opacity-70"
+    >
       Showing weekly averages for {{ activePeriod > 365 ? '2-year' : '1-year' }} view
     </p>
   </div>
 </template>
-
-<style scoped>
-.chart-container {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  padding: 20px;
-}
-
-.chart-container.embedded {
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  padding: 0;
-}
-
-.chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.chart-title {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.period-selector {
-  display: flex;
-  gap: 2px;
-  background: var(--color-surface-hover);
-  border-radius: 8px;
-  padding: 3px;
-}
-
-.period-btn {
-  padding: 4px 10px;
-  border: none;
-  background: transparent;
-  color: var(--color-text-muted);
-  font-size: 0.7rem;
-  font-weight: 600;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.period-btn:hover {
-  color: var(--color-text-secondary);
-}
-
-.period-btn.active {
-  background: rgba(16, 185, 129, 0.15);
-  color: #10b981;
-}
-
-.chart-wrapper {
-  height: 280px;
-}
-
-.chart-wrapper--embedded {
-  height: 220px;
-}
-
-.chart-loading {
-  height: 280px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-}
-
-.loading-spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid rgba(16, 185, 129, 0.15);
-  border-top-color: #10b981;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.loading-text {
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-}
-
-.chart-empty {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text-muted);
-  font-size: 0.85rem;
-}
-
-.agg-notice {
-  margin-top: 8px;
-  font-size: 0.7rem;
-  color: var(--color-text-muted);
-  text-align: center;
-  opacity: 0.7;
-}
-</style>

@@ -87,25 +87,31 @@ async function handleLogout() {
 </script>
 
 <template>
-  <div class="login-container">
-    <div class="login-card">
+  <div class="flex items-center justify-center min-h-[calc(100vh-120px)] py-8 px-4">
+    <div class="w-full max-w-[400px] flex flex-col gap-6">
       <!-- Logo & Title -->
-      <div class="login-header">
-        <div class="login-icon">
-          <UIcon name="i-lucide-shield" class="icon" />
+      <div class="text-center">
+        <div
+          class="size-14 mx-auto mb-4 flex items-center justify-center rounded-2xl bg-linear-to-br from-primary/15 to-secondary/15 border border-primary/20"
+        >
+          <UIcon name="i-lucide-shield" class="size-7 text-primary" />
         </div>
-        <h1>Austin Texas</h1>
-        <p class="subtitle">Sign in to your account</p>
+        <h1 class="text-[1.75rem] font-bold tracking-tight mb-1">Austin Texas</h1>
+        <p class="text-sm text-dimmed m-0">Sign in to your account</p>
       </div>
 
       <!-- Authenticated State -->
       <template v-if="loggedIn">
-        <div class="auth-state">
-          <div class="user-info">
-            <div class="user-avatar">{{ user?.email?.charAt(0).toUpperCase() }}</div>
+        <div class="flex flex-col gap-5 p-6 bg-elevated border border-default rounded-2xl">
+          <div class="flex items-center gap-3">
+            <div
+              class="size-11 flex items-center justify-center rounded-xl bg-linear-to-br from-primary to-secondary text-white font-semibold text-lg"
+            >
+              {{ user?.email?.charAt(0).toUpperCase() }}
+            </div>
             <div>
-              <p class="user-name">{{ user?.name || 'Anonymous' }}</p>
-              <p class="user-email">{{ user?.email }}</p>
+              <p class="font-semibold m-0">{{ user?.name || 'Anonymous' }}</p>
+              <p class="text-[0.8125rem] text-dimmed m-0">{{ user?.email }}</p>
             </div>
           </div>
           <UButton color="neutral" variant="outline" label="Sign Out" block @click="handleLogout" />
@@ -120,12 +126,14 @@ async function handleLogout() {
           size="lg"
           icon="i-lucide-apple"
           label="Continue with Apple"
-          class="apple-btn"
+          class="bg-black! text-white! border-none! dark:bg-white! dark:text-black!"
           @click="handleApple"
         />
 
         <!-- Divider -->
-        <div class="divider">
+        <div
+          class="flex items-center gap-3 text-dimmed text-xs uppercase tracking-wider before:content-[''] before:flex-1 before:h-px before:bg-border after:content-[''] after:flex-1 after:h-px after:bg-border"
+        >
           <span>or</span>
         </div>
 
@@ -143,7 +151,7 @@ async function handleLogout() {
 
         <!-- Email Form -->
         <Transition name="slide">
-          <div v-if="emailOpen" class="email-form">
+          <div v-if="emailOpen" class="flex flex-col gap-5">
             <!-- Tabs -->
             <UTabs
               v-model="mode"
@@ -156,8 +164,11 @@ async function handleLogout() {
             />
 
             <!-- Error -->
-            <div v-if="error" class="error-banner">
-              <UIcon name="i-lucide-alert-circle" class="error-icon" />
+            <div
+              v-if="error"
+              class="flex items-center gap-2 py-3 px-4 bg-error/10 dark:bg-error/15 border border-error/20 rounded-[10px] text-error text-sm"
+            >
+              <UIcon name="i-lucide-alert-circle" class="size-4 shrink-0" />
               <span>{{ error }}</span>
               <UButton
                 icon="i-lucide-x"
@@ -169,7 +180,7 @@ async function handleLogout() {
               />
             </div>
 
-            <UForm :state="form" class="form-fields" @submit="handleSubmit">
+            <UForm :state="form" class="flex flex-col gap-4" @submit="handleSubmit">
               <!-- Name (signup only) -->
               <Transition name="slide">
                 <UFormField v-if="mode === 'signup'" label="Name" name="name">
@@ -212,7 +223,7 @@ async function handleLogout() {
             </UForm>
 
             <!-- Toggle mode text -->
-            <p class="mode-toggle-text">
+            <p class="text-center text-[0.8125rem] text-dimmed">
               <template v-if="mode === 'signin'">
                 Don't have an account?
                 <UButton variant="link" label="Create one" size="xs" @click="toggleMode" />
@@ -229,172 +240,7 @@ async function handleLogout() {
   </div>
 </template>
 
-<style scoped>
-.login-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: calc(100vh - 120px);
-  padding: 2rem 1rem;
-}
-
-.login-card {
-  width: 100%;
-  max-width: 400px;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-/* Header */
-.login-header {
-  text-align: center;
-}
-
-.login-icon {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
-  border: 1px solid rgba(59, 130, 246, 0.2);
-}
-
-.login-icon .icon {
-  width: 28px;
-  height: 28px;
-  color: #3b82f6;
-}
-
-.login-header h1 {
-  font-size: 1.75rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  margin: 0 0 0.25rem;
-}
-
-.login-header .subtitle {
-  font-size: 0.875rem;
-  color: var(--ui-text-dimmed, #6b7280);
-  margin: 0;
-}
-
-/* Apple Button */
-.apple-btn {
-  background: #000 !important;
-  color: white !important;
-  border: none !important;
-}
-
-:root.dark .apple-btn {
-  background: white !important;
-  color: black !important;
-}
-
-/* Divider */
-.divider {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: var(--ui-text-dimmed, #9ca3af);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--ui-border, #e5e7eb);
-}
-
-/* Email Form */
-.email-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-/* Error */
-.error-banner {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: 10px;
-  color: #dc2626;
-  font-size: 0.875rem;
-}
-
-.error-icon {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
-
-/* Form Fields */
-.form-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-/* Mode toggle */
-.mode-toggle-text {
-  text-align: center;
-  font-size: 0.8125rem;
-  color: var(--ui-text-dimmed, #6b7280);
-}
-
-/* Auth state */
-.auth-state {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  padding: 1.5rem;
-  background: var(--ui-bg-elevated, #f9fafb);
-  border: 1px solid var(--ui-border, #e5e7eb);
-  border-radius: 16px;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.user-avatar {
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #3b82f6, #6366f1);
-  color: white;
-  font-weight: 600;
-  font-size: 1.125rem;
-}
-
-.user-name {
-  font-weight: 600;
-  margin: 0;
-}
-
-.user-email {
-  font-size: 0.8125rem;
-  color: var(--ui-text-dimmed, #6b7280);
-  margin: 0;
-}
-
-/* Slide transitions */
+<style>
 .slide-enter-active,
 .slide-leave-active {
   transition: all 0.25s ease;
@@ -413,10 +259,5 @@ async function handleLogout() {
   opacity: 1;
   max-height: 600px;
   transform: translateY(0);
-}
-
-/* Dark mode adjustments */
-:root.dark .error-banner {
-  background: rgba(239, 68, 68, 0.15);
 }
 </style>
