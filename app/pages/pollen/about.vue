@@ -30,12 +30,12 @@ const facts = [
 
 <template>
   <div>
-    <header class="page-header">
+    <div class="page-header">
       <h1 class="page-title">What is Cedar Fever?</h1>
       <p class="page-subtitle">
         Understanding mountain cedar allergies in Central Texas
       </p>
-    </header>
+    </div>
 
     <!-- Cedar tree hero image -->
     <div class="cedar-banner">

@@ -186,15 +186,15 @@ const chartOptions = computed(() => {
     <div class="chart-header">
       <h3 class="chart-title">Pollen Trend</h3>
       <div class="period-selector">
-        <button
+        <UButton
           v-for="p in periods"
           :key="p.days"
-          class="period-btn"
-          :class="{ active: activePeriod === p.days }"
+          size="xs"
+          :variant="activePeriod === p.days ? 'solid' : 'ghost'"
+          :color="activePeriod === p.days ? 'primary' : 'neutral'"
+          :label="p.label"
           @click="switchPeriod(p.days)"
-        >
-          {{ p.label }}
-        </button>
+        />
       </div>
     </div>
 

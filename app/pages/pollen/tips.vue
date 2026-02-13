@@ -62,10 +62,10 @@ const sections = [
 
 <template>
   <div>
-    <header class="page-header">
+    <div class="page-header">
       <h1 class="page-title">Cedar Allergy Tips & Treatment</h1>
       <p class="page-subtitle">Evidence-based strategies for managing cedar fever in Austin</p>
-    </header>
+    </div>
 
     <section v-for="section in sections" :key="section.title" class="tips-section">
       <div class="section-header">

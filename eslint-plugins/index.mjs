@@ -17,11 +17,16 @@ import lucideIconsOnly from './rules/lucide-icons-only.mjs'
 import noStyleBlockLayout from './rules/no-style-block-layout.mjs'
 import requireClientOnlySwitch from './rules/require-client-only-switch.mjs'
 import noAttrsOnFragment from './rules/no-attrs-on-fragment.mjs'
+import noNativeInput from './rules/no-native-input.mjs'
+import noNativeForm from './rules/no-native-form.mjs'
+import noNativeTable from './rules/no-native-table.mjs'
+import preferULink from './rules/prefer-ulink.mjs'
+import noNativeLayout from './rules/no-native-layout.mjs'
 
 const plugin = {
   meta: {
     name: 'eslint-plugin-atx',
-    version: '1.0.0',
+    version: '2.0.0',
   },
 
   rules: {
@@ -32,6 +37,11 @@ const plugin = {
     'no-style-block-layout': noStyleBlockLayout,
     'require-client-only-switch': requireClientOnlySwitch,
     'no-attrs-on-fragment': noAttrsOnFragment,
+    'no-native-input': noNativeInput,
+    'no-native-form': noNativeForm,
+    'no-native-table': noNativeTable,
+    'prefer-ulink': preferULink,
+    'no-native-layout': noNativeLayout,
   },
 }
 
@@ -50,6 +60,11 @@ plugin.configs = {
         'atx/no-style-block-layout': ['warn', { max: 50 }],
         'atx/require-client-only-switch': 'warn',
         'atx/no-attrs-on-fragment': 'warn',
+        'atx/no-native-input': 'warn',
+        'atx/no-native-form': 'warn',
+        'atx/no-native-table': 'warn',
+        'atx/prefer-ulink': 'warn',
+        'atx/no-native-layout': 'warn',
       },
     },
   ],

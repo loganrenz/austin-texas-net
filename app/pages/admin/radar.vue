@@ -242,6 +242,7 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
       </template>
 
       <div class="table-wrapper">
+        <!-- eslint-disable-next-line atx/no-native-table -->
         <table class="radar-table" v-if="keywords?.data?.length">
           <thead>
             <tr>
