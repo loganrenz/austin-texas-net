@@ -1,10 +1,16 @@
 /**
  * atx/no-attrs-on-fragment
  *
- * Detects Vue SFC templates with multiple root elements (fragments) that do
- * NOT declare `inheritAttrs: false`. When a parent passes `style` or `class`
- * to such a component, Vue emits a runtime warning because it cannot
- * automatically inherit the attributes onto a single root node.
+ * Detects Vue SFC templates that Vue cannot automatically inherit attributes
+ * onto. This happens when a component renders:
+ *   - Multiple root elements (fragment)
+ *   - A root-level <Teleport>
+ *   - Only non-whitespace text at the root
+ *
+ * When a parent passes `style` or `class` to such a component, Vue emits:
+ *   "[Vue warn]: Extraneous non-props attributes (style) were passed to
+ *    component but could not be automatically inherited because component
+ *    renders fragment or text or teleport root nodes."
  *
  * Fix options:
  *   1. Wrap template content in a single root element.
@@ -14,13 +20,23 @@
 
 import { defineTemplateBodyVisitor } from '../utils.mjs'
 
+/**
+ * Tag names that Vue treats as non-inheritable root nodes.
+ * These cannot receive fallthrough attributes even when used alone.
+ */
+const UNINHERITABLE_ROOT_TAGS = new Set([
+  'teleport',
+  'Teleport',
+  'template',
+])
+
 /** @type {import('eslint').Rule.RuleModule} */
 export default {
   meta: {
     type: 'suggestion',
     docs: {
       description:
-        'Disallow multi-root (fragment) templates without inheritAttrs: false',
+        'Disallow multi-root (fragment) templates and teleport/text-only roots without inheritAttrs: false',
       category: 'ATX Design System',
     },
     messages: {
@@ -28,6 +44,12 @@ export default {
         'This component has {{ count }} root elements (fragment template) but does not set `inheritAttrs: false`. ' +
         'If a parent passes style/class, Vue will emit a runtime warning. ' +
         'Either wrap in a single root element or add `defineOptions({ inheritAttrs: false })`.',
+      teleportRootNeedsInheritAttrs:
+        'Root-level <{{ tag }}> cannot inherit fallthrough attributes (style/class). ' +
+        'Wrap it in a plain element or add `defineOptions({ inheritAttrs: false })`.',
+      textOnlyRootNeedsInheritAttrs:
+        'This component renders only text at the root, which cannot inherit fallthrough attributes. ' +
+        'Wrap the text in a single root element or add `defineOptions({ inheritAttrs: false })`.',
     },
     schema: [],
   },
@@ -75,18 +97,46 @@ export default {
           // Only process the top-level <template> (document root)
           if (node.parent && node.parent.type !== 'VDocumentFragment') return
 
-          const rootElements = node.children.filter(
+          // Collect significant root children (elements + non-whitespace text)
+          const rootChildren = node.children.filter(
             (child) =>
               child.type === 'VElement' ||
-              // Text nodes that are non-whitespace count as roots
               (child.type === 'VText' && child.value.trim().length > 0)
           )
 
-          if (rootElements.length > 1 && !hasInheritAttrsFalse) {
+          if (hasInheritAttrsFalse) return
+
+          // Case 1: Multiple root nodes → fragment
+          if (rootChildren.length > 1) {
             context.report({
               node: node.startTag || node,
               messageId: 'fragmentNeedsInheritAttrs',
-              data: { count: String(rootElements.length) },
+              data: { count: String(rootChildren.length) },
+            })
+            return
+          }
+
+          // Case 2: Single root is <Teleport> or <template> (non-inheritable)
+          if (rootChildren.length === 1 && rootChildren[0].type === 'VElement') {
+            const tag = rootChildren[0].rawName || rootChildren[0].name
+            if (UNINHERITABLE_ROOT_TAGS.has(tag)) {
+              context.report({
+                node: rootChildren[0].startTag || rootChildren[0],
+                messageId: 'teleportRootNeedsInheritAttrs',
+                data: { tag },
+              })
+              return
+            }
+          }
+
+          // Case 3: Only text nodes at root (no elements)
+          if (
+            rootChildren.length > 0 &&
+            rootChildren.every((c) => c.type === 'VText')
+          ) {
+            context.report({
+              node: node.startTag || node,
+              messageId: 'textOnlyRootNeedsInheritAttrs',
             })
           }
         },
