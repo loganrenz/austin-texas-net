@@ -13,7 +13,7 @@ const props = defineProps<{
 
 const { categories } = useSiteData()
 const crossLinks = computed(() =>
-  categories.filter(c => c.slug !== props.category.slug).slice(0, 4)
+  categories.filter((c) => c.slug !== props.category.slug).slice(0, 4),
 )
 
 function getStatusLabel(status: SubApp['status']): string {
@@ -41,8 +41,15 @@ function isDisabled(app: SubApp): boolean {
 
 // Click tracking
 function trackAppClick(appTitle: string, destination: string) {
-  if (import.meta.client && (window as any).posthog) {
-    (window as any).posthog.capture('subapp_card_click', {
+  const ph = import.meta.client
+    ? (
+        window as Window & {
+          posthog?: { capture: (event: string, properties: Record<string, string>) => void }
+        }
+      ).posthog
+    : undefined
+  if (ph) {
+    ph.capture('subapp_card_click', {
       category: props.category.slug,
       app: appTitle,
       destination,
@@ -53,97 +60,103 @@ function trackAppClick(appTitle: string, destination: string) {
 
 <template>
   <UContainer>
-  <div>
-    <!-- Breadcrumb -->
-    <div class="flex items-center gap-2 text-sm text-muted mb-6">
-      <NuxtLink to="/" class="hover:text-primary transition-colors">Home</NuxtLink>
-      <UIcon name="i-lucide-chevron-right" class="size-3" />
-      <span class="text-default font-medium">{{ category.title }}</span>
-    </div>
-
-    <!-- Hero -->
-    <section class="cat-hero">
-      <div class="cat-hero-icon" :class="category.color">
-        <UIcon :name="category.icon" class="size-8" />
+    <div>
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-2 text-sm text-muted mb-6">
+        <NuxtLink to="/" class="hover:text-primary transition-colors">Home</NuxtLink>
+        <UIcon name="i-lucide-chevron-right" class="size-3" />
+        <span class="text-default font-medium">{{ category.title }}</span>
       </div>
-      <h1 class="cat-hero-title">{{ category.title }} in Austin</h1>
-      <p class="cat-hero-tagline">{{ category.tagline }}</p>
-    </section>
 
-    <!-- Live Now module slot (item 4) -->
-    <slot name="live-now" />
+      <!-- Hero -->
+      <section class="cat-hero">
+        <div class="cat-hero-icon" :class="category.color">
+          <UIcon :name="category.icon" class="size-8" />
+        </div>
+        <h1 class="cat-hero-title">{{ category.title }} in Austin</h1>
+        <p class="cat-hero-tagline">{{ category.tagline }}</p>
+      </section>
 
-    <!-- Overview (SEO content) -->
-    <section class="content-block">
-      <div class="prose-content" v-html="overview" />
-    </section>
+      <!-- Live Now module slot (item 4) -->
+      <slot name="live-now" />
 
-    <!-- Sub-app cards (item 5: standardized layout) -->
-    <section class="subapps">
-      <h2 class="section-label">Explore {{ category.title }}</h2>
-      <div class="subapp-grid">
-        <component
-          :is="isDisabled(app) ? 'div' : (isExternal(app) ? 'a' : 'NuxtLink')"
-          v-for="app in category.subApps"
-          :key="app.slug"
-          :to="!isDisabled(app) && !isExternal(app) ? getAppHref(app) : undefined"
-          :href="isExternal(app) ? app.standaloneUrl : undefined"
-          :target="isExternal(app) ? '_blank' : undefined"
-          :rel="isExternal(app) ? 'noopener' : undefined"
-          class="subapp-card group"
-          :class="{ 'subapp-card--disabled': isDisabled(app) }"
-          @click="!isDisabled(app) && trackAppClick(app.title, getAppHref(app) || app.standaloneUrl || '')"
-        >
-          <div class="subapp-top">
-            <h3 class="subapp-title">{{ app.title }}</h3>
-            <span
-              class="subapp-badge"
-              :class="app.status === 'live' ? 'badge-live' : 'badge-soon'"
-            >
-              {{ getStatusLabel(app.status) }}
+      <!-- Overview (SEO content) -->
+      <section class="content-block">
+        <div class="prose-content" v-html="overview" />
+      </section>
+
+      <!-- Sub-app cards (item 5: standardized layout) -->
+      <section class="subapps">
+        <h2 class="section-label">Explore {{ category.title }}</h2>
+        <div class="subapp-grid">
+          <component
+            :is="isDisabled(app) ? 'div' : isExternal(app) ? 'a' : 'NuxtLink'"
+            v-for="app in category.subApps"
+            :key="app.slug"
+            :to="!isDisabled(app) && !isExternal(app) ? getAppHref(app) : undefined"
+            :href="isExternal(app) ? app.standaloneUrl : undefined"
+            :target="isExternal(app) ? '_blank' : undefined"
+            :rel="isExternal(app) ? 'noopener' : undefined"
+            class="subapp-card group"
+            :class="{ 'subapp-card--disabled': isDisabled(app) }"
+            @click="
+              !isDisabled(app) &&
+              trackAppClick(app.title, getAppHref(app) || app.standaloneUrl || '')
+            "
+          >
+            <div class="subapp-top">
+              <h3 class="subapp-title">{{ app.title }}</h3>
+              <span
+                class="subapp-badge"
+                :class="app.status === 'live' ? 'badge-live' : 'badge-soon'"
+              >
+                {{ getStatusLabel(app.status) }}
+              </span>
+            </div>
+            <p class="subapp-desc">{{ app.description }}</p>
+            <span v-if="app.status === 'live'" class="subapp-cta">
+              Open
+              <UIcon
+                name="i-lucide-arrow-right"
+                class="size-3 ml-1 group-hover:translate-x-0.5 transition-transform"
+              />
             </span>
-          </div>
-          <p class="subapp-desc">{{ app.description }}</p>
-          <span v-if="app.status === 'live'" class="subapp-cta">
-            Open
-            <UIcon name="i-lucide-arrow-right" class="size-3 ml-1 group-hover:translate-x-0.5 transition-transform" />
-          </span>
-          <span v-else-if="app.standaloneUrl" class="subapp-cta subapp-cta--external">
-            Visit app
-            <UIcon name="i-lucide-external-link" class="size-3 ml-1" />
-          </span>
-        </component>
-      </div>
-    </section>
+            <span v-else-if="app.standaloneUrl" class="subapp-cta subapp-cta--external">
+              Visit app
+              <UIcon name="i-lucide-external-link" class="size-3 ml-1" />
+            </span>
+          </component>
+        </div>
+      </section>
 
-    <!-- FAQ -->
-    <section v-if="faqItems && faqItems.length > 0" class="faq">
-      <h2 class="section-label">Frequently Asked Questions</h2>
-      <div class="faq-list">
-        <details v-for="(item, i) in faqItems" :key="i" class="faq-item">
-          <summary class="faq-q">{{ item.question }}</summary>
-          <p class="faq-a">{{ item.answer }}</p>
-        </details>
-      </div>
-    </section>
+      <!-- FAQ -->
+      <section v-if="faqItems && faqItems.length > 0" class="faq">
+        <h2 class="section-label">Frequently Asked Questions</h2>
+        <div class="faq-list">
+          <details v-for="(item, i) in faqItems" :key="i" class="faq-item">
+            <summary class="faq-q">{{ item.question }}</summary>
+            <p class="faq-a">{{ item.answer }}</p>
+          </details>
+        </div>
+      </section>
 
-    <!-- Cross-links -->
-    <section class="crosslinks">
-      <h2 class="section-label">More from Austin</h2>
-      <div class="crosslink-grid">
-        <NuxtLink
-          v-for="c in crossLinks"
-          :key="c.slug"
-          :to="`/${c.slug}/`"
-          class="crosslink-card"
-        >
-          <UIcon :name="c.icon" class="size-5" :class="c.color" />
-          <span class="crosslink-title">{{ c.title }}</span>
-          <UIcon name="i-lucide-arrow-right" class="size-3 text-dimmed" />
-        </NuxtLink>
-      </div>
-    </section>
-  </div>
+      <!-- Cross-links -->
+      <section class="crosslinks">
+        <h2 class="section-label">More from Austin</h2>
+        <div class="crosslink-grid">
+          <NuxtLink
+            v-for="c in crossLinks"
+            :key="c.slug"
+            :to="`/${c.slug}/`"
+            class="crosslink-card"
+          >
+            <UIcon :name="c.icon" class="size-5" :class="c.color" />
+            <span class="crosslink-title">{{ c.title }}</span>
+            <UIcon name="i-lucide-arrow-right" class="size-3 text-dimmed" />
+          </NuxtLink>
+        </div>
+      </section>
+    </div>
   </UContainer>
 </template>
 
@@ -262,7 +275,7 @@ function trackAppClick(appTitle: string, destination: string) {
 .subapp-card:hover {
   border-color: var(--color-border-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 .subapp-card--disabled {
@@ -297,8 +310,8 @@ function trackAppClick(appTitle: string, destination: string) {
 }
 
 .badge-live {
-  background: rgba(34,197,94,0.12);
-  color: #22C55E;
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
 }
 
 .badge-soon {
@@ -398,8 +411,14 @@ function trackAppClick(appTitle: string, destination: string) {
 }
 
 @media (max-width: 640px) {
-  .subapp-grid { grid-template-columns: 1fr; }
-  .crosslink-grid { grid-template-columns: 1fr 1fr; }
-  .content-block { padding: 20px 16px; }
+  .subapp-grid {
+    grid-template-columns: 1fr;
+  }
+  .crosslink-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .content-block {
+    padding: 20px 16px;
+  }
 }
 </style>

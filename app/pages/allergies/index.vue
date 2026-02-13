@@ -4,35 +4,47 @@ const category = getCategoryBySlug('allergies')!
 
 usePageSeo({
   title: 'Austin Allergies — Cedar & Oak Pollen Tracking',
-  description: 'Live pollen counts and allergy tracking for Austin, Texas. Cedar fever season updates, oak pollen forecasts, and severity levels in grains/m³.',
+  description:
+    'Live pollen counts and allergy tracking for Austin, Texas. Cedar fever season updates, oak pollen forecasts, and severity levels in grains/m³.',
 })
 
 useSchemaOrg([
   defineWebPage({
     name: 'Austin Allergies — Cedar & Oak Pollen Tracking',
-    description: 'Live pollen counts and allergy tracking for Austin, Texas. Cedar fever season updates, oak pollen forecasts, and severity levels.',
+    description:
+      'Live pollen counts and allergy tracking for Austin, Texas. Cedar fever season updates, oak pollen forecasts, and severity levels.',
   }),
 ])
 
+interface PollenCurrentResponse {
+  current: {
+    date: string
+    count: number
+    level: string
+    source: string
+    description: string
+  } | null
+}
+
 // Live pollen data for the "live now" module
-const { data: pollenData } = await useFetch('/api/pollen/current', {
+const { data: pollenData } = await useFetch<PollenCurrentResponse>('/api/pollen/current', {
   server: false,
   lazy: true,
 })
 
-const cedarLevel = computed(() => (pollenData.value as any)?.current?.level ?? null)
-const cedarCount = computed(() => (pollenData.value as any)?.current?.count ?? null)
-const lastUpdated = computed(() => (pollenData.value as any)?.current?.date ?? null)
+const cedarLevel = computed(() => pollenData.value?.current?.level ?? null)
+const cedarCount = computed(() => pollenData.value?.current?.count ?? null)
+const lastUpdated = computed(() => pollenData.value?.current?.date ?? null)
 
 function severityColor(level: string | null): string {
   const map: Record<string, string> = {
-    'Low': '#22C55E',
-    'Medium': '#EAB308',
-    'High': '#F97316',
+    Low: '#22C55E',
+    Medium: '#EAB308',
+    High: '#F97316',
     'Very High': '#EF4444',
-    'Severe': '#A855F7',
+    Severe: '#A855F7',
   }
-  return level ? (map[level] || '#9CA3AF') : '#9CA3AF'
+  return level ? map[level] || '#9CA3AF' : '#9CA3AF'
 }
 
 const overview = `
@@ -52,19 +64,31 @@ const overview = `
 `
 
 const faqItems = [
-  { question: 'When is cedar season in Austin?', answer: 'Cedar (Mountain Juniper) pollen season runs from mid-December through mid-February, with peak counts typically occurring in January. Cold fronts trigger the heaviest pollen releases.' },
-  { question: 'Why are allergies so bad in Austin?', answer: 'Austin sits at the eastern edge of the Hill Country, directly in the pollen drift path from millions of Ashe Juniper and oak trees. The mild climate supports year-round allergen production, and population growth means more people are exposed each year.' },
-  { question: 'When is oak pollen season in Austin?', answer: 'Oak pollen season in Austin typically runs from late February through April, overlapping with the tail end of cedar season. Live oak and red oak are the primary producers.' },
-  { question: 'What is a high pollen count?', answer: 'For cedar pollen, counts above 500 grains/m³ are considered high, above 1,500 is very high, and above 5,000 is severe. Most allergy sufferers begin experiencing symptoms at just 50 grains/m³.' },
+  {
+    question: 'When is cedar season in Austin?',
+    answer:
+      'Cedar (Mountain Juniper) pollen season runs from mid-December through mid-February, with peak counts typically occurring in January. Cold fronts trigger the heaviest pollen releases.',
+  },
+  {
+    question: 'Why are allergies so bad in Austin?',
+    answer:
+      'Austin sits at the eastern edge of the Hill Country, directly in the pollen drift path from millions of Ashe Juniper and oak trees. The mild climate supports year-round allergen production, and population growth means more people are exposed each year.',
+  },
+  {
+    question: 'When is oak pollen season in Austin?',
+    answer:
+      'Oak pollen season in Austin typically runs from late February through April, overlapping with the tail end of cedar season. Live oak and red oak are the primary producers.',
+  },
+  {
+    question: 'What is a high pollen count?',
+    answer:
+      'For cedar pollen, counts above 500 grains/m³ are considered high, above 1,500 is very high, and above 5,000 is severe. Most allergy sufferers begin experiencing symptoms at just 50 grains/m³.',
+  },
 ]
 </script>
 
 <template>
-  <CategoryPage
-    :category="category"
-    :overview="overview"
-    :faq-items="faqItems"
-  >
+  <CategoryPage :category="category" :overview="overview" :faq-items="faqItems">
     <!-- Live Now module (item 4) -->
     <template #live-now>
       <section class="live-now">
@@ -79,7 +103,11 @@ const faqItems = [
           <div class="live-body">
             <div class="live-title">Cedar Pollen Tracker</div>
             <ClientOnly>
-              <div v-if="cedarLevel" class="live-value" :style="{ color: severityColor(cedarLevel) }">
+              <div
+                v-if="cedarLevel"
+                class="live-value"
+                :style="{ color: severityColor(cedarLevel) }"
+              >
                 {{ cedarLevel }} — {{ cedarCount?.toLocaleString() }} gr/m³
               </div>
               <div v-else class="live-value live-loading">Loading current levels…</div>
@@ -91,7 +119,10 @@ const faqItems = [
           </div>
           <div class="live-cta group-hover:text-primary transition-colors">
             Open tracker
-            <UIcon name="i-lucide-arrow-right" class="size-3.5 ml-1 group-hover:translate-x-0.5 transition-transform" />
+            <UIcon
+              name="i-lucide-arrow-right"
+              class="size-3.5 ml-1 group-hover:translate-x-0.5 transition-transform"
+            />
           </div>
         </NuxtLink>
       </section>
@@ -119,14 +150,21 @@ const faqItems = [
 .live-dot {
   width: 7px;
   height: 7px;
-  background: #22C55E;
+  background: #22c55e;
   border-radius: 50%;
   animation: pulse-dot 2s infinite;
 }
 
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
-  50% { opacity: 0.8; box-shadow: 0 0 0 5px rgba(34,197,94,0); }
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 0 5px rgba(34, 197, 94, 0);
+  }
 }
 
 .live-card {
@@ -144,7 +182,7 @@ const faqItems = [
 
 .live-card:hover {
   border-color: var(--color-border-hover);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
 }
 
 .live-icon {
@@ -195,7 +233,12 @@ const faqItems = [
 }
 
 @media (max-width: 640px) {
-  .live-card { flex-direction: column; align-items: flex-start; }
-  .live-cta { margin-top: 8px; }
+  .live-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .live-cta {
+    margin-top: 8px;
+  }
 }
 </style>

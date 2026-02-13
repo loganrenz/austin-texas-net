@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
     const forecast = await fetchGooglePollenForecast(apiKey, 5)
 
     return {
-      forecast: forecast.map(day => ({
+      forecast: forecast.map((day) => ({
         date: day.date,
         cedar: {
           upi: day.juniperUPI,
@@ -36,10 +36,10 @@ export default defineEventHandler(async (event) => {
       })),
       source: 'google-pollen-api',
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     throw createError({
       statusCode: 502,
-      message: `Google Pollen API failed: ${err.message}`,
+      message: `Google Pollen API failed: ${(err as Error).message}`,
     })
   }
 })

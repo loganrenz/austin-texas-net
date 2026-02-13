@@ -1,4 +1,4 @@
-import { desc, gte, sql } from 'drizzle-orm'
+import { gte, sql } from 'drizzle-orm'
 
 /**
  * GET /api/pollen/history
@@ -39,8 +39,16 @@ export default defineEventHandler(async (event) => {
       ORDER BY date ASC
     `)
 
+    interface WeeklyRow {
+      date: string
+      week: string
+      count: number
+      peak: number
+      data_points: number
+    }
+
     return {
-      readings: results.map((r: any) => ({
+      readings: (results as WeeklyRow[]).map((r) => ({
         date: r.date,
         week: r.week,
         count: r.count,
@@ -52,8 +60,8 @@ export default defineEventHandler(async (event) => {
         total: results.length,
         aggregation: 'weekly',
         days,
-        earliest: results.length > 0 ? (results[0] as any).date : null,
-        latest: results.length > 0 ? (results[results.length - 1] as any).date : null,
+        earliest: results.length > 0 ? (results[0] as WeeklyRow).date : null,
+        latest: results.length > 0 ? (results[results.length - 1] as WeeklyRow).date : null,
       },
     }
   }

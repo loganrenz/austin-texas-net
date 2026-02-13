@@ -23,7 +23,11 @@ const queryParams = computed(() => ({
   offset: (page.value - 1) * limit,
 }))
 
-const { data: keywords, refresh: refreshKeywords, status: keywordsStatus } = await useFetch('/api/radar/keywords', {
+const {
+  data: keywords,
+  refresh: refreshKeywords,
+  status: keywordsStatus,
+} = await useFetch('/api/radar/keywords', {
   query: queryParams,
   watch: [queryParams],
 })
@@ -67,7 +71,20 @@ async function runIngest() {
 }
 
 const generatingBrief = ref<number | null>(null)
-const briefResult = ref<any>(null)
+interface BriefResult {
+  keyword: string
+  suggestedTitle: string
+  metaDescription: string
+  outline: string
+  internalLinks: string[]
+  coverage: { app: string; domain: string; url: string | null } | null
+  subtypes: string[]
+  difficulty: number
+  strategicScore: number
+  monthlyVolume: number
+}
+
+const briefResult = ref<BriefResult | null>(null)
 
 async function generateBrief(keywordId: number) {
   generatingBrief.value = keywordId
@@ -81,18 +98,6 @@ async function generateBrief(keywordId: number) {
     generatingBrief.value = null
   }
 }
-
-// Columns for the keywords table
-const columns = [
-  { key: 'keyword', label: 'Keyword' },
-  { key: 'bucket', label: 'Bucket' },
-  { key: 'monthlyVolume', label: 'Vol' },
-  { key: 'difficulty', label: 'Diff' },
-  { key: 'strategicScore', label: 'Score' },
-  { key: 'intent', label: 'Intent' },
-  { key: 'matchedApp', label: 'App' },
-  { key: 'actions', label: '' },
-]
 
 function badgeColor(intent: string): 'warning' | 'info' | 'success' | 'secondary' | 'neutral' {
   const map: Record<string, 'warning' | 'info' | 'success' | 'secondary' | 'neutral'> = {
@@ -120,12 +125,7 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
         <h1 class="text-2xl font-bold">Search Radar</h1>
       </div>
       <div class="flex gap-2">
-        <UButton
-          icon="i-lucide-refresh-cw"
-          :loading="ingesting"
-          color="primary"
-          @click="runIngest"
-        >
+        <UButton icon="i-lucide-refresh-cw" :loading="ingesting" color="primary" @click="runIngest">
           Run Ingestion
         </UButton>
         <UButton variant="outline" color="neutral" to="/admin" icon="i-lucide-arrow-left">
@@ -138,12 +138,15 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
     <UCard v-if="ingestResult" class="ingest-banner">
       <div class="flex items-center gap-3">
         <UIcon name="i-lucide-check-circle" class="size-5 text-green-500" />
-        <span>Ingestion complete: <strong>{{ ingestResult.seeded }}</strong> seeds, <strong>{{ ingestResult.expanded }}</strong> expanded keywords</span>
+        <span
+          >Ingestion complete: <strong>{{ ingestResult.seeded }}</strong> seeds,
+          <strong>{{ ingestResult.expanded }}</strong> expanded keywords</span
+        >
       </div>
     </UCard>
 
     <!-- KPI Cards -->
-    <div class="kpi-grid" v-if="stats">
+    <div v-if="stats" class="kpi-grid">
       <UCard>
         <div class="kpi">
           <span class="kpi-value">{{ stats.kpi.total }}</span>
@@ -171,18 +174,13 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
     </div>
 
     <!-- Bucket + Intent breakdown -->
-    <div class="breakdown-grid" v-if="stats">
+    <div v-if="stats" class="breakdown-grid">
       <UCard>
         <template #header>
           <span class="font-semibold text-sm">By Bucket</span>
         </template>
         <div class="flex flex-wrap gap-2">
-          <UBadge
-            v-for="b in stats.buckets"
-            :key="b.bucket"
-            variant="subtle"
-            color="primary"
-          >
+          <UBadge v-for="b in stats.buckets" :key="b.bucket" variant="subtle" color="primary">
             {{ b.bucket }}: {{ b.count }} (avg {{ Math.round(b.avgScore) }})
           </UBadge>
         </div>
@@ -223,19 +221,25 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
       <template #header>
         <div class="flex justify-between items-center">
           <span class="font-semibold">Keywords ({{ keywords?.total ?? 0 }})</span>
-          <div class="flex gap-2" v-if="keywords && keywords.total > limit">
+          <div v-if="keywords && keywords.total > limit" class="flex gap-2">
             <UButton
-              size="xs" variant="outline" color="neutral"
+              size="xs"
+              variant="outline"
+              color="neutral"
               :disabled="page <= 1"
-              @click="page--"
               icon="i-lucide-chevron-left"
+              @click="page--"
             />
-            <span class="text-sm self-center">{{ page }} / {{ Math.ceil(keywords.total / limit) }}</span>
+            <span class="text-sm self-center"
+              >{{ page }} / {{ Math.ceil(keywords.total / limit) }}</span
+            >
             <UButton
-              size="xs" variant="outline" color="neutral"
+              size="xs"
+              variant="outline"
+              color="neutral"
               :disabled="page >= Math.ceil(keywords.total / limit)"
-              @click="page++"
               icon="i-lucide-chevron-right"
+              @click="page++"
             />
           </div>
         </div>
@@ -243,7 +247,7 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
 
       <div class="table-wrapper">
         <!-- eslint-disable-next-line atx/no-native-table -->
-        <table class="radar-table" v-if="keywords?.data?.length">
+        <table v-if="keywords?.data?.length" class="radar-table">
           <thead>
             <tr>
               <th>Keyword</th>
@@ -253,13 +257,15 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
               <th>Score</th>
               <th>Intent</th>
               <th>App</th>
-              <th></th>
+              <th />
             </tr>
           </thead>
           <tbody>
             <tr v-for="kw in keywords.data" :key="kw.id">
               <td class="font-medium">{{ kw.keyword }}</td>
-              <td><UBadge variant="subtle" color="neutral" size="xs">{{ kw.bucket }}</UBadge></td>
+              <td>
+                <UBadge variant="subtle" color="neutral" size="xs">{{ kw.bucket }}</UBadge>
+              </td>
               <td class="tabular-nums">{{ kw.monthlyVolume?.toLocaleString() }}</td>
               <td>
                 <UBadge variant="subtle" :color="diffColor(kw.difficulty ?? 50)" size="xs">
@@ -267,9 +273,18 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
                 </UBadge>
               </td>
               <td class="tabular-nums font-semibold">{{ kw.strategicScore }}</td>
-              <td><UBadge variant="subtle" :color="badgeColor(kw.intent ?? 'informational')" size="xs">{{ kw.intent }}</UBadge></td>
               <td>
-                <UBadge v-if="kw.matchedApp" variant="subtle" color="success" size="xs">{{ kw.matchedApp }}</UBadge>
+                <UBadge
+                  variant="subtle"
+                  :color="badgeColor(kw.intent ?? 'informational')"
+                  size="xs"
+                  >{{ kw.intent }}</UBadge
+                >
+              </td>
+              <td>
+                <UBadge v-if="kw.matchedApp" variant="subtle" color="success" size="xs">{{
+                  kw.matchedApp
+                }}</UBadge>
                 <span v-else class="text-dimmed text-xs">—</span>
               </td>
               <td>
@@ -305,12 +320,21 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
         <div class="brief-meta">
           <p><strong>Title:</strong> {{ briefResult.suggestedTitle }}</p>
           <p><strong>Meta:</strong> {{ briefResult.metaDescription }}</p>
-          <p><strong>Score:</strong> {{ briefResult.strategicScore }} · <strong>Diff:</strong> {{ briefResult.difficulty }} · <strong>Vol:</strong> {{ briefResult.monthlyVolume }}</p>
+          <p>
+            <strong>Score:</strong> {{ briefResult.strategicScore }} · <strong>Diff:</strong>
+            {{ briefResult.difficulty }} · <strong>Vol:</strong> {{ briefResult.monthlyVolume }}
+          </p>
         </div>
-        <div class="brief-links" v-if="briefResult.internalLinks?.length">
+        <div v-if="briefResult.internalLinks?.length" class="brief-links">
           <strong>Internal Links:</strong>
           <div class="flex flex-wrap gap-1 mt-1">
-            <UBadge v-for="link in briefResult.internalLinks" :key="link" variant="subtle" color="primary" size="xs">
+            <UBadge
+              v-for="link in briefResult.internalLinks"
+              :key="link"
+              variant="subtle"
+              color="primary"
+              size="xs"
+            >
               {{ link }}
             </UBadge>
           </div>
@@ -331,7 +355,9 @@ function diffColor(diff: number): 'success' | 'warning' | 'error' {
           <UBadge variant="subtle" color="neutral" size="xs">{{ kw.bucket }}</UBadge>
           <span class="tabular-nums font-semibold">{{ kw.strategicScore }}</span>
           <UButton
-            size="xs" variant="ghost" icon="i-lucide-file-text"
+            size="xs"
+            variant="ghost"
+            icon="i-lucide-file-text"
             :loading="generatingBrief === kw.id"
             @click="generateBrief(kw.id)"
           />

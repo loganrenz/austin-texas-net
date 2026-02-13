@@ -1,7 +1,8 @@
 <script setup lang="ts">
 usePageSeo({
   title: 'Cedar Pollen — Live Counts & Allergy Tracker',
-  description: 'Real-time cedar pollen counts, forecasts, and allergy severity tracking for Austin, Texas. Stay ahead of cedar fever season.',
+  description:
+    'Real-time cedar pollen counts, forecasts, and allergy severity tracking for Austin, Texas. Stay ahead of cedar fever season.',
 })
 
 useHead({
@@ -16,33 +17,34 @@ useHead({
 useSchemaOrg([
   defineWebPage({
     name: 'Austin Cedar Pollen — Live Pollen Counts & Allergy Tracker',
-    description: 'Real-time cedar pollen counts, forecasts, and allergy severity tracking for Austin, Texas.',
+    description:
+      'Real-time cedar pollen counts, forecasts, and allergy severity tracking for Austin, Texas.',
   }),
   {
     '@type': 'FAQPage',
-    'mainEntity': [
+    mainEntity: [
       {
         '@type': 'Question',
-        'name': 'When is cedar pollen season in Austin?',
-        'acceptedAnswer': {
+        name: 'When is cedar pollen season in Austin?',
+        acceptedAnswer: {
           '@type': 'Answer',
-          'text': 'Cedar pollen season in Austin typically runs from mid-December through mid-February, with peak counts usually occurring in January.',
+          text: 'Cedar pollen season in Austin typically runs from mid-December through mid-February, with peak counts usually occurring in January.',
         },
       },
       {
         '@type': 'Question',
-        'name': 'What is a high cedar pollen count?',
-        'acceptedAnswer': {
+        name: 'What is a high cedar pollen count?',
+        acceptedAnswer: {
           '@type': 'Answer',
-          'text': 'Cedar pollen counts above 500 grains/m³ are considered high, and counts above 1,000 grains/m³ are considered very high. Counts above 5,000 grains/m³ are severe.',
+          text: 'Cedar pollen counts above 500 grains/m³ are considered high, and counts above 1,000 grains/m³ are considered very high. Counts above 5,000 grains/m³ are severe.',
         },
       },
       {
         '@type': 'Question',
-        'name': 'What are cedar fever symptoms?',
-        'acceptedAnswer': {
+        name: 'What are cedar fever symptoms?',
+        acceptedAnswer: {
           '@type': 'Answer',
-          'text': 'Cedar fever symptoms include sneezing, runny nose, nasal congestion, itchy/watery eyes, sore throat, fatigue, and mild headache. Despite its name, cedar fever rarely causes actual fever.',
+          text: 'Cedar fever symptoms include sneezing, runny nose, nasal congestion, itchy/watery eyes, sore throat, fatigue, and mild headache. Despite its name, cedar fever rarely causes actual fever.',
         },
       },
     ],
@@ -51,10 +53,41 @@ useSchemaOrg([
 
 const colorMode = useColorMode()
 const hydrated = ref(false)
-onMounted(() => { hydrated.value = true })
+onMounted(() => {
+  hydrated.value = true
+})
+
+interface PollenForecastDay {
+  date: string
+  cedar: { upi: number | null; category: string | null; approxCount: number | null }
+  tree: { upi: number | null; category: string | null }
+  activeSpecies: string[]
+  healthRecommendations: string[]
+  inSeason: boolean
+}
+
+interface PollenCurrentResponse {
+  current: {
+    date: string
+    count: number
+    level: string
+    source: string
+    description: string
+  } | null
+  trend?: string
+  season?: { peakCount: number; avgCount: number; highDays: number }
+  allergens?: {
+    cedar: number
+    elm: number
+    mold: number
+    levels: { cedar: string; elm: string; mold: string }
+  } | null
+  forecast?: PollenForecastDay[]
+  message?: string
+}
 
 // Fetch current pollen data
-const { data: currentData } = await useFetch('/api/pollen/current', {
+const { data: currentData } = await useFetch<PollenCurrentResponse>('/api/pollen/current', {
   server: false,
   lazy: true,
 })
@@ -63,11 +96,11 @@ const { data: currentData } = await useFetch('/api/pollen/current', {
 const activeDays = ref(30)
 const { data: historyResponse, pending: historyPending } = await useFetch(
   () => `/api/pollen/history?days=${activeDays.value}`,
-  { server: false, lazy: true }
+  { server: false, lazy: true },
 )
 
 const historyData = computed(() => {
-  return (historyResponse.value as any)?.readings ?? []
+  return (historyResponse.value as { readings?: { date: string; count: number }[] })?.readings ?? []
 })
 
 function onPeriodChange(days: number) {
@@ -76,39 +109,39 @@ function onPeriodChange(days: number) {
 
 // Allergen breakdown
 const allergenData = computed(() => {
-  return (currentData.value as any)?.allergens ?? null
+  return currentData.value?.allergens ?? null
 })
 
 // Forecast data from Google Pollen API
 const forecastDays = computed(() => {
-  return (currentData.value as any)?.forecast ?? []
+  return currentData.value?.forecast ?? []
 })
 
 const healthTips = computed(() => {
-  const tips = (currentData.value as any)?.forecast?.[0]?.healthRecommendations ?? []
+  const tips = currentData.value?.forecast?.[0]?.healthRecommendations ?? []
   return tips.slice(0, 5)
 })
 
 // Severity background gradient (theme-aware)
 const severityGradient = computed(() => {
   if (!currentData.value || !hydrated.value) return 'none'
-  const level = (currentData.value as any)?.current?.level
+  const level = currentData.value?.current?.level ?? 'Low'
   const isDark = colorMode.value === 'dark'
   const alpha = isDark ? 0.08 : 0.06
   const base = isDark ? 'rgba(10,15,26,0.95)' : 'rgba(248,250,252,0.95)'
   const gradients: Record<string, string> = {
-    'Low': `linear-gradient(135deg, rgba(34,197,94,${alpha}), ${base})`,
-    'Medium': `linear-gradient(135deg, rgba(234,179,8,${alpha}), ${base})`,
-    'High': `linear-gradient(135deg, rgba(249,115,22,${alpha}), ${base})`,
+    Low: `linear-gradient(135deg, rgba(34,197,94,${alpha}), ${base})`,
+    Medium: `linear-gradient(135deg, rgba(234,179,8,${alpha}), ${base})`,
+    High: `linear-gradient(135deg, rgba(249,115,22,${alpha}), ${base})`,
     'Very High': `linear-gradient(135deg, rgba(239,68,68,${alpha}), ${base})`,
-    'Severe': `linear-gradient(135deg, rgba(168,85,247,${alpha}), ${base})`,
+    Severe: `linear-gradient(135deg, rgba(168,85,247,${alpha}), ${base})`,
   }
   return gradients[level] || gradients['Low']
 })
 
 const lastUpdatedFormatted = computed(() => {
-  if (!(currentData.value as any)?.current?.date) return ''
-  return (currentData.value as any).current.date
+  if (!currentData.value?.current?.date) return ''
+  return currentData.value.current.date
 })
 
 function formatDayName(dateStr: string): string {
@@ -118,11 +151,11 @@ function formatDayName(dateStr: string): string {
 
 function severityColor(level: string): string {
   const map: Record<string, string> = {
-    'Low': '#22C55E',
-    'Medium': '#EAB308',
-    'High': '#F97316',
+    Low: '#22C55E',
+    Medium: '#EAB308',
+    High: '#F97316',
     'Very High': '#EF4444',
-    'Severe': '#A855F7',
+    Severe: '#A855F7',
   }
   return map[level] || '#9CA3AF'
 }
@@ -163,7 +196,9 @@ function severityColor(level: string): string {
           <span class="live-text">Live Data</span>
         </div>
         <ClientOnly>
-          <span v-if="lastUpdatedFormatted" class="meta-item">Updated {{ lastUpdatedFormatted }}</span>
+          <span v-if="lastUpdatedFormatted" class="meta-item"
+            >Updated {{ lastUpdatedFormatted }}</span
+          >
         </ClientOnly>
       </div>
 
@@ -223,21 +258,27 @@ function severityColor(level: string): string {
       <p class="section-subtitle">Current grains/m³ by type</p>
       <div class="allergen-grid">
         <div class="allergen-card">
-          <div class="allergen-bar" style="background: #EF4444" />
+          <div class="allergen-bar" style="background: #ef4444" />
           <div class="allergen-name">Cedar</div>
-          <div class="allergen-count" style="color: #EF4444">{{ allergenData.cedar?.toLocaleString() ?? '—' }}</div>
+          <div class="allergen-count" style="color: #ef4444">
+            {{ allergenData.cedar?.toLocaleString() ?? '—' }}
+          </div>
           <div class="allergen-unit">grains/m³</div>
         </div>
         <div class="allergen-card">
-          <div class="allergen-bar" style="background: #60A5FA" />
+          <div class="allergen-bar" style="background: #60a5fa" />
           <div class="allergen-name">Elm</div>
-          <div class="allergen-count" style="color: #60A5FA">{{ allergenData.elm?.toLocaleString() ?? '—' }}</div>
+          <div class="allergen-count" style="color: #60a5fa">
+            {{ allergenData.elm?.toLocaleString() ?? '—' }}
+          </div>
           <div class="allergen-unit">grains/m³</div>
         </div>
         <div class="allergen-card">
-          <div class="allergen-bar" style="background: #A855F7" />
+          <div class="allergen-bar" style="background: #a855f7" />
           <div class="allergen-name">Mold</div>
-          <div class="allergen-count" style="color: #A855F7">{{ allergenData.mold?.toLocaleString() ?? '—' }}</div>
+          <div class="allergen-count" style="color: #a855f7">
+            {{ allergenData.mold?.toLocaleString() ?? '—' }}
+          </div>
           <div class="allergen-unit">grains/m³</div>
         </div>
       </div>
@@ -278,9 +319,7 @@ function severityColor(level: string): string {
 
     <!-- Data source attribution -->
     <ClientOnly>
-      <div class="data-source">
-        Data from KXAN &amp; Google Pollen API
-      </div>
+      <div class="data-source">Data from KXAN &amp; Google Pollen API</div>
     </ClientOnly>
   </div>
 </template>
@@ -311,20 +350,27 @@ function severityColor(level: string): string {
 .live-dot {
   width: 8px;
   height: 8px;
-  background: #22C55E;
+  background: #22c55e;
   border-radius: 50%;
   animation: pulse-dot 2s infinite;
 }
 
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
-  50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+  }
 }
 
 .live-text {
   font-size: 0.7rem;
   font-weight: 600;
-  color: #22C55E;
+  color: #22c55e;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -482,7 +528,7 @@ function severityColor(level: string): string {
 .tip-icon-wrap {
   width: 36px;
   height: 36px;
-  background: rgba(16,185,129,0.1);
+  background: rgba(16, 185, 129, 0.1);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -514,16 +560,33 @@ function severityColor(level: string): string {
   .hero-left {
     min-width: unset;
   }
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
-  .forecast-grid { grid-template-columns: repeat(3, 1fr); }
-  .tips-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .forecast-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .tips-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 640px) {
-  .hero { padding: 24px 16px; border-radius: 16px; }
-  .stats-grid { grid-template-columns: 1fr 1fr; }
-  .allergen-grid { grid-template-columns: 1fr; }
-  .forecast-grid { grid-template-columns: 1fr 1fr; }
-  .tips-grid { grid-template-columns: 1fr; }
+  .hero {
+    padding: 24px 16px;
+    border-radius: 16px;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .allergen-grid {
+    grid-template-columns: 1fr;
+  }
+  .forecast-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .tips-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

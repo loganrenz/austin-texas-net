@@ -22,10 +22,10 @@ export default defineEventHandler(async (event) => {
   let kxanData
   try {
     kxanData = await scrapeKxanPollen()
-  } catch (err: any) {
+  } catch (err: unknown) {
     throw createError({
       statusCode: 502,
-      message: `KXAN scrape failed: ${err.message}`,
+      message: `KXAN scrape failed: ${(err as Error).message}`,
     })
   }
 

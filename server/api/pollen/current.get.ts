@@ -19,7 +19,12 @@ export default defineEventHandler(async (event) => {
 
   // Also try to fetch live KXAN data
   let kxanLive = null
-  let allergens: { cedar: number; elm: number; mold: number; levels: { cedar: string; elm: string; mold: string } } | null = null
+  let allergens: {
+    cedar: number
+    elm: number
+    mold: number
+    levels: { cedar: string; elm: string; mold: string }
+  } | null = null
   try {
     const kxan = await scrapeKxanPollen()
     if (kxan.cedar.length > 0) {
@@ -45,17 +50,17 @@ export default defineEventHandler(async (event) => {
   }
 
   // Use KXAN live if it's more recent, otherwise DB
-  const current = kxanLive
-    && (!latest || kxanLive.date >= latest.date)
-    ? kxanLive
-    : latest
-      ? {
-          date: latest.date,
-          count: latest.count,
-          level: getSeverityLabel(latest.count),
-          source: latest.source,
-        }
-      : null
+  const current =
+    kxanLive && (!latest || kxanLive.date >= latest.date)
+      ? kxanLive
+      : latest
+        ? {
+            date: latest.date,
+            count: latest.count,
+            level: getSeverityLabel(latest.count),
+            source: latest.source,
+          }
+        : null
 
   if (!current) {
     return {
@@ -73,8 +78,8 @@ export default defineEventHandler(async (event) => {
 
   let trend = 'stable'
   if (recentReadings.length >= 3) {
-    const recent3 = recentReadings.slice(0, 3).map(r => r.count)
-    const older3 = recentReadings.slice(Math.max(0, recentReadings.length - 3)).map(r => r.count)
+    const recent3 = recentReadings.slice(0, 3).map((r) => r.count)
+    const older3 = recentReadings.slice(Math.max(0, recentReadings.length - 3)).map((r) => r.count)
     const recentAvg = recent3.reduce((a, b) => a + b, 0) / recent3.length
     const olderAvg = older3.reduce((a, b) => a + b, 0) / older3.length
     if (recentAvg > olderAvg * 1.2) trend = 'rising'
@@ -101,7 +106,7 @@ export default defineEventHandler(async (event) => {
     trend,
     season: getSeasonInfo(current.count, recentReadings),
     allergens,
-    forecast: forecast.map(day => ({
+    forecast: forecast.map((day) => ({
       date: day.date,
       cedar: {
         upi: day.juniperUPI,
@@ -129,20 +134,20 @@ function getSeverityLabel(count: number): string {
 
 function getSeverityDescription(level: string): string {
   const map: Record<string, string> = {
-    'Low': 'Minimal cedar pollen. Most people will be comfortable outdoors.',
-    'Medium': 'Moderate cedar pollen. Sensitive individuals may notice symptoms.',
-    'High': 'High cedar pollen levels. Allergy sufferers should limit outdoor exposure.',
+    Low: 'Minimal cedar pollen. Most people will be comfortable outdoors.',
+    Medium: 'Moderate cedar pollen. Sensitive individuals may notice symptoms.',
+    High: 'High cedar pollen levels. Allergy sufferers should limit outdoor exposure.',
     'Very High': 'Very high cedar pollen. Stay indoors if possible and keep windows closed.',
-    'Severe': 'Severe pollen levels. Avoid outdoor activity. Consider consulting your doctor.',
+    Severe: 'Severe pollen levels. Avoid outdoor activity. Consider consulting your doctor.',
   }
   return map[level] || ''
 }
 
-function getSeasonInfo(currentCount: number, recentReadings: any[]) {
-  const counts = recentReadings.map(r => r.count)
+function getSeasonInfo(_currentCount: number, recentReadings: { count: number }[]) {
+  const counts = recentReadings.map((r) => r.count)
   return {
     peakCount: counts.length > 0 ? Math.max(...counts) : 0,
-    avgCount: counts.length > 0 ? Math.round(counts.reduce((a: number, b: number) => a + b, 0) / counts.length) : 0,
-    highDays: counts.filter(c => c >= 1500).length,
+    avgCount: counts.length > 0 ? Math.round(counts.reduce((a, b) => a + b, 0) / counts.length) : 0,
+    highDays: counts.filter((c) => c >= 1500).length,
   }
 }

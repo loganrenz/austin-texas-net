@@ -30,21 +30,20 @@ export default defineEventHandler(async (event) => {
   // Verify Apple id_token via JWKS
   const JWKS = createRemoteJWKSet(new URL('https://appleid.apple.com/auth/keys'))
 
-  let payload: any
+  let payload: { sub?: string; email?: string; [key: string]: unknown }
   try {
     const config = useRuntimeConfig()
     const result = await jwtVerify(id_token, JWKS, {
       issuer: 'https://appleid.apple.com',
       audience: config.appleClientId,
     })
-    payload = result.payload
-  } catch (err) {
-    console.error('Apple id_token verification failed:', err)
+    payload = result.payload as typeof payload
+  } catch {
     throw createError({ statusCode: 401, message: 'Invalid Apple id_token' })
   }
 
-  const appleSub = payload.sub as string
-  const email = (payload.email as string) || ''
+  const appleSub = payload.sub ?? ''
+  const email = payload.email ?? ''
   // Apple only sends user name on first sign-in
   const name = appleUser?.name
     ? `${appleUser.name.firstName || ''} ${appleUser.name.lastName || ''}`.trim()

@@ -26,28 +26,29 @@ export default defineEventHandler(async (event) => {
   // Verify Apple id_token via JWKS
   const JWKS = createRemoteJWKSet(new URL('https://appleid.apple.com/auth/keys'))
 
-  let payload: any
+  let payload: { sub?: string; email?: string; [key: string]: unknown }
   try {
     const config = useRuntimeConfig()
     const result = await jwtVerify(id_token, JWKS, {
       issuer: 'https://appleid.apple.com',
       audience: config.appleClientId,
     })
-    payload = result.payload
-  } catch (err) {
-    console.error('Apple id_token verification failed:', err)
+    payload = result.payload as typeof payload
+  } catch {
     throw createError({ statusCode: 401, message: 'Invalid Apple id_token' })
   }
 
-  const appleSub = payload.sub as string
-  const email = (payload.email as string) || ''
+  const appleSub = payload.sub ?? ''
+  const email = payload.email ?? ''
 
   // Parse user info (only sent on first sign-in)
-  let appleUser: any = null
+  let appleUser: { name?: { firstName?: string; lastName?: string } } | null = null
   if (appleUserRaw) {
     try {
       appleUser = typeof appleUserRaw === 'string' ? JSON.parse(appleUserRaw) : appleUserRaw
-    } catch {}
+    } catch {
+      /* Apple may send malformed user JSON on repeat sign-ins */
+    }
   }
   const name = appleUser?.name
     ? `${appleUser.name.firstName || ''} ${appleUser.name.lastName || ''}`.trim()
@@ -77,6 +78,6 @@ export default defineEventHandler(async (event) => {
   setAuthCookie(event, jwt)
 
   // Redirect to the original page or home
-  const redirectTo = (state && state !== '/') ? state : '/'
+  const redirectTo = state && state !== '/' ? state : '/'
   return sendRedirect(event, redirectTo, 302)
 })
