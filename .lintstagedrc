@@ -1,0 +1,9 @@
+{
+  "*.{ts,vue}": [
+    "eslint --fix --no-error-on-unmatched-pattern",
+    "prettier --write"
+  ],
+  "*.{json,md,css}": [
+    "prettier --write"
+  ]
+}
