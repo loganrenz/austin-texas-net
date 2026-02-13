@@ -9,6 +9,7 @@ export default defineNuxtConfig({
     '@nuxtjs/sitemap',
     '@nuxtjs/robots',
     'nuxt-schema-org',
+    'nitro-cloudflare-dev',
   ],
   css: ['~/assets/css/main.css'],
 
