@@ -19,11 +19,12 @@ export function useLiveData<TApi extends { updatedAt: string }, TData>(
   })
 
   const value = computed<TData | null>(() => {
-    if (!data.value) return null
-    return transform(data.value)
+    const raw = data.value as TApi | null
+    if (!raw) return null
+    return transform(raw)
   })
 
-  const updatedAt = computed(() => data.value?.updatedAt ?? null)
+  const updatedAt = computed(() => (data.value as TApi | null)?.updatedAt ?? null)
 
   const status = computed<LiveStatus>(() => {
     if (fetchStatus.value === 'pending') return 'pending'

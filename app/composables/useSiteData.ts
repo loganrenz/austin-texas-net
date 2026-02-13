@@ -28,7 +28,7 @@ export function useSiteData() {
       title: 'Food',
       tagline: 'The best eats across Austin — tacos, trucks, happy hours, and more.',
       icon: 'i-lucide-utensils',
-      color: 'text-orange-500',
+      color: 'text-primary',
       subApps: [
         { slug: 'breakfast-tacos', title: 'Breakfast Tacos', description: 'Find the best breakfast tacos in Austin, from classic migas to creative fusion.', status: 'coming-soon', standaloneUrl: 'https://breakfast-tacos.atx-apps.com' },
         { slug: 'crawfish-boils', title: 'Crawfish Boils', description: 'Seasonal crawfish boil tracker — dates, locations, and prices.', status: 'coming-soon', standaloneUrl: 'https://crawfish-boils.atx-apps.com' },
@@ -42,7 +42,7 @@ export function useSiteData() {
       title: 'Outdoors',
       tagline: 'Lakes, trails, wildlife, and everything under the Texas sun.',
       icon: 'i-lucide-trees',
-      color: 'text-teal-500',
+      color: 'text-primary',
       subApps: [
         { slug: 'water-temps', title: 'Water Temps', description: 'Live water temperatures for Barton Springs, Lake Travis, and more.', status: 'coming-soon', standaloneUrl: 'https://water-temps.atx-apps.com' },
         { slug: 'disc-golf', title: 'Disc Golf', description: 'Austin disc golf courses — maps, ratings, and conditions.', status: 'coming-soon', standaloneUrl: 'https://disc-golf.atx-apps.com' },
@@ -56,7 +56,7 @@ export function useSiteData() {
       title: 'Allergies',
       tagline: 'Live pollen counts and allergy tracking for Central Texas.',
       icon: 'i-lucide-flower-2',
-      color: 'text-green-500',
+      color: 'text-primary',
       subApps: [
         { slug: 'cedar-pollen', title: 'Cedar Pollen', description: 'Live cedar pollen counts, 5-day forecasts, and severity tracking.', status: 'live' },
         { slug: 'oak-pollen', title: 'Oak Pollen', description: 'Oak pollen season tracker with counts and forecasts.', status: 'coming-soon', standaloneUrl: 'https://oak-pollen.atx-apps.com' },
@@ -67,7 +67,7 @@ export function useSiteData() {
       title: 'Events',
       tagline: 'Live music, rodeos, and the weirdest events in Austin.',
       icon: 'i-lucide-music',
-      color: 'text-purple-500',
+      color: 'text-primary',
       subApps: [
         { slug: 'live-music', title: 'Live Music', description: "Tonight's shows, venue maps, and genre filtering across Austin.", status: 'coming-soon', standaloneUrl: 'https://live-music.atx-apps.com' },
         { slug: 'rodeo-austin', title: 'Rodeo Austin', description: 'Rodeo Austin schedule, lineup, tickets, and event info.', status: 'coming-soon', standaloneUrl: 'https://rodeo-austin.atx-apps.com' },
@@ -79,7 +79,7 @@ export function useSiteData() {
       title: 'Real Estate',
       tagline: 'Neighborhoods, rent trends, and where to live in Austin.',
       icon: 'i-lucide-home',
-      color: 'text-blue-500',
+      color: 'text-primary',
       subApps: [
         { slug: 'neighborhoods', title: 'Neighborhoods', description: "Explore Austin's neighborhoods — demographics, walkability, and vibe.", status: 'coming-soon', standaloneUrl: 'https://hoods.atx-apps.com' },
         { slug: 'rent-heatmap', title: 'Rent Heatmap', description: 'Interactive rent price heatmap across Austin zip codes.', status: 'coming-soon', standaloneUrl: 'https://rent-heatmap.atx-apps.com' },
@@ -90,7 +90,7 @@ export function useSiteData() {
       title: 'Culture',
       tagline: 'Street art, ghost tours, and the soul of Austin.',
       icon: 'i-lucide-palette',
-      color: 'text-rose-500',
+      color: 'text-primary',
       subApps: [
         { slug: 'street-art', title: 'Street Art', description: 'Map of murals, graffiti, and public art installations across Austin.', status: 'coming-soon', standaloneUrl: 'https://street-art.atx-apps.com' },
         { slug: 'haunted-austin', title: 'Haunted Austin', description: 'Ghost tours, haunted locations, and spooky Austin history.', status: 'coming-soon', standaloneUrl: 'https://haunted-austin.atx-apps.com' },
@@ -101,7 +101,7 @@ export function useSiteData() {
       title: 'Fun',
       tagline: 'Games, quizzes, and fun ways to explore ATX.',
       icon: 'i-lucide-gamepad-2',
-      color: 'text-amber-500',
+      color: 'text-primary',
       subApps: [
         { slug: 'atx-games', title: 'ATX Games', description: 'Austin-themed games and interactive challenges.', status: 'coming-soon', standaloneUrl: 'https://games.atx-apps.com' },
       ],

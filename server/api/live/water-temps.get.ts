@@ -7,6 +7,7 @@ export default defineEventHandler(() => {
   const updatedAt = new Date(now.getTime() - 7 * 60 * 1000).toISOString()
 
   return {
+    _mock: true, // TODO: replace with real water temp data source
     primary: {
       location: 'Lake Travis',
       tempF: 78,

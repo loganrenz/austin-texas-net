@@ -12,6 +12,13 @@ export default defineNuxtConfig({
   ],
   css: ['~/assets/css/main.css'],
 
+  fonts: {
+    families: [
+      { name: 'Inter', provider: 'google', weights: [300, 400, 500, 600, 700] },
+      { name: 'Outfit', provider: 'google', weights: [400, 500, 600, 700, 800, 900] },
+    ],
+  },
+
   compatibilityDate: '2025-07-15',
 
   devtools: { enabled: true },

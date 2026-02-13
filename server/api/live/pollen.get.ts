@@ -7,6 +7,7 @@ export default defineEventHandler(() => {
   const updatedAt = new Date(now.getTime() - 5 * 60 * 1000).toISOString()
 
   return {
+    _mock: true, // TODO: replace with real pollen data source
     count: 439,
     level: 'High',
     type: 'Cedar',
