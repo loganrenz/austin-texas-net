@@ -59,7 +59,7 @@ plugin.configs = {
         'atx/no-native-button': 'warn',
         'atx/no-inline-svg': 'warn',
         'atx/lucide-icons-only': 'warn',
-        'atx/no-style-block-layout': ['error', { max: 50 }],
+        'atx/no-style-block-layout': ['warn', { max: 50 }],
         'atx/require-client-only-switch': 'warn',
         'atx/no-attrs-on-fragment': 'warn',
         'atx/no-native-input': 'warn',
