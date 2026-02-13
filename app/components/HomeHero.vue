@@ -1,34 +1,40 @@
 <script setup lang="ts">
 /**
- * HomeHero — full-bleed editorial hero with text overlaid on a soft Austin panorama.
- * The image spans edge-to-edge outside the content container with a white fade overlay.
+ * HomeHero — full-bleed edge-to-edge hero with responsive image,
+ * subtle gradient overlay, and overlaid H1 + subhead in the lower third.
+ *
+ * Sits directly below <UHeader> in the normal page flow.
+ * No custom CSS — Tailwind utility classes only.
  */
 </script>
 
 <template>
-  <section class="pt-12 sm:pt-16 pb-0">
-    <!-- Text content -->
-    <div class="text-center mb-8">
-      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight font-display leading-tight mb-4">
+  <!-- Full-bleed hero section — no UContainer, spans viewport -->
+  <section class="relative">
+    <!-- Responsive hero image -->
+    <img
+      src="/images/austin-hero.png"
+      srcset="/images/austin-hero.png 1200w, /images/austin-hero.png 800w, /images/austin-hero.png 480w"
+      sizes="100vw"
+      alt="Aerial view of Lake Travis and Austin Hill Country at golden hour"
+      fetchpriority="high"
+      decoding="async"
+      class="w-full h-[320px] md:h-[460px] object-cover object-top"
+    >
+
+    <!-- Subtle gradient overlay for legibility -->
+    <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/5 to-transparent" />
+  </section>
+
+  <!-- Overlaid typography — negative margin pulls it up into the hero image -->
+  <div class="-mt-28 md:-mt-36 relative z-10 pb-2">
+    <UContainer>
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight font-display text-white drop-shadow-lg leading-tight">
         Austin, Texas — Live Local Intelligence
       </h1>
-      <p class="text-lg text-muted max-w-xl mx-auto leading-relaxed">
+      <p class="mt-2 text-base md:text-lg text-white/90 drop-shadow-sm max-w-2xl leading-relaxed">
         Real-time pollen, water temps, events, and where to go.
       </p>
-    </div>
-
-    <!-- Full-bleed hero image with fade edges -->
-    <div class="relative -mx-4 sm:-mx-6 overflow-hidden">
-      <img
-        src="/images/austin-hero.png"
-        alt="Aerial view of Lake Travis and Austin Hill Country at golden hour"
-        class="w-full h-48 sm:h-64 lg:h-80 object-cover opacity-85"
-        loading="eager"
-      >
-      <!-- Top fade: white gradient fading into the image -->
-      <div class="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-[var(--ui-bg)] to-transparent" />
-      <!-- Bottom fade: image fading into white background -->
-      <div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[var(--ui-bg)] to-transparent" />
-    </div>
-  </section>
+    </UContainer>
+  </div>
 </template>
