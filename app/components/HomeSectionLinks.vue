@@ -43,6 +43,7 @@ const footerLinkOverrides: Record<string, Array<{ title: string; slug: string }>
 
 <template>
   <section class="border-t border-default pt-10 pb-6">
+    <UContainer>
     <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight font-display mb-6">
       Austin, <span class="italic font-normal text-muted">Texas</span>
     </h2>
@@ -83,5 +84,6 @@ const footerLinkOverrides: Record<string, Array<{ title: string; slug: string }>
         </ul>
       </div>
     </div>
+    </UContainer>
   </section>
 </template>

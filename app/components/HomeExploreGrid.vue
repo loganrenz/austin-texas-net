@@ -50,6 +50,7 @@ const exploreLinkOverrides: Record<string, Array<{ title: string; slug: string }
 
 <template>
   <section class="mb-10">
+    <UContainer>
     <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight font-display mb-6 pb-2 border-b border-default">
       Explore Austin
     </h2>
@@ -94,5 +95,6 @@ const exploreLinkOverrides: Record<string, Array<{ title: string; slug: string }
         </ul>
       </div>
     </div>
+    </UContainer>
   </section>
 </template>

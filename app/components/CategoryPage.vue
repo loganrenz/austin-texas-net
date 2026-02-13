@@ -52,6 +52,7 @@ function trackAppClick(appTitle: string, destination: string) {
 </script>
 
 <template>
+  <UContainer>
   <div>
     <!-- Breadcrumb -->
     <div class="flex items-center gap-2 text-sm text-muted mb-6">
@@ -143,6 +144,7 @@ function trackAppClick(appTitle: string, destination: string) {
       </div>
     </section>
   </div>
+  </UContainer>
 </template>
 
 <style scoped>

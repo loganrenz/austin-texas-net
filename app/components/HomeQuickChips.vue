@@ -14,6 +14,7 @@ const chips = [
 
 <template>
   <section class="mb-10">
+    <UContainer>
     <div class="flex flex-wrap gap-2">
       <UBadge
         v-for="chip in chips"
@@ -27,5 +28,6 @@ const chips = [
         class="cursor-pointer"
       />
     </div>
+    </UContainer>
   </section>
 </template>

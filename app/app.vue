@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { NavigationMenuItem, FooterColumn } from '@nuxt/ui'
+import type { Category, SubApp } from '~/composables/useSiteData'
 
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
@@ -35,9 +36,9 @@ const navItems = computed<NavigationMenuItem[]>(() => [
 
 /* ── Footer columns ───────────────────────────────────────── */
 const footerColumns = computed<FooterColumn[]>(() =>
-  categories.value.map(cat => ({
+  categories.map((cat: Category) => ({
     label: cat.title,
-    children: cat.subApps.map(app => ({
+    children: cat.subApps.map((app: SubApp) => ({
       label: app.title,
       to: app.status === 'live'
         ? `/${cat.slug}/${app.slug}/`
