@@ -1,17 +1,24 @@
 import withNuxt from './.nuxt/eslint.config.mjs'
+import atx from './eslint-plugins/index.mjs'
 
-export default withNuxt({
-  rules: {
-    // No unused variables/imports
-    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+export default withNuxt(
+  // ATX design system rules (all .vue files)
+  ...atx.configs.recommended,
 
-    // Consistent component naming (PascalCase)
-    'vue/component-name-in-template-casing': ['warn', 'PascalCase'],
+  // Project-level overrides
+  {
+    rules: {
+      // No unused variables/imports
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
 
-    // Require multi-word component names (Nuxt auto-imports bypass this)
-    'vue/multi-word-component-names': 'off',
+      // Consistent component naming (PascalCase)
+      'vue/component-name-in-template-casing': ['warn', 'PascalCase'],
 
-    // No console in production code
-    'no-console': ['warn', { allow: ['warn', 'error'] }],
-  },
-})
+      // Require multi-word component names (Nuxt auto-imports bypass this)
+      'vue/multi-word-component-names': 'off',
+
+      // No console in production code
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
+    },
+  }
+)

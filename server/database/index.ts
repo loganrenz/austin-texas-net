@@ -9,7 +9,7 @@ let _db: DrizzleD1Database<typeof schema> | null = null
  * Initialise the Drizzle ORM instance from a Cloudflare D1 binding.
  * Safe to call multiple times – only the first call creates the instance.
  */
-export function initDatabase(d1: any) {
+export function initDatabase(d1: D1Database) {
   if (!_db) {
     _db = drizzle(d1, { schema })
   }

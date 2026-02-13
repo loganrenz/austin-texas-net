@@ -136,9 +136,9 @@ watch(route, () => {
           <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-default">
             <span class="text-xs text-dimmed">&copy; {{ new Date().getFullYear() }} Austin-Texas.net</span>
             <div class="flex items-center gap-4 text-xs text-dimmed">
-              <span class="hover:text-primary transition-colors cursor-pointer">About</span>
-              <span class="hover:text-primary transition-colors cursor-pointer">Contact</span>
-              <span class="hover:text-primary transition-colors cursor-pointer">Privacy</span>
+              <NuxtLink to="/about/" class="hover:text-primary transition-colors">About</NuxtLink>
+              <NuxtLink to="/contact/" class="hover:text-primary transition-colors">Contact</NuxtLink>
+              <NuxtLink to="/privacy/" class="hover:text-primary transition-colors">Privacy</NuxtLink>
               <NuxtLink v-if="loggedIn && isAdmin" to="/admin/radar" class="hover:text-primary transition-colors">Admin</NuxtLink>
             </div>
           </div>

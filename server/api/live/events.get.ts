@@ -7,6 +7,7 @@ export default defineEventHandler(() => {
   const updatedAt = new Date(now.getTime() - 6 * 60 * 1000).toISOString()
 
   return {
+    _mock: true, // TODO: replace with real event source integration
     count: 73,
     events: [
       { name: "Eveor's Birthday Party", date: 'Saturday 7pm', venue: 'Zilker Park' },

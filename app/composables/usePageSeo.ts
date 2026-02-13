@@ -9,7 +9,7 @@ export function usePageSeo(opts: {
   title: string
   description: string
   image?: string
-  type?: string
+  type?: 'website' | 'article' | 'profile'
 }) {
   const route = useRoute()
   const runtimeConfig = useRuntimeConfig()
@@ -25,7 +25,7 @@ export function usePageSeo(opts: {
     ogDescription: opts.description,
     ogImage,
     ogUrl: canonicalUrl,
-    ogType: (opts.type as any) || 'website',
+    ogType: opts.type || 'website',
     twitterCard: 'summary_large_image',
     twitterTitle: opts.title,
     twitterDescription: opts.description,

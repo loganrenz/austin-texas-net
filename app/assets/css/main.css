@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+/* Fonts loaded by @nuxt/fonts module — see nuxt.config.ts */
 
 @import 'tailwindcss';
 @import '@nuxt/ui';
@@ -10,11 +10,11 @@
 
   /* Pollen section colors */
   --color-cedar-400: #44b944;
-  --color-severity-low: #22C55E;
-  --color-severity-medium: #EAB308;
+  --color-severity-low: #22c55e;
+  --color-severity-medium: #eab308;
   --color-severity-high: #f97316;
-  --color-severity-very-high: #EF4444;
-  --color-severity-severe: #A855F7;
+  --color-severity-very-high: #ef4444;
+  --color-severity-severe: #a855f7;
 }
 
 body {
@@ -31,9 +31,15 @@ h4,
 
 /* Animated gradient background */
 @keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .animate-gradient {
@@ -43,8 +49,14 @@ h4,
 
 /* Count-up animation */
 @keyframes count-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-count-in {
@@ -53,8 +65,14 @@ h4,
 
 /* Stagger animations */
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-up {
@@ -94,8 +112,15 @@ h4,
 
 /* Pulsing dot (live indicator) */
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
-  50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+  }
 }
 
 .animate-pulse-dot {
@@ -104,12 +129,16 @@ h4,
 
 /* Subtle shimmer for hero */
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent);
   background-size: 200% 100%;
   animation: shimmer 3s ease-in-out infinite;
 }
