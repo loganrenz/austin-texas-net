@@ -71,15 +71,15 @@ function trackAppClick(appTitle: string, destination: string) {
       <!-- Hero -->
       <section class="text-center pt-8 pb-6">
         <div
-          class="size-16 rounded-[18px] inline-flex items-center justify-center bg-current mb-4 [&>*]:text-white"
+          class="size-16 rounded-[18px] inline-flex items-center justify-center bg-current mb-4 *:text-white"
           :class="category.color"
         >
           <UIcon :name="category.icon" class="size-8" />
         </div>
-        <h1 class="text-[clamp(1.5rem,4vw,2rem)] font-extrabold tracking-tight mb-2">
+        <h1 class="text-[clamp(1.5rem,4vw,2rem)] font-extrabold tracking-[-0.02em] mb-2">
           {{ category.title }} in Austin
         </h1>
-        <p class="text-[0.95rem] text-muted max-w-[480px] mx-auto leading-relaxed">
+        <p class="text-[0.95rem] text-muted max-w-[480px] mx-auto leading-[1.6]">
           {{ category.tagline }}
         </p>
       </section>
@@ -88,16 +88,14 @@ function trackAppClick(appTitle: string, destination: string) {
       <slot name="live-now" />
 
       <!-- Overview (SEO content) — app-controlled prop, not user input -->
-      <section
-        class="bg-elevated border border-default rounded-2xl py-7 px-6 max-sm:py-5 max-sm:px-4 mb-6"
-      >
+      <section class="bg-elevated border border-default rounded-2xl px-4 py-5 sm:px-6 sm:py-7 mb-6">
         <!-- eslint-disable-next-line vue/no-v-html -->
         <div class="prose-content text-[0.88rem] leading-[1.8] text-muted" v-html="overview" />
       </section>
 
       <!-- Sub-app cards (item 5: standardized layout) -->
       <section class="mb-6">
-        <h2 class="text-xs font-bold uppercase tracking-wider text-muted mb-3.5">
+        <h2 class="text-xs font-bold uppercase tracking-[0.08em] text-muted mb-3.5">
           Explore {{ category.title }}
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3">
@@ -109,10 +107,12 @@ function trackAppClick(appTitle: string, destination: string) {
             :href="isExternal(app) ? app.standaloneUrl : undefined"
             :target="isExternal(app) ? '_blank' : undefined"
             :rel="isExternal(app) ? 'noopener' : undefined"
-            class="bg-elevated border border-default rounded-[14px] p-5 no-underline text-inherit transition-all duration-200 hover:border-(--color-border-hover) hover:-translate-y-px hover:shadow-md group"
-            :class="{
-              'opacity-60 cursor-default hover:translate-y-0 hover:shadow-none': isDisabled(app),
-            }"
+            class="bg-elevated border border-default rounded-[14px] p-5 no-underline text-inherit transition-all duration-200 ease-out group"
+            :class="
+              isDisabled(app)
+                ? 'opacity-60 cursor-default'
+                : 'hover:border-accented hover:-translate-y-px hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]'
+            "
             @click="
               !isDisabled(app) &&
               trackAppClick(app.title, getAppHref(app) || app.standaloneUrl || '')
@@ -123,7 +123,7 @@ function trackAppClick(appTitle: string, destination: string) {
               <span
                 class="text-[0.6rem] font-semibold py-0.5 px-2 rounded-full uppercase tracking-[0.04em]"
                 :class="
-                  app.status === 'live' ? 'bg-success/12 text-success' : 'bg-muted text-muted'
+                  app.status === 'live' ? 'bg-success/12 text-success' : 'bg-accented text-muted'
                 "
               >
                 {{ getStatusLabel(app.status) }}
@@ -153,26 +153,26 @@ function trackAppClick(appTitle: string, destination: string) {
 
       <!-- FAQ -->
       <section v-if="faqItems && faqItems.length > 0" class="mb-6">
-        <h2 class="text-xs font-bold uppercase tracking-wider text-muted mb-3.5">
+        <h2 class="text-xs font-bold uppercase tracking-[0.08em] text-muted mb-3.5">
           Frequently Asked Questions
         </h2>
         <div class="flex flex-col gap-2">
           <details
             v-for="(item, i) in faqItems"
             :key="i"
-            class="faq-item bg-elevated border border-default rounded-xl overflow-hidden"
+            class="bg-elevated border border-default rounded-xl overflow-hidden"
           >
             <summary class="faq-q py-4 px-5 text-[0.85rem] font-semibold cursor-pointer list-none">
               {{ item.question }}
             </summary>
-            <p class="px-5 pb-4 text-[0.82rem] text-muted leading-relaxed">{{ item.answer }}</p>
+            <p class="px-5 pb-4 pt-0 text-[0.82rem] text-muted leading-[1.7]">{{ item.answer }}</p>
           </details>
         </div>
       </section>
 
       <!-- Cross-links -->
       <section class="mb-2">
-        <h2 class="text-xs font-bold uppercase tracking-wider text-muted mb-3.5">
+        <h2 class="text-xs font-bold uppercase tracking-[0.08em] text-muted mb-3.5">
           More from Austin
         </h2>
         <div class="grid grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2">
@@ -180,7 +180,7 @@ function trackAppClick(appTitle: string, destination: string) {
             v-for="c in crossLinks"
             :key="c.slug"
             :to="`/${c.slug}/`"
-            class="flex items-center gap-2.5 py-3.5 px-4 bg-elevated border border-default rounded-xl no-underline text-inherit transition-colors duration-200 hover:border-(--color-border-hover)"
+            class="flex items-center gap-2.5 px-4 py-3.5 bg-elevated border border-default rounded-xl no-underline text-inherit transition-colors duration-200 hover:border-accented"
           >
             <UIcon :name="c.icon" class="size-5" :class="c.color" />
             <span class="text-[0.8rem] font-semibold flex-1">{{ c.title }}</span>
@@ -192,7 +192,7 @@ function trackAppClick(appTitle: string, destination: string) {
   </UContainer>
 </template>
 
-<style>
+<style scoped>
 .prose-content :deep(h2) {
   font-size: 1.05rem;
   font-weight: 700;
