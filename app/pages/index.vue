@@ -15,6 +15,20 @@ useSchemaOrg([
     name: 'Austin, Texas — Live Local Intelligence',
     description: 'Real-time pollen, water temps, events, and where to go in Austin, Texas.',
   }),
+  defineWebSite({
+    name: 'Austin Texas',
+    url: 'https://austin-texas.net',
+    potentialAction: [
+      {
+        '@type': 'SearchAction',
+        'target': {
+          '@type': 'EntryPoint',
+          'urlTemplate': 'https://www.google.com/search?q=site%3Aaustin-texas.net+{search_term_string}',
+        },
+        'query-input': 'required name=search_term_string',
+      },
+    ],
+  }),
 ])
 </script>
 

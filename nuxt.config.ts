@@ -93,10 +93,10 @@ export default defineNuxtConfig({
 
   schemaOrg: {
     identity: {
-      type: 'WebSite',
+      type: 'Organization',
       name: 'Austin Texas',
       url: 'https://austin-texas.net',
-      logo: '/favicon.png',
+      logo: 'https://austin-texas.net/android-chrome-512x512.png',
       description:
         'Your guide to Austin, Texas — pollen counts, local food, live music, neighborhoods, and more.',
     },
@@ -143,7 +143,13 @@ export default defineNuxtConfig({
         { name: 'ICBM', content: '30.2672, -97.7431' },
         { name: 'build-time', content: new Date().toISOString() },
       ],
-      link: [{ rel: 'icon', type: 'image/png', href: '/favicon.png' }],
+      link: [
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' },
+        { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16x16.png' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
+        { rel: 'manifest', href: '/site.webmanifest' },
+      ],
     },
     pageTransition: { name: 'page', mode: 'out-in' },
   },
