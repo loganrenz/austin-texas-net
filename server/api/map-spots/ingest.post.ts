@@ -18,6 +18,9 @@ import { searchAppleMaps } from '~~/server/utils/appleMapToken'
 const bodySchema = z.object({
   category: z.string().min(1),
   searchQuery: z.string().min(1),
+  lat: z.number().optional(),
+  lng: z.number().optional(),
+  limit: z.number().optional(),
 })
 
 export default defineEventHandler(async (event) => {
@@ -29,14 +32,15 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = await readBody(event)
-  const { category, searchQuery } = bodySchema.parse(body)
+  const { category, searchQuery, lat, lng, limit } = bodySchema.parse(body)
 
   const db = useDatabase()
 
-  // Search Apple Maps
+  // Search Apple Maps (use provided location or default to downtown Austin)
   const data = await searchAppleMaps(searchQuery, {
-    lat: 30.2672,
-    lng: -97.7431,
+    lat: lat ?? 30.2672,
+    lng: lng ?? -97.7431,
+    limit: limit ?? 25,
   })
 
   const places: any[] = data?.results || []
@@ -59,12 +63,10 @@ export default defineEventHandler(async (event) => {
       lat: coord.latitude ?? 0,
       lng: coord.longitude ?? 0,
       address: place.formattedAddressLines?.join(', ') || '',
-      neighborhood: structuredAddress.subLocality
-        || structuredAddress.locality
-        || '',
+      neighborhood: structuredAddress.subLocality || structuredAddress.locality || '',
       category: Array.isArray(place.poiCategory)
         ? place.poiCategory.join(', ')
-        : (place.poiCategory || 'Restaurant'),
+        : place.poiCategory || 'Restaurant',
       contentType: category,
       phone: place.telephone || '',
       url: place.urls?.[0] || place.url || '',
@@ -72,14 +74,16 @@ export default defineEventHandler(async (event) => {
     }
 
     // Check if spot already exists
-    const existing = await db.select()
+    const existing = await db
+      .select()
       .from(mapSpotsTable)
       .where(eq(mapSpotsTable.id, spotData.id))
       .get()
 
     if (existing) {
       // Update Apple data but preserve editorial overrides
-      await db.update(mapSpotsTable)
+      await db
+        .update(mapSpotsTable)
         .set({
           name: spotData.name,
           lat: spotData.lat,
@@ -93,8 +97,7 @@ export default defineEventHandler(async (event) => {
           updatedAt: now,
         })
         .where(eq(mapSpotsTable.id, spotData.id))
-    }
-    else {
+    } else {
       await db.insert(mapSpotsTable).values({
         ...spotData,
         featured: true,
