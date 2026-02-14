@@ -10,15 +10,14 @@ export default defineNuxtConfig({
     '@nuxtjs/sitemap',
     '@nuxtjs/robots',
     'nuxt-schema-org',
-    'nuxt-og-image',
     'nitro-cloudflare-dev',
   ],
   css: ['~/assets/css/main.css'],
 
   fonts: {
     families: [
-      { name: 'Inter', provider: 'google', weights: [300, 400, 500, 600, 700] },
-      { name: 'Outfit', provider: 'google', weights: [400, 500, 600, 700, 800, 900] },
+      { name: 'Inter', provider: 'google', weights: [300, 400, 500, 600, 700], global: true },
+      { name: 'Outfit', provider: 'google', weights: [400, 500, 600, 700, 800, 900], global: true },
     ],
   },
 
@@ -53,12 +52,15 @@ export default defineNuxtConfig({
     appleSecretKey: process.env.APPLE_SECRET_KEY || '',
     mapkitServerApiKey: process.env.MAPKIT_SERVER_API_KEY || '',
     googlePollenApiKey: process.env.GOOGLE_POLLEN_API_KEY || '',
-    pollenIngestKey: process.env.POLLEN_INGEST_KEY || '',
+    ingestApiKey: process.env.INGEST_API_KEY || '',
+    googleServiceAccountKey: process.env.GSC_SERVICE_ACCOUNT_JSON || '',
+    posthogApiKey: process.env.POSTHOG_PERSONAL_API_KEY || '',
     public: {
       appUrl: process.env.SITE_URL || 'https://austin-texas.net',
       mapkitToken: process.env.MAPKIT_TOKEN || '',
       gaMeasurementId: process.env.GA_MEASUREMENT_ID || '',
       posthogPublicKey: process.env.POSTHOG_PUBLIC_KEY || '',
+      googleSiteVerification: process.env.GOOGLE_SITE_VERIFICATION || '',
       appName: process.env.APP_NAME || 'Austin Texas',
     },
   },
@@ -68,13 +70,7 @@ export default defineNuxtConfig({
     name: 'Austin Texas',
   },
 
-  ogImage: {
-    defaults: {
-      component: 'OgImageDefault',
-      width: 1200,
-      height: 630,
-    },
-  },
+
 
   sitemap: {
     sources: ['/api/sitemap-urls'],
@@ -93,7 +89,7 @@ export default defineNuxtConfig({
 
   schemaOrg: {
     identity: {
-      type: 'WebSite',
+      type: 'Organization',
       name: 'Austin Texas',
       url: 'https://austin-texas.net',
       logo: '/favicon.png',
@@ -103,7 +99,10 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    preset: 'cloudflare-pages',
+    preset: 'cloudflare_module',
+    experimental: {
+      wasm: true,
+    },
     esbuild: {
       options: {
         target: 'esnext',
@@ -118,6 +117,25 @@ export default defineNuxtConfig({
         dir: './public/data',
       },
     ],
+    rollupConfig: {
+      plugins: [
+        // Handle .bin font file imports from @cloudflare/pages-plugin-vercel-og
+        {
+          name: 'binary-import',
+          load(id: string) {
+            if (id.endsWith('.bin') || id.endsWith('.ttf.bin')) {
+              const fs = require('node:fs')
+              const buffer = fs.readFileSync(id)
+              const base64 = buffer.toString('base64')
+              return `
+                const b = Uint8Array.from(atob("${base64}"), c => c.charCodeAt(0));
+                export default b.buffer;
+              `
+            }
+          },
+        },
+      ],
+    },
   },
 
   app: {
@@ -141,6 +159,7 @@ export default defineNuxtConfig({
         { name: 'geo.placename', content: 'Austin' },
         { name: 'geo.position', content: '30.2672;-97.7431' },
         { name: 'ICBM', content: '30.2672, -97.7431' },
+        { name: 'google-site-verification', content: process.env.GOOGLE_SITE_VERIFICATION || '' },
         { name: 'build-time', content: new Date().toISOString() },
       ],
       link: [{ rel: 'icon', type: 'image/png', href: '/favicon.png' }],

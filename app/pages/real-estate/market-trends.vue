@@ -14,10 +14,17 @@ const siblings = category.subApps.filter(a => a.slug !== 'market-trends' && a.st
 const crossLinks = categories.filter(c => c.slug !== 'real-estate').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 usePageSeo({
   title: 'Austin Housing Market Trends — Prices, Inventory & Sales Data',
   description:
     'Track Austin real estate market trends with monthly data on median home prices, homes sold, inventory, and days on market from Redfin.',
+  ogImageComponent: 'OgImageSubApp',
+  ogImageProps: {
+    category: category.title,
+    categoryColor: getCategoryHexColor('real-estate'),
+  },
 })
 
 useSchemaOrg([

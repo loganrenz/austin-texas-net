@@ -8,10 +8,21 @@ import { eq } from 'drizzle-orm'
  *   2. Expand via Google Autocomplete
  *   3. Classify intent, tag subtypes, score everything
  *
- * Admin-only. Can take 30-60s depending on autocomplete responses.
+ * Secured with x-api-key header (reuses ingestApiKey) or admin session.
+ * Designed to be called hourly by a cron trigger.
  */
 export default defineEventHandler(async (event) => {
-  await requireAdmin(event)
+  // Support both API-key auth (for cron workers) and session auth (for admin UI)
+  const config = useRuntimeConfig()
+  const apiKey = getHeader(event, 'x-api-key')
+
+  if (apiKey) {
+    if (apiKey !== config.ingestApiKey) {
+      throw createError({ statusCode: 401, message: 'Unauthorized' })
+    }
+  } else {
+    await requireAdmin(event)
+  }
   const db = useDatabase()
 
   const now = new Date().toISOString()

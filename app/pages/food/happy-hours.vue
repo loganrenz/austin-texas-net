@@ -3,6 +3,8 @@
 import type { MapPageConfig, MapSpot } from '~/types/mapSpot'
 import { happyHourSpots as staticSpots } from '~/data/happyHourSpots'
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('food')!
 const siblings = category.subApps.filter((a) => a.slug !== 'happy-hours')
@@ -29,6 +31,11 @@ const config: MapPageConfig = {
 usePageSeo({
   title: 'Top 10 Happy Hours in Austin — Best Deals, Cocktails & Patios',
   description: config.description,
+  ogImageComponent: 'OgImageSubApp',
+  ogImageProps: {
+    category: category.title,
+    categoryColor: getCategoryHexColor('food'),
+  },
 })
 
 useSchemaOrg([defineWebPage({ name: config.title, description: config.description })])

@@ -20,6 +20,23 @@ const crossLinks = computed(() =>
   categories.filter((c) => c.slug !== props.category.slug).slice(0, 4),
 )
 
+// FAQPage JSON-LD for Google rich results
+if (props.content?.faqItems?.length) {
+  useSchemaOrg([
+    {
+      '@type': 'FAQPage' as const,
+      'mainEntity': props.content.faqItems.map(item => ({
+        '@type': 'Question' as const,
+        'name': item.question,
+        'acceptedAnswer': {
+          '@type': 'Answer' as const,
+          'text': item.answer,
+        },
+      })),
+    },
+  ])
+}
+
 function getStatusLabel(status: SubApp['status']): string {
   return status === 'live' ? 'Live' : 'Coming Soon'
 }

@@ -61,6 +61,7 @@ export function useSiteData() {
       subApps: [
         { slug: 'this-weekend', title: 'This Weekend', description: 'What\'s happening in Austin this weekend — curated picks and full listings.', status: 'coming-soon' },
         { slug: 'live-music', title: 'Live Music', description: 'Tonight\'s shows, venue maps, and genre filtering across Austin.', status: 'coming-soon' },
+        { slug: 'sxsw', title: 'SXSW Guide', description: 'South by Southwest survival guide — dates, venues, tips, and what to know for Austin\'s biggest festival.', status: 'live' },
         { slug: 'festivals', title: 'Festivals', description: 'SXSW, ACL, and every festival in Austin — dates, lineups, and tips.', status: 'coming-soon' },
         { slug: 'family-events', title: 'Family Events', description: 'Kid-friendly events and activities happening around Austin.', status: 'coming-soon' },
         { slug: 'free-events', title: 'Free Events', description: 'Free things to do in Austin — concerts, markets, outdoor screenings.', status: 'coming-soon' },
@@ -170,8 +171,8 @@ export function useSiteData() {
       color: 'text-cyan-600 dark:text-cyan-400',
       bgColor: 'bg-cyan-100 dark:bg-cyan-900/30',
       subApps: [
-        { slug: 'water-temps', title: 'Water Temps', description: 'Live water temperatures for Barton Springs, Lake Travis, and more.', status: 'coming-soon' },
-        { slug: 'lake-levels', title: 'Lake Levels', description: 'Real-time Lake Travis and Lake Austin water levels from LCRA.', status: 'coming-soon' },
+        { slug: 'water-temps', title: 'Water Temps', description: 'Live water temperatures for Barton Springs, Lake Travis, and more.', status: 'live' },
+        { slug: 'lake-levels', title: 'Lake Levels', description: 'Real-time Lake Travis and Lake Austin water levels from LCRA.', status: 'live' },
         { slug: 'traffic-map', title: 'Traffic Map', description: 'Live Austin traffic map — congestion, incidents, and construction.', status: 'coming-soon' },
         { slug: 'power-outages', title: 'Power Outages', description: 'Austin Energy outage map — current outages and restoration estimates.', status: 'coming-soon' },
         { slug: 'aqi-live', title: 'AQI Live', description: 'Real-time Air Quality Index from EPA stations across Austin.', status: 'coming-soon' },

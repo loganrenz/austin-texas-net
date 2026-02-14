@@ -4,7 +4,7 @@ import { sql } from 'drizzle-orm'
  * POST /api/live/water-temps/ingest
  *
  * Fetches real-time water data from USGS IV Service and upserts into D1.
- * Secured with x-api-key header (reuses pollenIngestKey).
+ * Secured with x-api-key header (reuses ingestApiKey).
  * Designed to be called hourly by a cron trigger.
  */
 export default defineEventHandler(async (event) => {
@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
   const apiKey = getHeader(event, 'x-api-key')
 
-  if (!apiKey || apiKey !== config.pollenIngestKey) {
+  if (!apiKey || apiKey !== config.ingestApiKey) {
     throw createError({ statusCode: 401, message: 'Unauthorized' })
   }
 

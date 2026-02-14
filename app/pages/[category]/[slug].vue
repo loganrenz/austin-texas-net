@@ -18,6 +18,8 @@ if (!category.value || !subApp.value) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true })
 }
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 const displayName = computed(
   () =>
     subApp.value?.title ??
@@ -28,6 +30,11 @@ usePageSeo({
   title: `${displayName.value} — Coming Soon`,
   description:
     subApp.value?.description ?? `${displayName.value} is coming soon to Austin-Texas.net.`,
+  ogImageComponent: 'OgImageSubApp',
+  ogImageProps: {
+    category: category.value.title,
+    categoryColor: getCategoryHexColor(categorySlug.value),
+  },
 })
 
 useSchemaOrg([

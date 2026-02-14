@@ -99,10 +99,18 @@ const circles = computed(() =>
 /* eslint-enable atx/no-inline-hex */
 
 // ── SEO ────────────────────────────────────────────────────
+// ── SEO ────────────────────────────────────────────────────
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 usePageSeo({
   title: 'Bluebonnet Map — Texas Wildflower Sightings Across the State',
   description:
     'Interactive map of Texas bluebonnet (Lupinus texensis) sightings across the Lone Star State, powered by iNaturalist citizen-science data. See where wildflowers are blooming.',
+  ogImageComponent: 'OgImageSubApp',
+  ogImageProps: {
+    category: category.title,
+    categoryColor: getCategoryHexColor('outdoors'),
+  },
 })
 
 useSchemaOrg([

@@ -12,10 +12,17 @@ const category = getCategoryBySlug('weather')!
 const siblings = category.subApps.filter((a) => a.slug !== 'drought-status')
 const crossLinks = categories.filter((c) => c.slug !== 'weather').slice(0, 4)
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 usePageSeo({
   title: 'Austin Drought Status — U.S. Drought Monitor & Watering Restrictions',
   description:
     'Central Texas drought conditions from the U.S. Drought Monitor. Current drought classification, watering restriction status, and LCRA water supply updates.',
+  ogImageComponent: 'OgImageSubApp',
+  ogImageProps: {
+    category: category.title,
+    categoryColor: getCategoryHexColor('weather'),
+  },
 })
 
 useSchemaOrg([

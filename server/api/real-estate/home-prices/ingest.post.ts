@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
   const apiKey = getHeader(event, 'x-api-key')
 
-  if (!apiKey || apiKey !== config.pollenIngestKey) {
+  if (!apiKey || apiKey !== config.ingestApiKey) {
     throw createError({ statusCode: 401, message: 'Unauthorized' })
   }
 

@@ -201,6 +201,20 @@ export const developmentPermits = sqliteTable('development_permits', {
   createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
 })
 
+// ─── Bluebonnet Observations (iNaturalist) ──────────────────
+export const bluebonnetObservations = sqliteTable('bluebonnet_observations', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  inatId: integer('inat_id').notNull().unique(),
+  lat: real('lat').notNull(),
+  lng: real('lng').notNull(),
+  observedOn: text('observed_on').notNull(),    // YYYY-MM-DD
+  photoUrl: text('photo_url'),
+  observer: text('observer').notNull(),
+  place: text('place').notNull(),
+  url: text('url').notNull(),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+})
+
 // ─── Type helpers ───────────────────────────────────────────
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
@@ -228,3 +242,5 @@ export type RentPrice = typeof rentPrices.$inferSelect
 export type NewRentPrice = typeof rentPrices.$inferInsert
 export type DevelopmentPermit = typeof developmentPermits.$inferSelect
 export type NewDevelopmentPermit = typeof developmentPermits.$inferInsert
+export type BluebonnetObservation = typeof bluebonnetObservations.$inferSelect
+export type NewBluebonnetObservation = typeof bluebonnetObservations.$inferInsert

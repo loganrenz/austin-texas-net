@@ -13,10 +13,17 @@ const category = getCategoryBySlug('weather')!
 const siblings = category.subApps.filter((a) => a.slug !== 'freeze-alerts')
 const crossLinks = categories.filter((c) => c.slug !== 'weather').slice(0, 4)
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 usePageSeo({
   title: 'Austin Freeze Alerts — Winter Weather Warnings & Pipe Protection',
   description:
     'Austin freeze alerts and winter weather status. Track freeze warnings, frost advisories, and pipe protection alerts for Central Texas.',
+  ogImageComponent: 'OgImageSubApp',
+  ogImageProps: {
+    category: category.title,
+    categoryColor: getCategoryHexColor('weather'),
+  },
 })
 
 useSchemaOrg([

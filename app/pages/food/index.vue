@@ -7,12 +7,20 @@
 const slug = 'food'
 const { getCategoryBySlug } = useSiteData()
 const category = computed(() => getCategoryBySlug(slug))
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
 
 if (!category.value) {
   throw createError({ statusCode: 404, statusMessage: 'Category not found', fatal: true })
 }
 
-usePageSeo(category.value.seo)
+usePageSeo({
+  ...category.value.seo,
+  ogImageComponent: 'OgImageCategory',
+  ogImageProps: {
+    category: category.value.title,
+    categoryColor: getCategoryHexColor(slug),
+  },
+})
 
 useSchemaOrg([
   defineWebPage({

@@ -3,6 +3,8 @@
 import type { MapPageConfig, MapSpot } from '~/types/mapSpot'
 import { foodTruckSpots as staticSpots } from '~/data/foodTruckSpots'
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('food')!
 const siblings = category.subApps.filter((a) => a.slug !== 'food-trucks')
@@ -29,6 +31,11 @@ const config: MapPageConfig = {
 usePageSeo({
   title: 'Top 10 Food Trucks in Austin — Best Trailers & Street Food',
   description: config.description,
+  ogImageComponent: 'OgImageSubApp',
+  ogImageProps: {
+    category: category.title,
+    categoryColor: getCategoryHexColor('food'),
+  },
 })
 
 useSchemaOrg([defineWebPage({ name: config.title, description: config.description })])

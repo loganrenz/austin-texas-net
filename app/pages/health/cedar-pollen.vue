@@ -14,10 +14,17 @@ const siblings = category.subApps.filter((a) => a.slug !== 'cedar-pollen')
 const crossLinks = categories.filter((c) => c.slug !== 'health').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 usePageSeo({
   title: 'Austin Cedar Pollen Count — Live Tracker & Forecast',
   description:
     'Live cedar pollen counts for Austin, TX. Track mountain cedar levels, view 5-day forecasts, historical trends, and get health tips during cedar fever season.',
+  ogImageComponent: 'OgImageSubApp',
+  ogImageProps: {
+    category: category.title,
+    categoryColor: getCategoryHexColor('health'),
+  },
 })
 
 useSchemaOrg([

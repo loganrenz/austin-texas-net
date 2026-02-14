@@ -13,10 +13,17 @@ const category = getCategoryBySlug('weather')!
 const siblings = category.subApps.filter((a) => a.slug !== 'heat-index')
 const crossLinks = categories.filter((c) => c.slug !== 'weather').slice(0, 4)
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 usePageSeo({
   title: 'Austin Heat Index — Feels-Like Temperature & Safety Tips',
   description:
     'Current heat index and feels-like temperature for Austin, TX. Includes wind chill in winter, heat safety levels, and protection tips.',
+  ogImageComponent: 'OgImageSubApp',
+  ogImageProps: {
+    category: category.title,
+    categoryColor: getCategoryHexColor('weather'),
+  },
 })
 
 useSchemaOrg([

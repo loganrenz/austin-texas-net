@@ -14,10 +14,17 @@ const category = getCategoryBySlug('weather')!
 const siblings = category.subApps.filter((a) => a.slug !== 'current-conditions')
 const crossLinks = categories.filter((c) => c.slug !== 'weather').slice(0, 4)
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 usePageSeo({
   title: 'Austin Weather Now — Current Conditions, Temperature & Wind',
   description:
     'Real-time Austin weather from NWS Camp Mabry — current temperature, humidity, wind speed, barometric pressure, and active weather alerts.',
+  ogImageComponent: 'OgImageSubApp',
+  ogImageProps: {
+    category: category.title,
+    categoryColor: getCategoryHexColor('weather'),
+  },
 })
 
 useSchemaOrg([

@@ -12,7 +12,7 @@ import path from 'node:path'
  * Fix: when forwarding existing properties, do not override the receiver.
  */
 
-const ROOT = process.argv[2] ? path.resolve(process.argv[2]) : path.resolve('dist/_worker.js')
+const ROOT = process.argv[2] ? path.resolve(process.argv[2]) : path.resolve('.output/server')
 
 async function* walk(dir) {
   const entries = await fs.readdir(dir, { withFileTypes: true })

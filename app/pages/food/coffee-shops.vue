@@ -3,6 +3,8 @@
 import type { MapPageConfig, MapSpot } from '~/types/mapSpot'
 import { coffeeSpots as staticSpots } from '~/data/coffeeSpots'
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('food')!
 const siblings = category.subApps.filter((a) => a.slug !== 'coffee-shops')
@@ -29,6 +31,11 @@ const config: MapPageConfig = {
 usePageSeo({
   title: 'Top 10 Coffee Shops in Austin — Best Cafés & Roasters',
   description: config.description,
+  ogImageComponent: 'OgImageSubApp',
+  ogImageProps: {
+    category: category.title,
+    categoryColor: getCategoryHexColor('food'),
+  },
 })
 
 useSchemaOrg([defineWebPage({ name: config.title, description: config.description })])

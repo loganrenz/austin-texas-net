@@ -4,7 +4,7 @@ import { sql } from 'drizzle-orm'
  * POST /api/live/lake-levels/ingest
  *
  * Fetches lake level data from WaterDataForTexas.org and upserts into D1.
- * Secured with x-api-key header (reuses pollenIngestKey).
+ * Secured with x-api-key header (reuses ingestApiKey).
  * Designed to be called hourly by a cron trigger.
  */
 export default defineEventHandler(async (event) => {
@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
   const apiKey = getHeader(event, 'x-api-key')
 
-  if (!apiKey || apiKey !== config.pollenIngestKey) {
+  if (!apiKey || apiKey !== config.ingestApiKey) {
     throw createError({ statusCode: 401, message: 'Unauthorized' })
   }
 

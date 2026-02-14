@@ -9,6 +9,8 @@
 import type { MapPageConfig, MapSpot } from '~/types/mapSpot'
 import { tacoSpots as staticSpots } from '~/data/tacoSpots'
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('food')!
 const siblings = category.subApps.filter((a) => a.slug !== 'breakfast-tacos')
@@ -33,6 +35,11 @@ const config: MapPageConfig = {
 usePageSeo({
   title: 'Top 10 Breakfast Tacos in Austin — Best Spots & Map',
   description: config.description,
+  ogImageComponent: 'OgImageSubApp',
+  ogImageProps: {
+    category: category.title,
+    categoryColor: getCategoryHexColor('food'),
+  },
 })
 
 useSchemaOrg([

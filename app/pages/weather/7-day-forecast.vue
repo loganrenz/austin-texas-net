@@ -13,10 +13,17 @@ const category = getCategoryBySlug('weather')!
 const siblings = category.subApps.filter((a) => a.slug !== '7-day-forecast')
 const crossLinks = categories.filter((c) => c.slug !== 'weather').slice(0, 4)
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 usePageSeo({
   title: 'Austin 7-Day Forecast — Daily Highs, Lows & Conditions',
   description:
     'Austin 7-day weather forecast from the National Weather Service — daily temperatures, wind, precipitation chances, and detailed conditions.',
+  ogImageComponent: 'OgImageSubApp',
+  ogImageProps: {
+    category: category.title,
+    categoryColor: getCategoryHexColor('weather'),
+  },
 })
 
 useSchemaOrg([

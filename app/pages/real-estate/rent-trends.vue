@@ -65,10 +65,17 @@ const siblings = category.subApps.filter(a => a.slug !== 'rent-trends' && a.stat
 const crossLinks = categories.filter(c => c.slug !== 'real-estate').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 usePageSeo({
   title: 'Austin Rent Prices by Zip Code — 2025 Rental Data',
   description:
     'Explore median rent prices across Austin zip codes. Interactive map with Zillow rent data, year-over-year changes, and neighborhood rental comparisons.',
+  ogImageComponent: 'OgImageSubApp',
+  ogImageProps: {
+    category: category.title,
+    categoryColor: getCategoryHexColor('real-estate'),
+  },
 })
 
 useSchemaOrg([

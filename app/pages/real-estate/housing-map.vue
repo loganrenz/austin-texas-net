@@ -34,9 +34,16 @@ const siblings = category.subApps.filter(a => a.slug !== 'housing-map' && a.stat
 const crossLinks = categories.filter(c => c.slug !== 'real-estate').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 usePageSeo({
   title: 'Austin Housing Map — Home Prices & New Developments',
   description: 'Interactive map of Austin housing: median home prices by zip code and new construction permits. See where Austin is growing.',
+  ogImageComponent: 'OgImageSubApp',
+  ogImageProps: {
+    category: category.title,
+    categoryColor: getCategoryHexColor('real-estate'),
+  },
 })
 
 useSchemaOrg([defineWebPage({

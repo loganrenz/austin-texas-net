@@ -6,6 +6,7 @@
  */
 const route = useRoute()
 const { getCategoryBySlug } = useSiteData()
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
 
 const slug = computed(() => route.params.category as string)
 const category = computed(() => getCategoryBySlug(slug.value))
@@ -14,7 +15,14 @@ if (!category.value) {
   throw createError({ statusCode: 404, statusMessage: 'Category not found', fatal: true })
 }
 
-usePageSeo(category.value.seo)
+usePageSeo({
+  ...category.value.seo,
+  ogImageComponent: 'OgImageCategory',
+  ogImageProps: {
+    category: category.value.title,
+    categoryColor: getCategoryHexColor(slug.value),
+  },
+})
 
 useSchemaOrg([
   defineWebPage({

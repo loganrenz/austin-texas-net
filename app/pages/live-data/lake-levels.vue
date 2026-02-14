@@ -27,10 +27,17 @@ const siblings = category.subApps.filter((a) => a.slug !== 'lake-levels' && a.st
 const crossLinks = categories.filter((c) => c.slug !== 'live-data').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 usePageSeo({
   title: 'Austin Lake Levels — Lake Travis, Lake Austin & More',
   description:
     'Live lake levels for Lake Travis, Lake Austin, Lake Buchanan, and area reservoirs. Real-time elevation, percent full, and historical charts.',
+  ogImageComponent: 'OgImageSubApp',
+  ogImageProps: {
+    category: category.title,
+    categoryColor: getCategoryHexColor('live-data'),
+  },
 })
 
 useSchemaOrg([

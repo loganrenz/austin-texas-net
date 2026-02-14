@@ -27,3 +27,7 @@ logs
 # VS Code
 .vscode/*
 !.vscode/settings.json
+
+# Playwright
+test-results/
+playwright-report/

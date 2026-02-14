@@ -5,7 +5,7 @@
  * Calls the austin-texas.net pollen ingest endpoints to refresh D1 data.
  *
  * Secrets (set via `wrangler secret put`):
- *   INGEST_API_KEY  — matches the pollenIngestKey in the Nuxt app
+ *   INGEST_API_KEY  — matches the ingestApiKey in the Nuxt app
  *
  * Vars (set in wrangler.json or dashboard):
  *   INGEST_URL — base URL of the Nuxt app (e.g., https://austin-texas.net)
