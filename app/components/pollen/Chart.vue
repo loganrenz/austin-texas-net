@@ -53,11 +53,7 @@ function switchPeriod(days: number) {
 }
 
 function getSeverityColor(count: number): string {
-  if (count < 50) return '#22C55E'
-  if (count < 500) return '#EAB308'
-  if (count < 1500) return '#F97316'
-  if (count < 5000) return '#EF4444'
-  return '#A855F7'
+  return severityFromCount(count).color
 }
 
 const isDark = computed(() => colorMode.value === 'dark')
@@ -85,7 +81,7 @@ const chartData = computed(() => {
       {
         label: isWeekly ? 'Avg Pollen Count' : 'Pollen Count',
         data: values,
-        borderColor: '#10B981',
+        borderColor: POLLEN_ACCENT,
         borderWidth: 2,
         pointRadius: dataSlice.length > 60 ? 0 : dataSlice.length > 30 ? 2 : 4,
         pointHoverRadius: 6,
@@ -126,7 +122,7 @@ const chartOptions = computed(() => {
       tooltip: {
         backgroundColor: dark ? 'rgba(15,23,42,0.95)' : 'rgba(255,255,255,0.95)',
         titleColor: dark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)',
-        bodyColor: dark ? '#ffffff' : '#1a1a2e',
+        bodyColor: dark ? 'rgba(255,255,255,1)' : 'rgba(26,26,46,1)',
         borderColor: dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
         borderWidth: 1,
         padding: 12,

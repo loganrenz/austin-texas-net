@@ -2,14 +2,18 @@
 /**
  * CategoryPage — reusable SEO authority hub for each category.
  * Renders title, long-form overview, sub-app cards, FAQ, and cross-links.
+ * Content (overview + FAQs) comes from Nuxt Content markdown files.
  */
 import type { Category, SubApp } from '~/composables/useSiteData'
+import type { CategoriesCollectionItem } from '@nuxt/content'
 
 const props = defineProps<{
   category: Category
-  overview: string
-  faqItems?: Array<{ question: string; answer: string }>
+  content?: CategoriesCollectionItem
 }>()
+
+const { items: breadcrumbs } = useBreadcrumbs()
+const faqItems = computed(() => props.content?.faqItems ?? [])
 
 const { categories } = useSiteData()
 const crossLinks = computed(() =>
@@ -39,6 +43,8 @@ function isDisabled(app: SubApp): boolean {
   return app.status === 'coming-soon' && !app.standaloneUrl
 }
 
+const NuxtLinkComponent = resolveComponent('NuxtLink')
+
 // Click tracking
 function trackAppClick(appTitle: string, destination: string) {
   const ph = import.meta.client
@@ -61,15 +67,10 @@ function trackAppClick(appTitle: string, destination: string) {
 <template>
   <UContainer>
     <div>
-      <!-- Breadcrumb -->
-      <div class="flex items-center gap-2 text-sm text-muted mb-6">
-        <NuxtLink to="/" class="hover:text-primary transition-colors">Home</NuxtLink>
-        <UIcon name="i-lucide-chevron-right" class="size-3" />
-        <span class="text-default font-medium">{{ category.title }}</span>
-      </div>
-
       <!-- Hero -->
-      <section class="text-center pt-8 pb-6">
+      <section class="pt-8 pb-6">
+        <UBreadcrumb v-if="breadcrumbs.length > 0" :items="breadcrumbs" class="mb-6" />
+        <div class="text-center">
         <div
           class="size-16 rounded-[18px] inline-flex items-center justify-center bg-current mb-4 *:text-white"
           :class="category.color"
@@ -82,15 +83,14 @@ function trackAppClick(appTitle: string, destination: string) {
         <p class="text-[0.95rem] text-muted max-w-[480px] mx-auto leading-[1.6]">
           {{ category.tagline }}
         </p>
+        </div>
       </section>
 
-      <!-- Live Now module slot (item 4) -->
-      <slot name="live-now" />
-
-      <!-- Overview (SEO content) — app-controlled prop, not user input -->
-      <section class="bg-elevated border border-default rounded-2xl px-4 py-5 sm:px-6 sm:py-7 mb-6">
-        <!-- eslint-disable-next-line vue/no-v-html -->
-        <div class="prose-content text-[0.88rem] leading-[1.8] text-muted" v-html="overview" />
+      <!-- Overview (SEO content) rendered from Nuxt Content markdown -->
+      <section v-if="content" class="bg-elevated border border-default rounded-2xl px-4 py-5 sm:px-6 sm:py-7 mb-6">
+        <div class="prose-content text-[0.88rem] leading-[1.8] text-muted">
+          <ContentRenderer :value="content" />
+        </div>
       </section>
 
       <!-- Sub-app cards (item 5: standardized layout) -->
@@ -100,7 +100,7 @@ function trackAppClick(appTitle: string, destination: string) {
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3">
           <component
-            :is="isDisabled(app) ? 'div' : isExternal(app) ? 'a' : 'NuxtLink'"
+            :is="isDisabled(app) ? 'div' : isExternal(app) ? 'a' : NuxtLinkComponent"
             v-for="app in category.subApps"
             :key="app.slug"
             :to="!isDisabled(app) && !isExternal(app) ? getAppHref(app) : undefined"
@@ -152,7 +152,7 @@ function trackAppClick(appTitle: string, destination: string) {
       </section>
 
       <!-- FAQ -->
-      <section v-if="faqItems && faqItems.length > 0" class="mb-6">
+      <section v-if="faqItems.length > 0" class="mb-6">
         <h2 class="text-xs font-bold uppercase tracking-[0.08em] text-muted mb-3.5">
           Frequently Asked Questions
         </h2>

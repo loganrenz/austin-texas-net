@@ -1,0 +1,44 @@
+import { sql } from 'drizzle-orm'
+import { z } from 'zod'
+
+/**
+ * GET /api/live/lake-levels/history
+ *
+ * Returns time-series data for a given lake, used for charting.
+ * Query params:
+ *   lake — lake key (default: Travis)
+ *   days — lookback period (default: 30)
+ */
+const querySchema = z.object({
+  lake: z.string().min(1).default('Travis'),
+  days: z.coerce.number().int().min(1).max(365).default(30),
+})
+
+export default defineEventHandler(async (event) => {
+  const query = getQuery(event)
+  const { lake, days } = querySchema.parse(query)
+
+  const db = useDatabase()
+
+  try {
+    const result = await db.run(sql`
+      SELECT elevation, percent_full, conservation_storage, timestamp
+      FROM lake_readings
+      WHERE lake_key = ${lake}
+        AND timestamp >= date('now', ${`-${days} days`})
+      ORDER BY timestamp ASC
+    `)
+
+    const data = (result.rows as any[] || []).map(r => ({
+      elevation: r.elevation,
+      percentFull: r.percent_full,
+      conservationStorage: r.conservation_storage,
+      timestamp: r.timestamp,
+    }))
+
+    return { lake, days, data }
+  }
+  catch {
+    return { lake, days, data: [] }
+  }
+})

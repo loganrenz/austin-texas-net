@@ -1,4 +1,10 @@
 import { gte, sql } from 'drizzle-orm'
+import { z } from 'zod'
+
+const querySchema = z.object({
+  days: z.coerce.number().min(1).max(730).optional().default(30),
+  agg: z.enum(['daily', 'weekly']).optional(),
+})
 
 /**
  * GET /api/pollen/history
@@ -10,11 +16,11 @@ import { gte, sql } from 'drizzle-orm'
  *   agg   — 'daily' | 'weekly' (default: auto based on days)
  */
 export default defineEventHandler(async (event) => {
-  const query = getQuery(event)
-  const days = Math.min(Math.max(Number(query.days) || 30, 1), 730)
+  const q = querySchema.parse(getQuery(event))
+  const days = q.days
 
   // Auto-aggregate for large ranges
-  const aggMode = (query.agg as string) || (days > 90 ? 'weekly' : 'daily')
+  const aggMode = q.agg || (days > 90 ? 'weekly' : 'daily')
 
   const db = useDatabase()
   const { pollenReadings } = await import('../../database/schema')

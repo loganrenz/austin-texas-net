@@ -16,13 +16,7 @@ const props = withDefaults(defineProps<{
 
 const MAX_GRAINS = 10000
 
-const severity = computed(() => {
-  if (props.count < 50) return { level: 'Low', color: '#22C55E' }
-  if (props.count < 500) return { level: 'Medium', color: '#EAB308' }
-  if (props.count < 1500) return { level: 'High', color: '#F97316' }
-  if (props.count < 5000) return { level: 'Very High', color: '#EF4444' }
-  return { level: 'Severe', color: '#A855F7' }
-})
+const severity = computed(() => severityFromCount(props.count))
 
 const radius = computed(() => props.size / 2 - 14)
 const circumference = computed(() => 2 * Math.PI * radius.value)

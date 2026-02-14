@@ -25,7 +25,23 @@
 
 - **Tailwind utility classes only.** Do not add `<style>` or `<style scoped>` blocks to components or pages. All styling must use Tailwind utility classes directly in template markup.
 - **No custom CSS in Vue files.** If a utility class doesn't exist, compose Tailwind classes or extend the theme in `app/assets/css/main.css` — never write one-off CSS in a component.
-- **Exception: `app/assets/css/main.css`** is the only place custom CSS is allowed (global resets, theme extensions, Tailwind `@layer` directives).
+- **Exception: `app/assets/css/main.css`** is the only place custom CSS is allowed (global resets, theme extensions, Tailwind `@layer` directives, keyframe animations).
+
+## Homepage Design Rules
+
+- **Light-first.** The homepage is bright, open, and modern. No dark hero backgrounds. No dark overlays.
+- **Consistent category cards.** Every category card follows the same visual pattern: icon, title, tagline, child link list.
+- **Live data sections must use skeleton loading states.** Never show empty voids while data loads.
+- **All interactive elements must have hover/focus transitions.** Cards lift on hover. Links shift color. Buttons have depth changes.
+- **Micro-animations required.** Cards fade-up on viewport entry. No static, abrupt content appearance.
+- **No placeholder images.** Generate real images or omit. Broken/missing images are never acceptable.
+
+## Expansion Rules
+
+- **New categories require Radar analysis backing.** No category is created on a whim — validated demand must exist.
+- **Every new category must have a hub page before child pages are created.** Hub → children, always.
+- **`useSiteData.ts` is the single source of truth** for category structure. Update it first, everything else follows.
+- **URL slugs are permanent.** Once published, a slug never changes.
 
 ## Cloudflare Workers / D1
 

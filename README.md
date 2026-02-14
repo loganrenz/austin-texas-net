@@ -16,35 +16,53 @@ pnpm lint         # ESLint
 
 ```
 app/
-├── assets/css/main.css      # Tailwind v4 + Nuxt UI imports, theme tokens
+├── assets/css/main.css      # Tailwind v4 + Nuxt UI imports, theme tokens, keyframes
 ├── components/
-│   ├── CategoryLinkList.vue  # Single category block with icon + link list
-│   ├── CategoryPage.vue      # Reusable category hub page (existing)
-│   ├── CategorySection.vue   # "Explore Austin" grid of category blocks
-│   ├── LiveBadge.vue         # Pulsing LIVE dot / "Updated X min ago"
-│   ├── LiveMetric.vue        # Editorial metric card with gradient header
-│   └── LiveStrip.vue         # Horizontal row of 3 live metric cards
+│   ├── CategoryPage.vue      # Reusable category hub page
+│   ├── HomeHero.vue          # Homepage hero section
+│   ├── HomeExploreGrid.vue   # Category card grid
+│   ├── HomeQuickChips.vue    # Quick-access navigation chips
 ├── composables/
+│   ├── useAuth.ts            # Authentication state & helpers
+│   ├── useLiveData.ts        # Generic live data fetching
 │   ├── useLivePollen.ts      # Fetches /api/live/pollen
 │   ├── useLiveWaterTemps.ts  # Fetches /api/live/water-temps
 │   ├── usePageSeo.ts         # Per-page SEO meta helper
-│   ├── useSiteData.ts        # Category structure + helper functions
+│   ├── useSiteData.ts        # Category structure & helper functions
 │   └── useWeekendEvents.ts   # Fetches /api/live/events
 ├── pages/
 │   ├── index.vue                    # Homepage
+│   ├── login.vue                    # Login page
 │   ├── [category]/index.vue         # Category hub (dynamic)
-│   ├── [category]/list/[slug].vue   # Filterable list pattern
-│   ├── [category]/map/[slug].vue    # Map placeholder pattern
-│   └── [category]/tool/[slug].vue   # Tool detail pattern
+│   ├── [category]/[slug].vue        # Sub-page (dynamic)
+│   ├── admin/radar.vue              # Admin Radar dashboard
+│   └── allergies/cedar-pollen.vue   # Cedar pollen detail page
 ├── types/
 │   └── live.ts               # Shared TypeScript types for live data
 └── app.vue                   # Root layout (header, footer, navigation)
 
 server/
-└── api/live/
-    ├── pollen.get.ts         # Mock pollen API
-    ├── water-temps.get.ts    # Mock water temperature API
-    └── events.get.ts         # Mock events API
+├── api/
+│   ├── auth/                 # Auth endpoints (login, signup, logout, refresh, me, Apple OAuth)
+│   ├── live/                 # Live data (pollen, water-temps, events)
+│   ├── pollen/               # Pollen data CRUD
+│   ├── radar/                # Radar SEO endpoints (keywords, ingest, brief, queue, stats)
+│   ├── health.get.ts         # Health check
+│   └── sitemap-urls.ts       # Dynamic sitemap URL source
+├── database/
+│   ├── index.ts              # Drizzle instance export
+│   └── schema.ts             # Database schema (users, pollen, radar keywords)
+├── middleware/
+│   └── auth.ts               # Server-side auth middleware
+└── utils/
+    ├── auth.ts               # JWT auth helpers
+    ├── database.ts           # D1 database access
+    ├── google-pollen.ts      # Google Pollen API client
+    ├── kxan-scraper.ts       # KXAN weather data scraper
+    ├── pollen.ts             # Pollen data processing
+    ├── rateLimit.ts          # API rate limiting
+    ├── requireAdmin.ts       # Admin route guard
+    └── radar/                # Radar modules (autocomplete, classify, geo, intent, scoring, seeds)
 ```
 
 ## UI Rules
@@ -54,13 +72,14 @@ server/
 3. **No Raw Colors** — Use semantic tokens (`text-muted`, `text-default`, `bg-default`, `border-default`).
 4. **Responsive** — All layouts must work from `320px` to `1440px`. Grid pattern: `grid-cols-1 md:grid-cols-3`.
 5. **Icons** — Use Lucide icons via `i-lucide-*` prefix.
+6. **Light-First** — Default to light theme. No dark hero sections. Bright, open aesthetic.
 
 ## How to Add a Page
 
-### New Tool Page
+### New Sub-Page
 
-1. Create `app/pages/[category]/tool/[slug].vue` or add content to the existing scaffold.
-2. Ensure the tool's `slug` exists in `useSiteData()` category config.
+1. Create `app/pages/[category]/[slug].vue` or add content to the existing scaffold.
+2. Ensure the sub-page's `slug` exists in `useSiteData()` category config.
 3. Call `usePageSeo()` with unique `title` and `description`.
 4. Call `useSchemaOrg()` for structured data.
 
@@ -68,13 +87,13 @@ server/
 
 1. Add the category to `useSiteData.ts` with `title`, `slug`, `icon`, `color`, `tagline`, and `subApps[]`.
 2. The dynamic `[category]/index.vue` route handles it automatically.
+3. New categories require Radar-backed demand validation.
 
 ### New Live Data Source
 
-1. Create a server API stub: `server/api/live/<name>.get.ts`
+1. Create a server API endpoint: `server/api/live/<name>.get.ts`
 2. Create a composable: `app/composables/useLive<Name>.ts` with typed `useFetch<T>`
 3. Add types to `app/types/live.ts`
-4. Add a `LiveMetric` to `LiveStrip.vue`
 
 ## SEO Checklist
 

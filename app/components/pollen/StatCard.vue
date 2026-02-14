@@ -11,7 +11,7 @@ const props = withDefaults(defineProps<{
   color?: string
 }>(), {
   suffix: '',
-  color: '#10B981'
+  color: POLLEN_ACCENT
 })
 
 const displayValue = ref(0)

@@ -9,6 +9,12 @@ import {
 } from '../../utils/auth'
 import { enforceRateLimit } from '../../utils/rateLimit'
 import { jwtVerify, createRemoteJWKSet } from 'jose'
+import { z } from 'zod'
+
+const bodySchema = z.object({
+  id_token: z.string().min(1, 'Missing id_token from Apple'),
+  user: z.any().optional(),
+})
 
 /**
  * Apple Sign In — client-side flow handler.
@@ -20,12 +26,8 @@ import { jwtVerify, createRemoteJWKSet } from 'jose'
 export default defineEventHandler(async (event) => {
   await enforceRateLimit(event, 'auth-apple', 10, 60_000)
 
-  const body = await readBody(event)
+  const body = bodySchema.parse(await readBody(event))
   const { id_token, user: appleUser } = body
-
-  if (!id_token) {
-    throw createError({ statusCode: 400, message: 'Missing id_token from Apple' })
-  }
 
   // Verify Apple id_token via JWKS
   const JWKS = createRemoteJWKSet(new URL('https://appleid.apple.com/auth/keys'))

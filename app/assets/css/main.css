@@ -29,41 +29,41 @@ h4,
   font-family: var(--font-display);
 }
 
-/* Animated gradient background */
-@keyframes gradient-shift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+/* ── Hill Country limestone texture ────────────────────────── */
+.limestone-texture {
+  background-image:
+    radial-gradient(circle at 20% 35%, rgba(120, 100, 70, 0.04) 1px, transparent 1px),
+    radial-gradient(circle at 75% 44%, rgba(120, 100, 70, 0.03) 1px, transparent 1px),
+    radial-gradient(circle at 46% 72%, rgba(140, 120, 90, 0.035) 1px, transparent 1px);
+  background-size: 7px 7px, 11px 11px, 5px 5px;
 }
 
-.animate-gradient {
-  background-size: 200% 200%;
-  animation: gradient-shift 8s ease infinite;
+:is(.dark) .limestone-texture {
+  background-image:
+    radial-gradient(circle at 20% 35%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    radial-gradient(circle at 75% 44%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    radial-gradient(circle at 46% 72%, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 7px 7px, 11px 11px, 5px 5px;
 }
 
-/* Count-up animation */
-@keyframes count-in {
+/* ── Card stagger entrance ─────────────────────────────────── */
+@keyframes card-enter {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(24px) scale(0.97);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
-.animate-count-in {
-  animation: count-in 0.6s ease-out forwards;
+.animate-card-enter {
+  animation: card-enter 0.5s ease-out forwards;
+  opacity: 0;
 }
 
-/* Stagger animations */
+/* ── Stagger animations ────────────────────────────────────── */
 @keyframes fade-up {
   from {
     opacity: 0;
@@ -94,7 +94,41 @@ h4,
   opacity: 0;
 }
 
-/* Glassmorphism — theme-aware */
+/* ── Animated gradient background ──────────────────────────── */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+/* ── Count-up animation ────────────────────────────────────── */
+@keyframes count-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-count-in {
+  animation: count-in 0.6s ease-out forwards;
+}
+
+/* ── Glassmorphism — theme-aware ───────────────────────────── */
 .glass {
   background: var(--color-surface);
   backdrop-filter: blur(16px);
@@ -110,7 +144,7 @@ h4,
   border-radius: 1rem;
 }
 
-/* Pulsing dot (live indicator) */
+/* ── Pulsing dot (live indicator) ──────────────────────────── */
 @keyframes pulse-dot {
   0%,
   100% {
@@ -127,7 +161,7 @@ h4,
   animation: pulse-dot 2s infinite;
 }
 
-/* Subtle shimmer for hero */
+/* ── Subtle shimmer for hero ───────────────────────────────── */
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
@@ -143,7 +177,7 @@ h4,
   animation: shimmer 3s ease-in-out infinite;
 }
 
-/* Page transitions */
+/* ── Page transitions ──────────────────────────────────────── */
 .page-enter-active,
 .page-leave-active {
   transition: all 0.3s ease;

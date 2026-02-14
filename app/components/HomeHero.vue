@@ -1,43 +1,33 @@
 <script setup lang="ts">
 /**
- * HomeHero — full-bleed edge-to-edge hero with responsive image,
- * subtle gradient overlay, and overlaid H1 + subhead in the lower third.
- *
- * Sits directly below <UHeader> in the normal page flow.
- * No custom CSS — Tailwind utility classes only.
+ * HomeHero — Texan rope-lettering hero with Austin icons.
+ * Uses the user's custom SVG logo. Scales naturally across viewports.
+ * Austin skyline PNG backdrop at low opacity behind it.
  */
 </script>
 
 <template>
-  <!-- eslint-disable atx/no-raw-tailwind-colors -- dark hero overlay requires specific shade-level colors for legibility -->
-  <section class="relative overflow-hidden bg-neutral-900">
-    <!-- Background image — decorative only, cropped tight -->
-    <img
-      src="/images/austin-hero.png"
-      alt=""
-      role="presentation"
-      fetchpriority="high"
-      decoding="async"
-      class="absolute inset-0 w-full h-full object-cover object-center opacity-40"
-    />
-
-    <!-- Dark scrim for guaranteed legibility -->
-    <div
-      class="absolute inset-0 bg-linear-to-b from-neutral-900/60 via-neutral-900/40 to-neutral-900/80"
-    />
+  <section class="relative">
+    <!-- Austin skyline backdrop — very low opacity, pinned to bottom -->
+    <div class="absolute inset-x-0 bottom-0 pointer-events-none select-none" aria-hidden="true">
+      <img
+        src="/images/austin-skyline.png"
+        alt=""
+        class="w-full h-auto opacity-[0.025] dark:opacity-[0.04]"
+        loading="eager"
+      />
+    </div>
 
     <!-- Content -->
-    <div class="relative z-10 pt-10 pb-8 md:pt-14 md:pb-10">
-      <UContainer>
-        <h1
-          class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight font-display text-white leading-tight"
-        >
-          Austin, Texas — Live Local Intelligence
-        </h1>
-        <p class="mt-1.5 text-sm md:text-base text-neutral-300 max-w-xl leading-relaxed">
-          Real-time pollen, water temps, events, and where to go.
-        </p>
-      </UContainer>
-    </div>
+    <UContainer class="relative py-4 md:py-6 lg:py-8 flex justify-center">
+      <img
+        src="/images/austin-logo-rope-all-things.svg"
+        alt="AUSTIN-TEXAS.NET — Live, local intelligence."
+        class="w-full max-w-[280px] sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl h-auto animate-fade-up"
+        loading="eager"
+      />
+      <!-- Hidden h1 for SEO — screen readers and crawlers see this -->
+      <h1 class="sr-only">AUSTIN-TEXAS.NET — Live, local intelligence</h1>
+    </UContainer>
   </section>
 </template>

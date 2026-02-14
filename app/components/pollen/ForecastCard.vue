@@ -16,17 +16,7 @@ defineProps<{
 }>()
 
 function getLevelColor(level: string): string {
-  const map: Record<string, string> = {
-    None: '#64748B',
-    'Very Low': '#22C55E',
-    Low: '#22C55E',
-    Medium: '#EAB308',
-    Moderate: '#EAB308',
-    High: '#F97316',
-    'Very High': '#EF4444',
-    Severe: '#A855F7',
-  }
-  return map[level] || '#64748B'
+  return severityColor(level)
 }
 </script>
 

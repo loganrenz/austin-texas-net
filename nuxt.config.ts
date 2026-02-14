@@ -3,6 +3,7 @@ import pkg from './package.json'
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: [
+    '@nuxt/content',
     '@nuxt/ui',
     '@nuxt/fonts',
     '@nuxt/eslint',
@@ -48,10 +49,13 @@ export default defineNuxtConfig({
     appleClientId: process.env.APPLE_CLIENT_ID || 'com.atxapps',
     appleTeamId: process.env.APPLE_TEAM_ID || '',
     appleKeyId: process.env.APPLE_KEY_ID || '',
+    appleSecretKey: process.env.APPLE_SECRET_KEY || '',
+    mapkitServerApiKey: process.env.MAPKIT_SERVER_API_KEY || '',
     googlePollenApiKey: process.env.GOOGLE_POLLEN_API_KEY || '',
     pollenIngestKey: process.env.POLLEN_INGEST_KEY || '',
     public: {
       appUrl: process.env.SITE_URL || 'https://austin-texas.net',
+      mapkitToken: process.env.MAPKIT_TOKEN || '',
       gaMeasurementId: process.env.GA_MEASUREMENT_ID || '',
       posthogPublicKey: process.env.POSTHOG_PUBLIC_KEY || '',
       appName: process.env.APP_NAME || 'Austin Texas'

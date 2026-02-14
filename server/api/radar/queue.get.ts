@@ -1,4 +1,9 @@
-import { sql } from 'drizzle-orm'
+import { isNull, eq, desc, and } from 'drizzle-orm'
+import { z } from 'zod'
+
+const querySchema = z.object({
+  limit: z.coerce.number().min(1).max(50).optional().default(20),
+})
 
 /**
  * GET /api/radar/queue
@@ -10,13 +15,13 @@ export default defineEventHandler(async (event) => {
   await requireAdmin(event)
   const db = useDatabase()
 
-  const limit = Math.min(50, Number(getQuery(event).limit) || 20)
+  const q = querySchema.parse(getQuery(event))
 
   const rows = await db.select()
     .from(schema.keywords)
-    .where(sql`${schema.keywords.matchedApp} IS NULL AND ${schema.keywords.pageExists} = 0`)
-    .orderBy(sql`${schema.keywords.strategicScore} DESC`)
-    .limit(limit)
+    .where(and(isNull(schema.keywords.matchedApp), eq(schema.keywords.pageExists, false)))
+    .orderBy(desc(schema.keywords.strategicScore))
+    .limit(q.limit)
 
   return { data: rows, total: rows.length }
 })

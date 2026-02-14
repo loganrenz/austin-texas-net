@@ -7,6 +7,13 @@ import {
   createSession,
 } from '../../utils/auth'
 import { createRemoteJWKSet, jwtVerify } from 'jose'
+import { z } from 'zod'
+
+const bodySchema = z.object({
+  id_token: z.string().min(1, 'Missing id_token from Apple'),
+  state: z.string().optional(),
+  user: z.any().optional(),
+})
 
 /**
  * Apple Sign In server-side callback — receives form_post from Apple.
@@ -16,12 +23,8 @@ import { createRemoteJWKSet, jwtVerify } from 'jose'
  * and redirect to the original `state` URL.
  */
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
+  const body = bodySchema.parse(await readBody(event))
   const { id_token, state, user: appleUserRaw } = body
-
-  if (!id_token) {
-    throw createError({ statusCode: 400, message: 'Missing id_token from Apple' })
-  }
 
   // Verify Apple id_token via JWKS
   const JWKS = createRemoteJWKSet(new URL('https://appleid.apple.com/auth/keys'))

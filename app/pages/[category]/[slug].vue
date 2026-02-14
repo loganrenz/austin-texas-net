@@ -49,17 +49,6 @@ const crossLinks = computed(() =>
 
 <template>
   <div>
-    <!-- Breadcrumb -->
-    <div class="flex items-center gap-2 text-sm text-muted mb-6">
-      <NuxtLink to="/" class="hover:text-primary transition-colors">Home</NuxtLink>
-      <UIcon name="i-lucide-chevron-right" class="size-3" />
-      <NuxtLink :to="`/${categorySlug}/`" class="hover:text-primary transition-colors">
-        {{ category?.title }}
-      </NuxtLink>
-      <UIcon name="i-lucide-chevron-right" class="size-3" />
-      <span class="text-default font-medium">{{ displayName }}</span>
-    </div>
-
     <!-- Coming Soon hero -->
     <section class="text-center py-12 sm:py-20">
       <!-- Icon -->

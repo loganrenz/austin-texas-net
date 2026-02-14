@@ -1,121 +1,59 @@
 <script setup lang="ts">
 /**
- * HomeExploreGrid — "Explore Austin" section with 4 category cards.
- * Sources from useSiteData(), filtered to Food / Outdoors / Allergies / Real Estate.
+ * HomeExploreGrid — editorial directory with big mobile touch targets.
+ * No cards, no boxes. Bold headings + sub-links in responsive columns.
+ * Background handled at page level.
  */
 const { categories } = useSiteData()
-
-const exploreSlugs = ['food', 'outdoors', 'allergies', 'real-estate']
-const exploreCategories = computed(
-  () =>
-    exploreSlugs
-      .map((slug) => categories.find((c) => c.slug === slug))
-      .filter(Boolean) as typeof categories,
-)
-
-const exploreIcons: Record<string, string> = {
-  food: 'i-lucide-utensils-crossed',
-  outdoors: 'i-lucide-map-pin',
-  allergies: 'i-lucide-flower-2',
-  'real-estate': 'i-lucide-landmark',
-}
-
-/** Per-category accent colors for visual distinction */
-const exploreColors: Record<string, string> = {
-  food: 'text-amber-600 dark:text-amber-400',
-  outdoors: 'text-emerald-600 dark:text-emerald-400',
-  allergies: 'text-rose-600 dark:text-rose-400',
-  'real-estate': 'text-sky-600 dark:text-sky-400',
-}
-
-/** Subtle icon background tints */
-const exploreBg: Record<string, string> = {
-  food: 'bg-amber-100 dark:bg-amber-900/30',
-  outdoors: 'bg-emerald-100 dark:bg-emerald-900/30',
-  allergies: 'bg-rose-100 dark:bg-rose-900/30',
-  'real-estate': 'bg-sky-100 dark:bg-sky-900/30',
-}
-
-/** Map mock labels to category subApp slugs */
-const exploreLinkOverrides: Record<string, Array<{ title: string; slug: string }>> = {
-  food: [
-    { title: 'Breakfast Tacos', slug: 'breakfast-tacos' },
-    { title: 'Happy Hours', slug: 'happy-hours' },
-    { title: 'Barbecue', slug: 'great-hills-restaurants' },
-    { title: 'Food Trucks', slug: 'food-trucks' },
-  ],
-  outdoors: [
-    { title: 'Hiking Trails', slug: 'disc-golf' },
-    { title: 'Swimming Holes', slug: 'water-temps' },
-    { title: 'Parks & Gardens', slug: 'bluebonnets' },
-    { title: 'Camping Spots', slug: 'kayak-launches' },
-  ],
-  allergies: [
-    { title: 'Pollen Count', slug: 'cedar-pollen' },
-    { title: '7 Day Forecast', slug: 'cedar-pollen' },
-    { title: 'Allergy Remedies', slug: 'oak-pollen' },
-    { title: 'Weather Forecast', slug: 'oak-pollen' },
-  ],
-  'real-estate': [
-    { title: 'Home Prices', slug: 'neighborhoods' },
-    { title: 'Rent Heatmap', slug: 'rent-heatmap' },
-    { title: 'Top Neighborhoods', slug: 'neighborhoods' },
-    { title: 'Market Trends', slug: 'rent-heatmap' },
-  ],
-}
 </script>
 
 <template>
-  <section class="py-10">
+  <section class="pb-8 md:pb-12">
     <UContainer>
-      <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight font-display mb-6">
-        Explore Austin
-      </h2>
-
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <NuxtLink
-          v-for="cat in exploreCategories"
+      <div class="columns-1 sm:columns-2 lg:columns-3 gap-x-8 md:gap-x-12">
+        <div
+          v-for="(cat, i) in categories"
           :key="cat.slug"
-          :to="`/${cat.slug}/`"
-          class="group flex flex-col rounded-xl border border-default bg-elevated/50 p-5 hover:border-primary/40 hover:shadow-sm transition-all"
+          class="break-inside-avoid mb-4 md:mb-6 animate-card-enter"
+          :style="{ animationDelay: `${i * 40}ms` }"
         >
-          <!-- Category header -->
-          <div class="flex items-center gap-2 mb-4">
+          <!-- Category heading — oversized tap target -->
+          <NuxtLink
+            :to="`/${cat.slug}/`"
+            class="group flex items-center gap-3 min-h-[52px] py-3 -mx-3 px-3 rounded-xl
+                   hover:bg-emerald-50/60 dark:hover:bg-white/5
+                   active:bg-emerald-100/50 dark:active:bg-white/10
+                   transition-colors"
+          >
             <div
-              class="flex items-center justify-center size-8 rounded-lg"
-              :class="exploreBg[cat.slug]"
+              class="flex items-center justify-center size-10 rounded-xl shrink-0"
+              :class="cat.bgColor"
             >
-              <UIcon
-                :name="exploreIcons[cat.slug] || cat.icon"
-                class="size-4"
-                :class="exploreColors[cat.slug] || cat.color"
-              />
+              <UIcon :name="cat.icon" class="size-5" :class="cat.color" />
             </div>
-            <h3
-              class="text-sm font-bold tracking-tight"
-              :class="exploreColors[cat.slug] || cat.color"
-            >
+            <h3 class="text-lg font-extrabold tracking-tight font-display text-default">
               {{ cat.title }}
             </h3>
-          </div>
+            <UIcon
+              name="i-lucide-chevron-right"
+              class="size-5 text-muted/40 group-hover:text-default/60 ml-auto shrink-0 transition-colors"
+            />
+          </NuxtLink>
 
-          <!-- Links -->
-          <ul class="space-y-1.5 flex-1">
-            <li
-              v-for="link in exploreLinkOverrides[cat.slug] || cat.subApps.slice(0, 4)"
-              :key="link.slug"
-              class="text-sm text-muted group-hover:text-default/70 transition-colors"
+          <!-- Sub-app links — each is a big full-width tap target -->
+          <div class="pl-[52px]">
+            <NuxtLink
+              v-for="app in cat.subApps.slice(0, 4)"
+              :key="app.slug"
+              :to="`/${cat.slug}/${app.slug}/`"
+              class="flex items-center min-h-[44px] py-2 text-[15px] font-medium
+                     text-default/70 hover:text-default active:text-default
+                     transition-colors"
             >
-              {{ link.title }}
-            </li>
-          </ul>
-
-          <span
-            class="mt-4 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            Explore →
-          </span>
-        </NuxtLink>
+              {{ app.title }}
+            </NuxtLink>
+          </div>
+        </div>
       </div>
     </UContainer>
   </section>

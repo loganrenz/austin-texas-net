@@ -5,6 +5,9 @@ export default withNuxt(
   // ATX design system rules (all .vue files)
   ...atx.configs.recommended,
 
+  // ATX server safety rules (server/**/*.ts)
+  ...atx.configs.server,
+
   // Project-level overrides
   {
     rules: {

@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { sql, isNotNull, isNull, desc } from 'drizzle-orm'
 
 /**
  * GET /api/radar/stats
@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
   ] = await Promise.all([
     db.select({ count: sql<number>`count(*)` }).from(schema.keywords),
     db.select({ count: sql<number>`count(*)` }).from(schema.keywords)
-      .where(sql`${schema.keywords.matchedApp} IS NOT NULL`),
+      .where(isNotNull(schema.keywords.matchedApp)),
     db.select({ avg: sql<number>`avg(${schema.keywords.difficulty})` }).from(schema.keywords),
     db.select({
       bucket: schema.keywords.bucket,
@@ -33,8 +33,8 @@ export default defineEventHandler(async (event) => {
     }).from(schema.keywords).groupBy(schema.keywords.intent),
     db.select()
       .from(schema.keywords)
-      .where(sql`${schema.keywords.matchedApp} IS NULL`)
-      .orderBy(sql`${schema.keywords.strategicScore} DESC`)
+      .where(isNull(schema.keywords.matchedApp))
+      .orderBy(desc(schema.keywords.strategicScore))
       .limit(10),
   ])
 

@@ -2,7 +2,7 @@
 description: SEO Architecture Policy for Austin-Texas.net — mandatory constraints for URL structure, page quality, hierarchy, technical discipline, and content standards.
 ---
 
-# Austin-Texas.net — SEO Architecture Policy (v1)
+# Austin-Texas.net — SEO Architecture Policy (v2)
 
 These are **hard constraints**, not suggestions. Every page, component, and route must comply.
 
@@ -11,13 +11,52 @@ These are **hard constraints**, not suggestions. Every page, component, and rout
 ## 1. URL Structure Is Law
 
 - Use **one domain only** — no subdomains.
-- Structure:
+- Structure follows a strict two-level hierarchy:
   ```
   /category/
-  /category/tool/
+  /category/sub-page/
   ```
+- Canonical category tree:
+
+  ```
+  /allergies/
+  ├── /allergies/cedar-pollen-today/
+  ├── /allergies/pollen-forecast/
+  ├── /allergies/mold-levels/
+  └── /allergies/history/
+
+  /outdoors/
+  ├── /outdoors/lake-travis-water-temp/
+  ├── /outdoors/lake-levels/
+  ├── /outdoors/swimming-holes/
+  └── /outdoors/bluebonnet-map/
+
+  /food/
+  ├── /food/breakfast-tacos/
+  ├── /food/bbq/
+  ├── /food/best-restaurants/
+  └── /food/food-trucks/
+
+  /events/
+  ├── /events/this-weekend/
+  ├── /events/concerts/
+  ├── /events/festivals/
+  └── /events/calendar/
+
+  /real-estate/
+  ├── /real-estate/median-home-price/
+  ├── /real-estate/neighborhood-guide/
+  └── /real-estate/new-listings/
+
+  /culture/
+  ├── /culture/live-music-venues/
+  ├── /culture/museums/
+  └── /culture/parks/
+  ```
+
 - **Never change URLs once published.**
 - No duplicate paths for the same content.
+- New categories may be added via **Radar analysis** — each must follow the same hub + child pattern.
 
 ---
 

@@ -23,11 +23,7 @@ useHead({
 })
 
 /* ── Header nav items ─────────────────────────────────────── */
-const navItems = computed<NavigationMenuItem[]>(() => [
-  { label: 'Search', icon: 'i-lucide-search', to: '/search/' },
-  { label: 'Categories', icon: 'i-lucide-layout-grid', to: '/food/' },
-  { label: 'About', icon: 'i-lucide-info', to: '/about/' },
-])
+const navItems = computed<NavigationMenuItem[]>(() => [])
 
 const footerLinks = [
   { label: 'About', to: '/about/' },
@@ -40,22 +36,11 @@ const adminLinks = [{ label: 'Admin', to: '/admin/radar' }]
 
 <template>
   <UApp>
-    <!-- Header -->
-    <UHeader title="Austin-Texas.net" to="/">
-      <template #title>
-        <span class="font-display text-lg font-bold tracking-tight italic">Austin-Texas.net</span>
-      </template>
-
-      <UNavigationMenu :items="navItems" />
-
-      <template #body>
-        <UNavigationMenu :items="navItems" orientation="vertical" class="-mx-2.5" />
-      </template>
-    </UHeader>
-
     <!-- Main — unconstrained so pages control their own layout -->
     <UMain>
-      <NuxtPage />
+      <NuxtLayout>
+        <NuxtPage />
+      </NuxtLayout>
     </UMain>
 
     <!-- Footer -->

@@ -1,4 +1,4 @@
-import { eq, desc, asc, and, like, gte, lte, sql } from 'drizzle-orm'
+import { eq, desc, asc, and, like, gte, lte, sql, isNotNull, isNull } from 'drizzle-orm'
 import { z } from 'zod'
 
 const querySchema = z.object({
@@ -29,8 +29,8 @@ export default defineEventHandler(async (event) => {
   const conditions = []
   if (q.bucket) conditions.push(eq(schema.keywords.bucket, q.bucket))
   if (q.intent) conditions.push(eq(schema.keywords.intent, q.intent))
-  if (q.covered === 'true') conditions.push(sql`${schema.keywords.matchedApp} IS NOT NULL`)
-  if (q.covered === 'false') conditions.push(sql`${schema.keywords.matchedApp} IS NULL`)
+  if (q.covered === 'true') conditions.push(isNotNull(schema.keywords.matchedApp))
+  if (q.covered === 'false') conditions.push(isNull(schema.keywords.matchedApp))
   if (q.diffMin != null) conditions.push(gte(schema.keywords.difficulty, q.diffMin))
   if (q.diffMax != null) conditions.push(lte(schema.keywords.difficulty, q.diffMax))
   if (q.oppMin != null) conditions.push(gte(schema.keywords.opportunityScore, q.oppMin))

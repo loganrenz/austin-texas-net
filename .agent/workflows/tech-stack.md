@@ -48,7 +48,10 @@ This document is the single source of truth for every technology used in this pr
 - **Schema location**: `server/database/schema.ts`
 - **DB helper**: `server/database/index.ts` — exports the Drizzle instance
 - **Utility**: `server/utils/database.ts` — database access helper
-- **Migrations**: `drizzle/0000_initial_schema.sql`, `drizzle/0001_pollen_readings.sql`
+- **Migrations**:
+  - `drizzle/0000_initial_schema.sql`
+  - `drizzle/0001_pollen_readings.sql`
+  - `drizzle/0002_radar_keywords.sql`
 
 ### Rules
 
@@ -89,7 +92,7 @@ This document is the single source of truth for every technology used in this pr
 | ----------------- | ------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `nuxt-schema-org` | ^5.0.10 | JSON-LD structured data. Auto-generates `WebSite`, `Organization`, etc. schema. Configured in `nuxt.config.ts → schemaOrg`. |
 | `@nuxtjs/sitemap` | ^7.6.0  | Auto-generates `/sitemap.xml`. Dynamic URLs sourced from `/api/sitemap-urls`.                                               |
-| `@nuxtjs/robots`  | ^5.7.0  | Generates `robots.txt`. Currently disallows `/api/` routes.                                                                 |
+| `@nuxtjs/robots`  | ^5.7.0  | Generates `robots.txt`. Currently disallows `/admin/` routes.                                                               |
 
 ### SEO Composable
 
@@ -150,23 +153,41 @@ This document is the single source of truth for every technology used in this pr
 
 ## Server-Side Utilities
 
-| File                            | Purpose                    |
-| ------------------------------- | -------------------------- |
-| `server/utils/database.ts`      | D1/Drizzle database access |
-| `server/utils/google-pollen.ts` | Google Pollen API client   |
-| `server/utils/kxan-scraper.ts`  | KXAN weather data scraper  |
-| `server/utils/pollen.ts`        | Pollen data processing     |
-| `server/utils/rateLimit.ts`     | API rate limiting          |
+| File                            | Purpose                        |
+| ------------------------------- | ------------------------------ |
+| `server/utils/auth.ts`          | JWT auth helpers               |
+| `server/utils/database.ts`      | D1/Drizzle database access     |
+| `server/utils/google-pollen.ts` | Google Pollen API client       |
+| `server/utils/kxan-scraper.ts`  | KXAN weather data scraper      |
+| `server/utils/pollen.ts`        | Pollen data processing         |
+| `server/utils/rateLimit.ts`     | API rate limiting              |
+| `server/utils/requireAdmin.ts`  | Admin route guard              |
+| `server/utils/radar/`           | Radar SEO intelligence modules |
+
+### Radar Modules (`server/utils/radar/`)
+
+| File              | Purpose                             |
+| ----------------- | ----------------------------------- |
+| `autocomplete.ts` | Google autocomplete query expansion |
+| `classify.ts`     | Keyword → category classification   |
+| `geo.ts`          | Austin geo-relevance scoring        |
+| `intent.ts`       | Search intent analysis              |
+| `scoring.ts`      | Composite keyword scoring           |
+| `seeds.ts`        | Seed keyword generation             |
+| `types.ts`        | Shared Radar TypeScript types       |
 
 ---
 
 ## API Routes
 
-| Route                        | Purpose                        |
-| ---------------------------- | ------------------------------ |
-| `server/api/health.get.ts`   | Health check endpoint          |
-| `server/api/sitemap-urls.ts` | Dynamic sitemap URL source     |
-| `server/api/pollen/`         | Pollen data CRUD (4 endpoints) |
+| Route                     | Purpose                                                          |
+| ------------------------- | ---------------------------------------------------------------- |
+| `server/api/health.get`   | Health check endpoint                                            |
+| `server/api/sitemap-urls` | Dynamic sitemap URL source                                       |
+| `server/api/pollen/`      | Pollen data CRUD (4 endpoints)                                   |
+| `server/api/live/`        | Live data endpoints (pollen, water, events)                      |
+| `server/api/auth/`        | Auth endpoints (login, signup, logout, refresh, me, Apple OAuth) |
+| `server/api/radar/`       | Radar SEO endpoints (keywords, ingest, brief, queue, stats)      |
 
 ---
 
@@ -203,3 +224,4 @@ Defined in `nuxt.config.ts → vite.define`:
 5. **Tailwind v4** — CSS-first config, no JS config file.
 6. **PostHog for analytics** — client-side only, via Nuxt plugin.
 7. **Zod for validation** — runtime safety on all API boundaries.
+8. **Radar as internal SEO engine** — keyword discovery, classification, and scoring pipeline.

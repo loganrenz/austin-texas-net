@@ -28,6 +28,11 @@ import noNativeHr from './rules/no-native-hr.mjs'
 import noNativeProgress from './rules/no-native-progress.mjs'
 import noNativeDialog from './rules/no-native-dialog.mjs'
 import noNativeKbd from './rules/no-native-kbd.mjs'
+import noInlineHex from './rules/no-inline-hex.mjs'
+import requireValidatedBody from './rules/require-validated-body.mjs'
+import requireValidatedQuery from './rules/require-validated-query.mjs'
+import preferDrizzleOperators from './rules/prefer-drizzle-operators.mjs'
+import noFetchInComponent from './rules/no-fetch-in-component.mjs'
 
 const plugin = {
   meta: {
@@ -54,6 +59,11 @@ const plugin = {
     'no-native-progress': noNativeProgress,
     'no-native-dialog': noNativeDialog,
     'no-native-kbd': noNativeKbd,
+    'no-inline-hex': noInlineHex,
+    'require-validated-body': requireValidatedBody,
+    'require-validated-query': requireValidatedQuery,
+    'prefer-drizzle-operators': preferDrizzleOperators,
+    'no-fetch-in-component': noFetchInComponent,
   },
 }
 
@@ -83,6 +93,20 @@ plugin.configs = {
         'atx/no-native-progress': 'warn',
         'atx/no-native-dialog': 'warn',
         'atx/no-native-kbd': 'warn',
+        'atx/no-inline-hex': 'warn',
+        'atx/no-fetch-in-component': 'warn',
+      },
+    },
+  ],
+  server: [
+    {
+      name: 'atx/server',
+      plugins: { atx: plugin },
+      files: ['server/**/*.ts'],
+      rules: {
+        'atx/require-validated-body': 'warn',
+        'atx/require-validated-query': 'warn',
+        'atx/prefer-drizzle-operators': 'warn',
       },
     },
   ],
