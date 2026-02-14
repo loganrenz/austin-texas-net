@@ -23,13 +23,18 @@ const { getCategoryBySlug } = useSiteData()
 const category = computed(() => getCategoryBySlug(props.config.parentCategory))
 const { items: breadcrumbs } = useBreadcrumbs()
 
-const mapView = ref<InstanceType<typeof import('~/components/map/ContentView.vue').default> | null>(null)
+const mapView = ref<{ scrollToSpot: (id: string) => void } | null>(null)
+
+// ── Selection state ────────────────────────────────────────────
+const selectedId = ref<string | null>(null)
 
 // ── Area / Region filter ───────────────────────────────────────
 const selectedRegion = ref('all')
 
 // Fetch neighborhoods to build neighborhood-name → region lookup
-const { data: neighborhoodData } = await useFetch<{ neighborhoods: { name: string; region: string }[] }>('/api/neighborhoods')
+const { data: neighborhoodData } = await useFetch<{
+  neighborhoods: { name: string; region: string }[]
+}>('/api/neighborhoods')
 
 const regionLookup = computed<Record<string, string>>(() => {
   const map: Record<string, string> = {}
@@ -64,11 +69,9 @@ const filteredSpots = computed<MapSpot[]>(() => {
   return props.spots.filter((s) => spotRegion(s) === selectedRegion.value)
 })
 
-// ── Selection state ────────────────────────────────────────────
 const selectedSpot = computed<MapSpot | null>(() => {
-  const slug = mapView.value?.selectedSlug
-  if (!slug) return null
-  return filteredSpots.value.find((s) => s.slug === slug) ?? null
+  if (!selectedId.value) return null
+  return filteredSpots.value.find((s) => s.id === selectedId.value) ?? null
 })
 
 function selectOnMap(slug: string) {
@@ -76,9 +79,7 @@ function selectOnMap(slug: string) {
 }
 
 function clearSelection() {
-  if (mapView.value) {
-    mapView.value.selectedSlug = null
-  }
+  selectedId.value = null
 }
 
 // Clear detail selection when region changes
@@ -89,9 +90,14 @@ watch(selectedRegion, () => clearSelection())
   <div>
     <!-- Map — top half -->
     <ClientOnly>
-      <MapContentView ref="mapView" :spots="filteredSpots" :config="config" />
+      <MapContentView
+        ref="mapView"
+        v-model:selected-id="selectedId"
+        :spots="filteredSpots"
+        :config="config"
+      />
       <template #fallback>
-        <div class="flex h-[50vh] min-h-[360px] max-h-[600px] w-full items-center justify-center border-b border-default bg-elevated">
+        <div class="mapkit-placeholder">
           <div class="text-center">
             <UIcon name="i-lucide-map" class="mb-2 size-10 text-muted" />
             <p class="text-sm text-muted">Loading map…</p>
@@ -103,7 +109,11 @@ watch(selectedRegion, () => clearSelection())
     <!-- Content — below the map -->
     <UContainer class="py-8 md:py-12">
       <!-- Breadcrumbs -->
-      <UBreadcrumb v-if="breadcrumbs.length > 0 && !selectedSpot" :items="breadcrumbs" class="mb-6" />
+      <UBreadcrumb
+        v-if="breadcrumbs.length > 0 && !selectedSpot"
+        :items="breadcrumbs"
+        class="mb-6"
+      />
 
       <!-- Header (hidden when a spot is selected) -->
       <div v-if="!selectedSpot" class="mb-8 animate-fade-up">
@@ -122,10 +132,16 @@ watch(selectedRegion, () => clearSelection())
           </div>
         </div>
 
-        <p class="text-base sm:text-lg text-muted max-w-2xl leading-relaxed mb-5" v-html="config.introText" />
+        <p
+          class="text-base sm:text-lg text-muted max-w-2xl leading-relaxed mb-5"
+          v-html="config.introText"
+        />
 
         <!-- Area filter -->
-        <div v-if="regionOptions.length > 2" class="flex w-fit items-center gap-2 rounded-xl border border-default bg-elevated px-3.5 py-2.5">
+        <div
+          v-if="regionOptions.length > 2"
+          class="flex w-fit items-center gap-2 rounded-xl border border-default bg-elevated px-3.5 py-2.5"
+        >
           <UIcon name="i-lucide-map-pin" class="size-4 shrink-0 text-muted" />
           <USelect
             v-model="selectedRegion"
@@ -162,4 +178,3 @@ watch(selectedRegion, () => clearSelection())
     </UContainer>
   </div>
 </template>
-

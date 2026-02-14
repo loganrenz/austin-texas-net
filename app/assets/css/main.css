@@ -35,7 +35,10 @@ h4,
     radial-gradient(circle at 20% 35%, rgba(120, 100, 70, 0.04) 1px, transparent 1px),
     radial-gradient(circle at 75% 44%, rgba(120, 100, 70, 0.03) 1px, transparent 1px),
     radial-gradient(circle at 46% 72%, rgba(140, 120, 90, 0.035) 1px, transparent 1px);
-  background-size: 7px 7px, 11px 11px, 5px 5px;
+  background-size:
+    7px 7px,
+    11px 11px,
+    5px 5px;
 }
 
 :is(.dark) .limestone-texture {
@@ -43,7 +46,10 @@ h4,
     radial-gradient(circle at 20% 35%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
     radial-gradient(circle at 75% 44%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
     radial-gradient(circle at 46% 72%, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 7px 7px, 11px 11px, 5px 5px;
+  background-size:
+    7px 7px,
+    11px 11px,
+    5px 5px;
 }
 
 /* ── Card stagger entrance ─────────────────────────────────── */
@@ -175,6 +181,182 @@ h4,
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent);
   background-size: 200% 100%;
   animation: shimmer 3s ease-in-out infinite;
+}
+
+/* ── Shared MapKit map component ───────────────────────────── */
+.mapkit-wrapper {
+  position: relative;
+  width: 100%;
+  height: 50vh;
+  min-height: 340px;
+  max-height: 560px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--ui-border);
+}
+
+.mapkit-canvas {
+  width: 100%;
+  height: 100%;
+  transition: opacity 0.3s ease;
+}
+
+.mapkit-status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--ui-bg);
+  text-align: center;
+  padding: 2rem;
+}
+
+.mapkit-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--ui-border);
+  border-top-color: var(--ui-text-muted);
+  border-radius: 50%;
+  animation: mapkit-spin 0.8s linear infinite;
+}
+
+@keyframes mapkit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.mapkit-placeholder {
+  width: 100%;
+  height: 50vh;
+  min-height: 340px;
+  max-height: 560px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ui-bg-elevated);
+  border-bottom: 1px solid var(--ui-border);
+}
+
+/* ── Map pin styles (used in createApp micro-apps) ─────────── */
+.mapkit-pin {
+  cursor: pointer;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: max-content;
+}
+
+.mapkit-pin.is-selected {
+  z-index: 100;
+}
+
+.mapkit-pin-bubble {
+  position: relative;
+}
+
+.mapkit-pin-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #d97706, #7c2d12);
+  box-shadow:
+    0 1px 5px rgba(0, 0, 0, 0.25),
+    0 0 0 2px white;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.mapkit-pin-circle:hover {
+  transform: scale(1.12);
+}
+
+.mapkit-pin-icon {
+  width: 16px;
+  height: 16px;
+  color: white;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.15));
+}
+
+.is-selected .mapkit-pin-circle {
+  transform: scale(1.18);
+  box-shadow:
+    0 2px 10px rgba(245, 158, 11, 0.5),
+    0 0 0 2.5px white,
+    0 0 0 4.5px rgba(245, 158, 11, 0.25);
+}
+
+.mapkit-pin-rank {
+  position: absolute;
+  bottom: -3px;
+  right: -5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  border-radius: 8px;
+  background: white;
+  color: #92400e;
+  font-size: 9px;
+  font-weight: 800;
+  font-family: var(--font-display);
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+:is(.dark) .mapkit-pin-rank {
+  background: #1c1c1e;
+  color: #fbbf24;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.mapkit-pin-name {
+  display: block;
+  max-width: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-display);
+  line-height: 1.15;
+  text-align: center;
+  color: #1e293b;
+  text-shadow:
+    0 0 4px white,
+    0 0 4px white,
+    1px 0 3px white,
+    -1px 0 3px white,
+    0 1px 3px white,
+    0 -1px 3px white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+:is(.dark) .mapkit-pin-name {
+  color: #f1f5f9;
+  text-shadow:
+    0 0 4px rgba(0, 0, 0, 0.9),
+    0 0 4px rgba(0, 0, 0, 0.9),
+    1px 0 3px rgba(0, 0, 0, 0.8),
+    -1px 0 3px rgba(0, 0, 0, 0.8);
+}
+
+.is-selected .mapkit-pin-name {
+  font-weight: 800;
+  color: #92400e;
+}
+
+:is(.dark) .is-selected .mapkit-pin-name {
+  color: #fbbf24;
 }
 
 /* ── Page transitions ──────────────────────────────────────── */
