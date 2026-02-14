@@ -375,8 +375,10 @@ function flatKeys(obj: any): Array<{ key: string; value: any }> {
               size="sm"
               :disabled="lat == null && lng == null"
               @click="
-                lat = null
-                lng = null
+                () => {
+                  lat = null
+                  lng = null
+                }
               "
             >
               Clear

@@ -29,16 +29,11 @@ useSchemaOrg([
   }),
 ])
 
-const { data: content } = await useAsyncData(
-  `category-content-${slug}`,
-  () => queryCollection('categories').where('slug', '=', slug).first(),
+const { data: content } = await useAsyncData(`category-content-${slug}`, () =>
+  queryCollection('categories').where('slug', '=', slug).first(),
 )
 </script>
 
 <template>
-  <CategoryPage
-    v-if="category"
-    :category="category"
-    :content="content ?? undefined"
-  />
+  <CategoryPage v-if="category" :category="category" :content="content ?? undefined" />
 </template>

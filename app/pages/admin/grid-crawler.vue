@@ -341,6 +341,21 @@ async function onMapClick(coords: { lat: number; lng: number }) {
     }, 5000)
   }
 }
+
+function setMyAddress() {
+  startLat.value = 30.445
+  startLng.value = -97.792
+}
+
+function setDowntownAddress() {
+  startLat.value = 30.267
+  startLng.value = -97.743
+}
+
+function clearAddress() {
+  startLat.value = null
+  startLng.value = null
+}
 </script>
 
 <template>
@@ -596,37 +611,13 @@ async function onMapClick(coords: { lat: number; lng: number }) {
             placeholder="auto-resume"
             class="w-[140px]"
           />
-          <UButton
-            size="xs"
-            variant="ghost"
-            color="neutral"
-            @click="
-              startLat = 30.445
-              startLng = -97.792
-            "
-          >
+          <UButton size="xs" variant="ghost" color="neutral" @click="setMyAddress">
             📍 My Address
           </UButton>
-          <UButton
-            size="xs"
-            variant="ghost"
-            color="neutral"
-            @click="
-              startLat = 30.267
-              startLng = -97.743
-            "
-          >
+          <UButton size="xs" variant="ghost" color="neutral" @click="setDowntownAddress">
             🏛️ Downtown
           </UButton>
-          <UButton
-            size="xs"
-            variant="ghost"
-            color="neutral"
-            @click="
-              startLat = null
-              startLng = null
-            "
-          >
+          <UButton size="xs" variant="ghost" color="neutral" @click="clearAddress">
             ↩ Auto-resume
           </UButton>
         </div>

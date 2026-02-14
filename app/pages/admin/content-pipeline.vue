@@ -41,6 +41,11 @@ const { data: topicsData, refresh: refreshTopics } = await useFetch(
 )
 const { data: runsData, refresh: refreshRuns } = await useFetch('/api/admin/content-pipeline/runs')
 
+const refreshTopicAndRuns = async () => {
+  await refreshTopics()
+  await refreshRuns()
+}
+
 const topics = computed(() => topicsData.value?.topics ?? [])
 const runs = computed(() => runsData.value?.runs ?? [])
 
@@ -308,12 +313,7 @@ const categorizedTopics = computed(() => {
         color="neutral"
         variant="ghost"
         size="sm"
-        @click="
-          () => {
-            refreshTopics()
-            refreshRuns()
-          }
-        "
+        @click="refreshTopicAndRuns"
       >
         Refresh
       </UButton>

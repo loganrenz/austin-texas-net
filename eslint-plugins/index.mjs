@@ -33,6 +33,7 @@ import requireValidatedBody from './rules/require-validated-body.mjs'
 import requireValidatedQuery from './rules/require-validated-query.mjs'
 import preferDrizzleOperators from './rules/prefer-drizzle-operators.mjs'
 import noFetchInComponent from './rules/no-fetch-in-component.mjs'
+import noMultiStatementInlineHandler from './rules/no-multi-statement-inline-handler.mjs'
 
 const plugin = {
   meta: {
@@ -64,6 +65,7 @@ const plugin = {
     'require-validated-query': requireValidatedQuery,
     'prefer-drizzle-operators': preferDrizzleOperators,
     'no-fetch-in-component': noFetchInComponent,
+    'no-multi-statement-inline-handler': noMultiStatementInlineHandler,
   },
 }
 
@@ -95,6 +97,7 @@ plugin.configs = {
         'atx/no-native-kbd': 'error',
         'atx/no-inline-hex': 'error',
         'atx/no-fetch-in-component': 'error',
+        'atx/no-multi-statement-inline-handler': 'error',
       },
     },
   ],

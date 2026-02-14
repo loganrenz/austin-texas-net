@@ -34,3 +34,4 @@ playwright-report/
 
 # Content pipeline dry-run output
 scripts/content-output/
+.env.content
