@@ -28,12 +28,7 @@ const CACHE_TTL_MS = 1000 * 60 * 60 * 12 // 12 hours
 const SEARCH_LIMIT = 25
 
 // Multiple search queries to get broad food truck coverage
-const SEARCH_QUERIES = [
-  'food trucks',
-  'food trailer park',
-  'taco truck',
-  'BBQ trailer',
-]
+const SEARCH_QUERIES = ['food trucks', 'food trailer park', 'taco truck', 'BBQ trailer']
 
 export interface FoodSpot {
   id: string
@@ -53,19 +48,24 @@ interface SpotsPayload {
 }
 
 interface NeighborhoodFeature {
+  type: 'Feature'
+  geometry: { type: 'Point'; coordinates: [number, number] }
   properties: {
     name: string
-    region: string
-    centerLat: number | null
-    centerLng: number | null
+    slug: string
+    region: string | null
+    city: string | null
+    centerLat: number
+    centerLng: number
   }
 }
 
-interface NeighborhoodPayload {
+interface GeoJSONFeatureCollection {
+  type: 'FeatureCollection'
   features: NeighborhoodFeature[]
 }
 
-let cache: { expiresAt: number, payload: SpotsPayload } | null = null
+let cache: { expiresAt: number; payload: SpotsPayload } | null = null
 
 function toNumber(value: unknown, fallback: number) {
   const parsed = Number(value)
@@ -119,7 +119,7 @@ function findRegion(neighborhood: string, lookup: Map<string, string>): string {
  */
 async function fetchNeighborhoodRegionLookup(): Promise<Map<string, string>> {
   try {
-    const data = await $fetch<NeighborhoodPayload>('/api/neighborhoods', {
+    const data = await $fetch<GeoJSONFeatureCollection>('/api/neighborhoods/geojson', {
       timeout: 10_000,
     })
     return buildRegionLookup(data.features ?? [])
@@ -132,7 +132,10 @@ async function fetchNeighborhoodRegionLookup(): Promise<Map<string, string>> {
 /**
  * Convert an Apple Maps search result into a FoodSpot.
  */
-function toFoodSpot(result: AppleMapsSearchResult, regionLookup: Map<string, string>): FoodSpot | null {
+function toFoodSpot(
+  result: AppleMapsSearchResult,
+  regionLookup: Map<string, string>,
+): FoodSpot | null {
   const name = (result.name || result.displayName || '').trim()
   if (!name) return null
 
@@ -182,7 +185,7 @@ export default defineEventHandler(async (event) => {
     // Fetch neighborhood→region mapping in parallel with searches
     const [regionLookup, ...searchResults] = await Promise.all([
       fetchNeighborhoodRegionLookup(),
-      ...SEARCH_QUERIES.map(query =>
+      ...SEARCH_QUERIES.map((query) =>
         searchPlaces(accessToken, {
           query,
           searchLocation: AUSTIN_CENTER,
