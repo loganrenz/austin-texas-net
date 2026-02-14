@@ -18,6 +18,7 @@ const config: MapPageConfig = {
   parentPath: '/food/',
   mapCenter: { lat: 30.2672, lng: -97.7431 },
   accentColor: 'emerald',
+  // eslint-disable-next-line atx/no-inline-hex -- MapKit pin gradient
   pinColor: '#059669',
   categoryIcon: 'i-lucide-truck',
   apiEndpoint: '/api/map-spots?category=food-trucks',

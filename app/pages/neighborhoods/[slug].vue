@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import type {
+  GeoJSONFeatureCollection,
+  GeoJSONFeatureProperties,
+  OverlayStyle,
+} from '~/components/AppMapKit.vue'
+
 /**
  * neighborhoods/[slug].vue — Individual neighborhood page.
  * Fetches neighborhood data from the API by slug.
@@ -22,7 +28,9 @@ interface NeighborhoodData {
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 
-const { data, error } = await useFetch<{ neighborhood: NeighborhoodData }>(`/api/neighborhoods/${slug.value}`)
+const { data, error } = await useFetch<{ neighborhood: NeighborhoodData }>(
+  `/api/neighborhoods/${slug.value}`,
+)
 
 if (error.value || !data.value?.neighborhood) {
   throw createError({ statusCode: 404, statusMessage: 'Neighborhood not found', fatal: true })
@@ -38,19 +46,44 @@ const cityLabel = computed(() => {
 
 usePageSeo({
   title: `${displayName.value}${cityLabel.value} — Austin Neighborhood Guide`,
-  description: neighborhood.value.description
-    || `Explore ${displayName.value}${cityLabel.value} — local dining, activities, real estate, and everything you need to know about this Austin-area neighborhood.`,
+  description:
+    neighborhood.value.description ||
+    `Explore ${displayName.value}${cityLabel.value} — local dining, activities, real estate, and everything you need to know about this Austin-area neighborhood.`,
 })
 
 useSchemaOrg([
   defineWebPage({
     name: `${displayName.value} Neighborhood Guide`,
-    description: neighborhood.value.description
-      || `Guide to ${displayName.value}${cityLabel.value} — dining, activities, and neighborhood info.`,
+    description:
+      neighborhood.value.description ||
+      `Guide to ${displayName.value}${cityLabel.value} — dining, activities, and neighborhood info.`,
   }),
 ])
 
 const { items: breadcrumbs } = useBreadcrumbs()
+
+// ── GeoJSON boundary data (filtered to this neighborhood) ────
+const { data: allGeojson } = await useFetch<GeoJSONFeatureCollection>(
+  '/api/neighborhoods/geojson',
+  { key: `neighborhood-geojson-${slug.value}` },
+)
+
+const neighborhoodGeojson = computed<GeoJSONFeatureCollection | null>(() => {
+  if (!allGeojson.value?.features) return null
+  const feature = allGeojson.value.features.find((f) => f.properties.slug === slug.value)
+  if (!feature) return null
+  return { type: 'FeatureCollection', features: [feature] }
+})
+
+function overlayStyleFn(_properties: GeoJSONFeatureProperties): OverlayStyle {
+  return {
+    strokeColor: '#0d9488',
+    strokeOpacity: 0.9,
+    fillColor: '#14b8a6',
+    fillOpacity: 0.15,
+    lineWidth: 2.5,
+  }
+}
 
 // Fetch sibling neighborhoods in the same region
 const { data: regionData } = await useFetch('/api/neighborhoods', {
@@ -65,9 +98,7 @@ const siblings = computed(() =>
 
 // Cross-category links
 const { categories } = useSiteData()
-const crossLinks = computed(() =>
-  categories.filter(c => c.slug !== 'neighborhoods').slice(0, 4),
-)
+const crossLinks = computed(() => categories.filter((c) => c.slug !== 'neighborhoods').slice(0, 4))
 </script>
 
 <template>
@@ -80,7 +111,9 @@ const crossLinks = computed(() =>
           <!-- Map pin icon -->
           <div
             class="size-20 rounded-3xl inline-flex items-center justify-center mb-6"
-            style="background: linear-gradient(135deg, var(--color-orange-500), var(--color-orange-700));"
+            style="
+              background: linear-gradient(135deg, var(--color-orange-500), var(--color-orange-700));
+            "
           >
             <UIcon name="i-lucide-map-pin" class="size-10 text-white" />
           </div>
@@ -114,9 +147,32 @@ const crossLinks = computed(() =>
           </div>
 
           <p class="text-base sm:text-lg text-muted max-w-xl mx-auto leading-relaxed">
-            {{ neighborhood.description || `Explore ${displayName}${cityLabel} — dining, entertainment, real estate, and local life in this Austin-area neighborhood.` }}
+            {{
+              neighborhood.description ||
+              `Explore ${displayName}${cityLabel} — dining, entertainment, real estate, and local life in this Austin-area neighborhood.`
+            }}
           </p>
         </div>
+      </section>
+
+      <!-- Neighborhood Boundary Map -->
+      <section
+        v-if="neighborhoodGeojson"
+        class="mb-8 -mx-4 sm:-mx-6 lg:mx-0 lg:rounded-2xl lg:overflow-hidden lg:border lg:border-default"
+      >
+        <ClientOnly>
+          <AppMapKit
+            :geojson="neighborhoodGeojson"
+            :overlay-style-fn="overlayStyleFn"
+            :bounding-padding="0.15"
+          />
+          <template #fallback>
+            <div class="mapkit-placeholder">
+              <div class="mapkit-spinner" />
+              <p class="text-sm text-muted mt-3">Loading map…</p>
+            </div>
+          </template>
+        </ClientOnly>
       </section>
 
       <!-- Quick Facts -->
@@ -137,7 +193,9 @@ const crossLinks = computed(() =>
           </div>
           <div class="text-center">
             <p class="text-xs text-dimmed uppercase tracking-wide mb-1">Coordinates</p>
-            <p class="text-sm font-semibold">{{ neighborhood.lat.toFixed(2) }}°N, {{ Math.abs(neighborhood.lng).toFixed(2) }}°W</p>
+            <p class="text-sm font-semibold">
+              {{ neighborhood.lat.toFixed(2) }}°N, {{ Math.abs(neighborhood.lng).toFixed(2) }}°W
+            </p>
           </div>
         </div>
       </section>
@@ -147,13 +205,18 @@ const crossLinks = computed(() =>
         <h2 class="text-sm font-bold uppercase tracking-widest text-muted mb-4">What's Coming</h2>
         <div class="text-sm text-muted leading-relaxed space-y-3">
           <p>
-            We're building <strong class="text-default">{{ displayName }}</strong>'s neighborhood guide as part of
-            <NuxtLink to="/neighborhoods/" class="text-primary hover:underline">Neighborhoods</NuxtLink>
+            We're building <strong class="text-default">{{ displayName }}</strong
+            >'s neighborhood guide as part of
+            <NuxtLink to="/neighborhoods/" class="text-primary hover:underline"
+              >Neighborhoods</NuxtLink
+            >
             on Austin-Texas.net — a set of free, fast, locally-focused tools powered by live data.
           </p>
           <p>
-            When this page is fully built out, you'll find local dining and drinks, real estate trends,
-            things to do, parks and green spaces, and community insights — all specific to <strong class="text-default">{{ displayName }}</strong>.
+            When this page is fully built out, you'll find local dining and drinks, real estate
+            trends, things to do, parks and green spaces, and community insights — all specific to
+            <strong class="text-default">{{ displayName }}</strong
+            >.
           </p>
         </div>
       </section>

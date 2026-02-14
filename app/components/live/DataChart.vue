@@ -24,14 +24,14 @@ const props = withDefaults(
     data: Array<{ timestamp: string; value: number }>
     title?: string
     unit?: string
-    accentColor?: string  // CSS color
+    accentColor?: string // CSS color
     loading?: boolean
     embedded?: boolean
   }>(),
   {
     title: 'Trend',
     unit: '',
-    accentColor: '#06b6d4',  // cyan-500
+    accentColor: '#06b6d4', // eslint-disable-line atx/no-inline-hex -- Chart.js default
     loading: false,
     embedded: false,
   },
@@ -58,16 +58,17 @@ function switchPeriod(days: number) {
 }
 
 const chartData = computed(() => {
-  const dataSlice = activePeriod.value <= 30
-    ? props.data.slice(-activePeriod.value * 24) // hourly readings
-    : props.data
+  const dataSlice =
+    activePeriod.value <= 30
+      ? props.data.slice(-activePeriod.value * 24) // hourly readings
+      : props.data
 
   const labels = dataSlice.map((d) => {
     const date = new Date(d.timestamp)
     return `${date.getMonth() + 1}/${date.getDate()}`
   })
 
-  const values = dataSlice.map(d => d.value)
+  const values = dataSlice.map((d) => d.value)
   const accent = props.accentColor
 
   return {
@@ -101,7 +102,7 @@ const chartData = computed(() => {
 
 const chartOptions = computed(() => {
   const dark = isDark.value
-  const values = props.data.map(d => d.value)
+  const values = props.data.map((d) => d.value)
   const minVal = Math.min(...values)
   const maxVal = Math.max(...values)
   const range = maxVal - minVal || 1

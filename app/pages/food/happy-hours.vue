@@ -18,6 +18,7 @@ const config: MapPageConfig = {
   parentPath: '/food/',
   mapCenter: { lat: 30.2672, lng: -97.7431 },
   accentColor: 'violet',
+  // eslint-disable-next-line atx/no-inline-hex -- MapKit pin gradient
   pinColor: '#7c3aed',
   categoryIcon: 'i-lucide-wine',
   apiEndpoint: '/api/map-spots?category=happy-hours',

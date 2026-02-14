@@ -1,3 +1,4 @@
+<!-- eslint-disable atx/no-inline-hex -- GeoJSON overlay colors are MapKit JS API data -->
 <script setup lang="ts">
 import type {
   GeoJSONFeature,

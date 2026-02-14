@@ -177,6 +177,7 @@ function extractAllPoints(geometry: GeoJSONGeometry): Array<[number, number]> {
 }
 
 function defaultOverlayStyle(): OverlayStyle {
+  /* eslint-disable atx/no-inline-hex -- MapKit overlay defaults */
   return {
     strokeColor: '#065f46',
     strokeOpacity: 1,
@@ -184,6 +185,7 @@ function defaultOverlayStyle(): OverlayStyle {
     fillOpacity: 0.2,
     lineWidth: 1.5,
   }
+  /* eslint-enable atx/no-inline-hex */
 }
 
 function buildPolygonRings(geometry: GeoJSONGeometry): Array<any[]> {

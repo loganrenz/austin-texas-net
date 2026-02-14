@@ -68,7 +68,7 @@ const chartData = computed(() => {
 })
 
 const severityInfo = computed(() => {
-  if (!current.value) return { level: 'Low' as const, color: '#22C55E' }
+  if (!current.value) return { level: 'Low' as const, color: '#22C55E' } // eslint-disable-line atx/no-inline-hex
   return severityFromCount(current.value.count)
 })
 
@@ -96,9 +96,11 @@ const allergenBars = computed(() => {
   const a = allergens.value
   const max = Math.max(a.cedar, a.elm || 0, a.mold || 0, 1)
   return [
+    /* eslint-disable atx/no-inline-hex -- allergen bar chart colors */
     { label: 'Cedar', value: a.cedar, pct: (a.cedar / max) * 100, color: '#EF4444' },
     { label: 'Elm', value: a.elm || 0, pct: ((a.elm || 0) / max) * 100, color: '#F97316' },
     { label: 'Mold', value: a.mold || 0, pct: ((a.mold || 0) / max) * 100, color: '#8B5CF6' },
+    /* eslint-enable atx/no-inline-hex */
   ]
 })
 

@@ -18,6 +18,7 @@ const config: MapPageConfig = {
   parentPath: '/food/',
   mapCenter: { lat: 30.2672, lng: -97.7431 },
   accentColor: 'rose',
+  // eslint-disable-next-line atx/no-inline-hex -- MapKit pin gradient
   pinColor: '#e11d48',
   categoryIcon: 'i-lucide-utensils-crossed',
   apiEndpoint: '/api/map-spots?category=restaurant-map',
