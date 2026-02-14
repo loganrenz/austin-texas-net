@@ -11,8 +11,6 @@ export default withNuxt(
   // Project-level overrides
   {
     rules: {
-      // No unused variables/imports
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
 
       // Consistent component naming (PascalCase)
       'vue/component-name-in-template-casing': ['warn', 'PascalCase'],

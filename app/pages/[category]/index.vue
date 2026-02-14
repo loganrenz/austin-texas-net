@@ -4,9 +4,9 @@
  * Structural data from useSiteData(). Content from Nuxt Content markdown.
  * Unknown slugs → 404.
  */
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
 const route = useRoute()
 const { getCategoryBySlug } = useSiteData()
-import { getCategoryHexColor } from '~/utils/categoryHexColors'
 
 const slug = computed(() => route.params.category as string)
 const category = computed(() => getCategoryBySlug(slug.value))

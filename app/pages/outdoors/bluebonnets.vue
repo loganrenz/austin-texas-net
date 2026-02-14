@@ -11,6 +11,11 @@
  * the content below the map with observation detail + photo.
  */
 
+ 
+
+// ── SEO ────────────────────────────────────────────────────
+// ── SEO ────────────────────────────────────────────────────
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('outdoors')!
 const siblings = category.subApps.filter((a) => a.slug !== 'bluebonnets')
@@ -96,11 +101,6 @@ const circles = computed(() =>
     opacity: 0.7,
   })),
 )
-/* eslint-enable atx/no-inline-hex */
-
-// ── SEO ────────────────────────────────────────────────────
-// ── SEO ────────────────────────────────────────────────────
-import { getCategoryHexColor } from '~/utils/categoryHexColors'
 
 usePageSeo({
   title: 'Bluebonnet Map — Texas Wildflower Sightings Across the State',

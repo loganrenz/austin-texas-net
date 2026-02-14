@@ -9,12 +9,12 @@
  */
 import type { NwsCurrentConditions, NwsAlert } from '~~/server/utils/nws'
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('weather')!
 const siblings = category.subApps.filter((a) => a.slug !== 'current-conditions')
 const crossLinks = categories.filter((c) => c.slug !== 'weather').slice(0, 4)
-
-import { getCategoryHexColor } from '~/utils/categoryHexColors'
 
 usePageSeo({
   title: 'Austin Weather Now — Current Conditions, Temperature & Wind',

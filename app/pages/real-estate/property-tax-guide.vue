@@ -4,13 +4,13 @@
  * Static editorial page with rates, exemptions, protest tips, and calculator.
  */
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('real-estate')!
 const siblings = category.subApps.filter(a => a.slug !== 'property-tax-guide' && a.status === 'live')
 const crossLinks = categories.filter(c => c.slug !== 'real-estate').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
-
-import { getCategoryHexColor } from '~/utils/categoryHexColors'
 
 usePageSeo({
   title: 'Austin Property Tax Guide — Rates, Exemptions & Protest Tips',
@@ -75,7 +75,7 @@ function fmt(n: number): string { return `$${Math.round(n).toLocaleString()}` }
             <div>
               <label class="block text-sm font-semibold mb-2">Home Value</label>
               <UInput v-model.number="homeValue" type="number" :min="0" :step="10000" size="lg" />
-              <input v-model.number="homeValue" type="range" :min="100000" :max="2000000" :step="10000" class="w-full mt-2 accent-primary">
+              <input v-model.number="homeValue" type="range" :min="100000" :max="2000000" :step="10000" class="w-full mt-2 accent-primary"/>
               <div class="flex justify-between text-xs text-muted mt-1">
                 <span>$100K</span>
                 <span class="font-bold text-default">{{ fmt(homeValue) }}</span>

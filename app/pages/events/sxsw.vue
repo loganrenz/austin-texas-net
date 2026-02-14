@@ -10,13 +10,13 @@
  * Search Radar keyword: "sxsw austin" (14,800 monthly volume).
  */
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('events')!
 const siblings = category.subApps.filter((a) => a.slug !== 'sxsw')
 const crossLinks = categories.filter((c) => c.slug !== 'events').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
-
-import { getCategoryHexColor } from '~/utils/categoryHexColors'
 
 usePageSeo({
   title: 'SXSW 2026 Guide — Dates, Tips & Survival Guide for South by Southwest',

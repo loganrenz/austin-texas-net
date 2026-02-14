@@ -8,6 +8,8 @@
  * List view shows all zips with price, YoY change, and trend.
  */
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 interface HomePriceSpot {
   id: string
   name: string
@@ -94,8 +96,6 @@ const category = getCategoryBySlug('real-estate')!
 const siblings = category.subApps.filter(a => a.slug !== 'median-home-prices' && a.status === 'live')
 const crossLinks = categories.filter(c => c.slug !== 'real-estate').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
-
-import { getCategoryHexColor } from '~/utils/categoryHexColors'
 
 usePageSeo({
   title: 'Median Home Prices in Austin by Zip Code — 2025 Data',

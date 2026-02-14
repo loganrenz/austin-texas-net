@@ -8,13 +8,13 @@
  * 5-day forecast, allergen breakdown, and health tips.
  */
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('health')!
 const siblings = category.subApps.filter((a) => a.slug !== 'cedar-pollen')
 const crossLinks = categories.filter((c) => c.slug !== 'health').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
-
-import { getCategoryHexColor } from '~/utils/categoryHexColors'
 
 usePageSeo({
   title: 'Austin Cedar Pollen Count — Live Tracker & Forecast',

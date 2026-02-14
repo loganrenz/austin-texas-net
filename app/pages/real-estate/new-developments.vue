@@ -8,6 +8,8 @@
  * List view shows permit details: description, units, valuation, date.
  */
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 interface PermitSpot {
   id: string
   name: string
@@ -28,8 +30,6 @@ const category = getCategoryBySlug('real-estate')!
 const siblings = category.subApps.filter(a => a.slug !== 'new-developments' && a.status === 'live')
 const crossLinks = categories.filter(c => c.slug !== 'real-estate').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
-
-import { getCategoryHexColor } from '~/utils/categoryHexColors'
 
 usePageSeo({
   title: 'New Developments in Austin — Construction Permits & Building Map',

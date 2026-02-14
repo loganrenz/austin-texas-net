@@ -7,6 +7,8 @@ import type {
   OverlayStyle,
 } from '~/components/AppMapKit.vue'
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 /**
  * neighborhoods/index.vue — Data-driven neighborhood directory.
  * Fetches all neighborhoods from the API, with search + region/city filters.
@@ -14,8 +16,6 @@ import type {
  */
 const { getCategoryBySlug } = useSiteData()
 const category = getCategoryBySlug('neighborhoods')!
-
-import { getCategoryHexColor } from '~/utils/categoryHexColors'
 
 usePageSeo({
   title: 'Austin Neighborhoods — Every Corner of the ATX Metro',

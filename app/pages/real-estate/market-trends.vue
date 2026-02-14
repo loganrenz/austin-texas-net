@@ -8,13 +8,13 @@
  * as interactive time-series charts.
  */
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('real-estate')!
 const siblings = category.subApps.filter(a => a.slug !== 'market-trends' && a.status === 'live')
 const crossLinks = categories.filter(c => c.slug !== 'real-estate').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
-
-import { getCategoryHexColor } from '~/utils/categoryHexColors'
 
 usePageSeo({
   title: 'Austin Housing Market Trends — Prices, Inventory & Sales Data',

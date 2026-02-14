@@ -5,6 +5,8 @@
  * Composite map combining home price pins and development permit pins.
  */
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 interface MapItem {
   id: string
   name: string
@@ -33,8 +35,6 @@ const category = getCategoryBySlug('real-estate')!
 const siblings = category.subApps.filter(a => a.slug !== 'housing-map' && a.status === 'live')
 const crossLinks = categories.filter(c => c.slug !== 'real-estate').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
-
-import { getCategoryHexColor } from '~/utils/categoryHexColors'
 
 usePageSeo({
   title: 'Austin Housing Map — Home Prices & New Developments',

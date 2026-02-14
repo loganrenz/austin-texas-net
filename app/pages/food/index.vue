@@ -4,10 +4,10 @@
  * Mirrors [category]/index.vue but with a hardcoded slug so Nuxt's
  * static-route priority doesn't skip the dynamic catch-all.
  */
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
 const slug = 'food'
 const { getCategoryBySlug } = useSiteData()
 const category = computed(() => getCategoryBySlug(slug))
-import { getCategoryHexColor } from '~/utils/categoryHexColors'
 
 if (!category.value) {
   throw createError({ statusCode: 404, statusMessage: 'Category not found', fatal: true })

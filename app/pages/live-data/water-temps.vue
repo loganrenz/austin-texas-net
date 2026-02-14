@@ -8,6 +8,8 @@
  * panel with the station info and a historical trend chart.
  */
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 interface WaterSpot {
   id: string
   name: string
@@ -25,8 +27,6 @@ const category = getCategoryBySlug('live-data')!
 const siblings = category.subApps.filter((a) => a.slug !== 'water-temps' && a.status === 'live')
 const crossLinks = categories.filter((c) => c.slug !== 'live-data').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
-
-import { getCategoryHexColor } from '~/utils/categoryHexColors'
 
 usePageSeo({
   title: 'Austin Water Temperatures — Live Readings & Map',

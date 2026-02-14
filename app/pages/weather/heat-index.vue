@@ -8,12 +8,12 @@
  */
 import type { NwsCurrentConditions, NwsForecastPeriod } from '~~/server/utils/nws'
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('weather')!
 const siblings = category.subApps.filter((a) => a.slug !== 'heat-index')
 const crossLinks = categories.filter((c) => c.slug !== 'weather').slice(0, 4)
-
-import { getCategoryHexColor } from '~/utils/categoryHexColors'
 
 usePageSeo({
   title: 'Austin Heat Index — Feels-Like Temperature & Safety Tips',

@@ -5,6 +5,8 @@
  * "coming soon" page when the sub-app is registered but not yet built.
  * Falls through to a 404 if neither category nor sub-app exist.
  */
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 const route = useRoute()
 const { getCategoryBySlug, categories } = useSiteData()
 
@@ -17,8 +19,6 @@ const subApp = computed(() => category.value?.subApps.find((a) => a.slug === slu
 if (!category.value || !subApp.value) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true })
 }
-
-import { getCategoryHexColor } from '~/utils/categoryHexColors'
 
 const displayName = computed(
   () =>

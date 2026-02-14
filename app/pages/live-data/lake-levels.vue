@@ -8,6 +8,8 @@
  * panel with elevation, capacity, and a historical trend chart.
  */
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 interface LakeSpot {
   id: string
   name: string
@@ -26,8 +28,6 @@ const category = getCategoryBySlug('live-data')!
 const siblings = category.subApps.filter((a) => a.slug !== 'lake-levels' && a.status === 'live')
 const crossLinks = categories.filter((c) => c.slug !== 'live-data').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
-
-import { getCategoryHexColor } from '~/utils/categoryHexColors'
 
 usePageSeo({
   title: 'Austin Lake Levels — Lake Travis, Lake Austin & More',

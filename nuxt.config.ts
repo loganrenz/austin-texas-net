@@ -13,7 +13,10 @@ export default defineNuxtConfig({
     'nitro-cloudflare-dev',
   ],
   css: ['~/assets/css/main.css'],
-
+  sourcemap: {
+    server: true,
+    client: true,
+  },
   fonts: {
     families: [
       { name: 'Inter', provider: 'google', weights: [300, 400, 500, 600, 700], global: true },

@@ -7,6 +7,8 @@
  * Each pin shows the current median monthly rent for a zip code.
  */
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 interface RentSpot {
   id: string
   name: string
@@ -64,8 +66,6 @@ const category = getCategoryBySlug('real-estate')!
 const siblings = category.subApps.filter(a => a.slug !== 'rent-trends' && a.status === 'live')
 const crossLinks = categories.filter(c => c.slug !== 'real-estate').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
-
-import { getCategoryHexColor } from '~/utils/categoryHexColors'
 
 usePageSeo({
   title: 'Austin Rent Prices by Zip Code — 2025 Rental Data',

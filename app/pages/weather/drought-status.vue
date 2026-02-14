@@ -7,12 +7,12 @@
  */
 import { DROUGHT_MONITOR_MAP_URL, DROUGHT_MONITOR_PAGE_URL } from '~~/server/utils/nws'
 
+import { getCategoryHexColor } from '~/utils/categoryHexColors'
+
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('weather')!
 const siblings = category.subApps.filter((a) => a.slug !== 'drought-status')
 const crossLinks = categories.filter((c) => c.slug !== 'weather').slice(0, 4)
-
-import { getCategoryHexColor } from '~/utils/categoryHexColors'
 
 usePageSeo({
   title: 'Austin Drought Status — U.S. Drought Monitor & Watering Restrictions',
