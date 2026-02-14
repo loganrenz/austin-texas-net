@@ -21,16 +21,18 @@ export default defineEventHandler(async (event) => {
   const days = parseInt(query.days) || 30
 
   try {
-    const res: any = await $fetch(`https://us.posthog.com/api/projects/${POSTHOG_PROJECT_ID}/query/`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: {
-        query: {
-          kind: 'HogQLQuery',
-          query: `
+    const res = await $fetch<{ results?: (string | number)[][] }>(
+      `https://us.posthog.com/api/projects/${POSTHOG_PROJECT_ID}/query/`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: {
+          query: {
+            kind: 'HogQLQuery',
+            query: `
             SELECT
               replaceRegexpAll(properties.$pathname, '\\\\?.*', '') AS page,
               count() AS pageviews,
@@ -43,21 +45,23 @@ export default defineEventHandler(async (event) => {
             ORDER BY pageviews DESC
             LIMIT 20
           `,
+          },
         },
       },
-    })
+    )
 
-    const rows = (res.results || []).map((row: any[]) => ({
+    const rows = (res.results || []).map((row: (string | number)[]) => ({
       page: row[0] || '/',
       pageviews: row[1] || 0,
       uniqueVisitors: row[2] || 0,
     }))
 
     return { rows }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { status?: number; statusCode?: number; message?: string }
     throw createError({
-      statusCode: error.status || error.statusCode || 500,
-      statusMessage: `PostHog Error: ${error.message}`,
+      statusCode: err.status || err.statusCode || 500,
+      statusMessage: `PostHog Error: ${err.message}`,
     })
   }
 })

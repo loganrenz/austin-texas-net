@@ -2,6 +2,29 @@
 <script setup lang="ts">
 definePageMeta({ title: 'Search Console', middleware: 'auth' })
 
+interface GSCSitemapContent {
+  type: string
+  submitted: number
+  indexed: number
+}
+interface GSCSitemap {
+  path: string
+  lastSubmitted: string
+  errors: number
+  warnings: number
+  contents: GSCSitemapContent[]
+}
+interface GSCRow {
+  keys?: string[]
+  clicks?: number
+  impressions?: number
+  ctr: number
+  position: number
+}
+interface GSCPerformance {
+  rows?: GSCRow[]
+}
+
 const { ensureLoaded } = useAuth()
 await ensureLoaded()
 
@@ -12,22 +35,26 @@ const { data: gscData, status } = await useFetch('/api/admin/gsc/performance', {
   watch: [dimension],
 })
 
-const { data: sitemapData, status: sitemapStatus } = await useFetch<{ sitemaps: any[] }>('/api/admin/gsc/sitemaps')
+const { data: sitemapData, status: sitemapStatus } = await useFetch<{ sitemaps: GSCSitemap[] }>(
+  '/api/admin/gsc/sitemaps',
+)
 
 const sitemaps = computed(() => sitemapData.value?.sitemaps || [])
 
 const totalSubmitted = computed(() =>
   sitemaps.value.reduce(
-    (sum: number, s: any) =>
-      sum + (s.contents?.reduce((cs: number, c: any) => cs + (c.submitted || 0), 0) || 0),
+    (sum: number, s: GSCSitemap) =>
+      sum +
+      (s.contents?.reduce((cs: number, c: GSCSitemapContent) => cs + (c.submitted || 0), 0) || 0),
     0,
   ),
 )
 
 const totalIndexed = computed(() =>
   sitemaps.value.reduce(
-    (sum: number, s: any) =>
-      sum + (s.contents?.reduce((cs: number, c: any) => cs + (c.indexed || 0), 0) || 0),
+    (sum: number, s: GSCSitemap) =>
+      sum +
+      (s.contents?.reduce((cs: number, c: GSCSitemapContent) => cs + (c.indexed || 0), 0) || 0),
     0,
   ),
 )
@@ -64,6 +91,7 @@ const formatDate = (d: string) =>
       </div>
 
       <div class="flex gap-1 bg-elevated border border-default rounded-xl p-1">
+        <!-- eslint-disable-next-line atx/no-native-button -- custom segmented tab selector -->
         <button
           v-for="tab in dimensionTabs"
           :key="tab.value"
@@ -110,7 +138,9 @@ const formatDate = (d: string) =>
           </div>
           <div class="p-4 rounded-xl bg-default border border-default">
             <p class="text-xs text-dimmed uppercase tracking-wider font-medium">URLs Indexed</p>
-            <p class="text-2xl font-bold tabular-nums text-success">{{ totalIndexed.toLocaleString() }}</p>
+            <p class="text-2xl font-bold tabular-nums text-success">
+              {{ totalIndexed.toLocaleString() }}
+            </p>
           </div>
         </div>
 
@@ -166,7 +196,7 @@ const formatDate = (d: string) =>
       </div>
 
       <div
-        v-else-if="!gscData || !(gscData as any).rows?.length"
+        v-else-if="!gscData || !(gscData as unknown as GSCPerformance).rows?.length"
         class="h-64 flex flex-col items-center justify-center text-dimmed"
       >
         <UIcon name="i-lucide-search-x" class="size-16 mb-4 opacity-20" />
@@ -178,7 +208,17 @@ const formatDate = (d: string) =>
         <table class="admin-table">
           <thead>
             <tr>
-              <th>{{ dimension === 'query' ? 'Query' : dimension === 'page' ? 'Page' : dimension === 'device' ? 'Device' : 'Country' }}</th>
+              <th>
+                {{
+                  dimension === 'query'
+                    ? 'Query'
+                    : dimension === 'page'
+                      ? 'Page'
+                      : dimension === 'device'
+                        ? 'Device'
+                        : 'Country'
+                }}
+              </th>
               <th class="text-right">Clicks</th>
               <th class="text-right">Impressions</th>
               <th class="text-right">CTR</th>
@@ -186,7 +226,7 @@ const formatDate = (d: string) =>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(row, idx) in (gscData as any).rows" :key="idx">
+            <tr v-for="(row, idx) in (gscData as unknown as GSCPerformance).rows" :key="idx">
               <td class="font-medium max-w-[300px] truncate">{{ row.keys?.[0] }}</td>
               <td class="text-right tabular-nums">{{ row.clicks?.toLocaleString() }}</td>
               <td class="text-right tabular-nums">{{ row.impressions?.toLocaleString() }}</td>

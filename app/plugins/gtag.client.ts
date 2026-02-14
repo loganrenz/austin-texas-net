@@ -2,6 +2,12 @@
  * Google Analytics 4 (gtag.js) — client-only plugin.
  * Loads GA4 script and captures SPA pageviews on route change.
  */
+
+declare global {
+  interface Window {
+    dataLayer: unknown[]
+  }
+}
 export default defineNuxtPlugin({
   name: 'gtag',
   parallel: true,
@@ -18,9 +24,9 @@ export default defineNuxtPlugin({
     document.head.appendChild(script)
 
     // Initialize dataLayer
-    ;(window as any).dataLayer = (window as any).dataLayer || []
-    function gtag(...args: any[]) {
-      ;(window as any).dataLayer.push(args)
+    window.dataLayer = window.dataLayer || []
+    function gtag(...args: unknown[]) {
+      window.dataLayer.push(args)
     }
     gtag('js', new Date())
     gtag('config', id, { send_page_view: false })

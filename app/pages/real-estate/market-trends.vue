@@ -1,4 +1,5 @@
 <!-- eslint-disable atx/no-fetch-in-component -- SSR page data fetching -->
+<!-- eslint-disable atx/no-native-table -- Custom data table with precise column layout -->
 <script setup lang="ts">
 /**
  * /real-estate/market-trends/ — Austin Housing Market Trends
@@ -12,8 +13,8 @@ import { getCategoryHexColor } from '~/utils/categoryHexColors'
 
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('real-estate')!
-const siblings = category.subApps.filter(a => a.slug !== 'market-trends' && a.status === 'live')
-const crossLinks = categories.filter(c => c.slug !== 'real-estate').slice(0, 4)
+const siblings = category.subApps.filter((a) => a.slug !== 'market-trends' && a.status === 'live')
+const crossLinks = categories.filter((c) => c.slug !== 'real-estate').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
 
 usePageSeo({
@@ -70,13 +71,21 @@ const chartOptions = [
 ]
 
 const chartData = computed(() => {
-  return stats.value.map(s => {
+  return stats.value.map((s) => {
     let value: number | null
     switch (activeChart.value) {
-      case 'price': value = s.medianSalePrice; break
-      case 'sold': value = s.homesSold; break
-      case 'inventory': value = s.inventory; break
-      case 'dom': value = s.daysOnMarket; break
+      case 'price':
+        value = s.medianSalePrice
+        break
+      case 'sold':
+        value = s.homesSold
+        break
+      case 'inventory':
+        value = s.inventory
+        break
+      case 'dom':
+        value = s.daysOnMarket
+        break
     }
     return { timestamp: s.period, value: value ?? 0 }
   })
@@ -84,20 +93,28 @@ const chartData = computed(() => {
 
 const chartUnit = computed(() => {
   switch (activeChart.value) {
-    case 'price': return '$'
-    case 'sold': return 'homes'
-    case 'inventory': return 'homes'
-    case 'dom': return 'days'
-    default: return ''
+    case 'price':
+      return '$'
+    case 'sold':
+      return 'homes'
+    case 'inventory':
+      return 'homes'
+    case 'dom':
+      return 'days'
+    default:
+      return ''
   }
 })
 
 function formatStatValue(value: number | null, type: string): string {
   if (value == null) return '—'
   switch (type) {
-    case 'price': return `$${(value / 1000).toFixed(0)}K`
-    case 'ratio': return `${(value * 100).toFixed(1)}%`
-    default: return value.toLocaleString()
+    case 'price':
+      return `$${(value / 1000).toFixed(0)}K`
+    case 'ratio':
+      return `${(value * 100).toFixed(1)}%`
+    default:
+      return value.toLocaleString()
   }
 }
 </script>
@@ -105,11 +122,7 @@ function formatStatValue(value: number | null, type: string): string {
 <template>
   <div>
     <UContainer class="py-8 md:py-12">
-      <UBreadcrumb
-        v-if="breadcrumbs.length > 0"
-        :items="breadcrumbs"
-        class="mb-6"
-      />
+      <UBreadcrumb v-if="breadcrumbs.length > 0" :items="breadcrumbs" class="mb-6" />
 
       <!-- Header -->
       <div class="mb-8 animate-fade-up">
@@ -124,35 +137,55 @@ function formatStatValue(value: number | null, type: string): string {
           </div>
         </div>
         <p class="text-base sm:text-lg text-muted max-w-2xl leading-relaxed">
-          Monthly Austin housing market data tracking median prices, sales volume, inventory, and market pace.
+          Monthly Austin housing market data tracking median prices, sales volume, inventory, and
+          market pace.
         </p>
       </div>
 
       <!-- Key Stats Cards -->
-      <div v-if="latestStat" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 animate-fade-up-delay-1">
-        <div class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-3">
+      <div
+        v-if="latestStat"
+        class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 animate-fade-up-delay-1"
+      >
+        <div
+          class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-3"
+        >
           <span class="text-xl font-extrabold font-display">
             {{ formatStatValue(latestStat.medianSalePrice, 'price') }}
           </span>
-          <span class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center">Median Price</span>
+          <span class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center"
+            >Median Price</span
+          >
         </div>
-        <div class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-3">
+        <div
+          class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-3"
+        >
           <span class="text-xl font-extrabold font-display">
             {{ formatStatValue(latestStat.homesSold, 'count') }}
           </span>
-          <span class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center">Homes Sold</span>
+          <span class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center"
+            >Homes Sold</span
+          >
         </div>
-        <div class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-3">
+        <div
+          class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-3"
+        >
           <span class="text-xl font-extrabold font-display">
             {{ formatStatValue(latestStat.inventory, 'count') }}
           </span>
-          <span class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center">Inventory</span>
+          <span class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center"
+            >Inventory</span
+          >
         </div>
-        <div class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-3">
+        <div
+          class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-3"
+        >
           <span class="text-xl font-extrabold font-display">
             {{ formatStatValue(latestStat.daysOnMarket, 'count') }}
           </span>
-          <span class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center">Days on Market</span>
+          <span class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center"
+            >Days on Market</span
+          >
         </div>
       </div>
 
@@ -177,7 +210,7 @@ function formatStatValue(value: number | null, type: string): string {
           <ClientOnly>
             <LiveDataChart
               :data="chartData"
-              :title="chartOptions.find(o => o.value === activeChart)?.label || ''"
+              :title="chartOptions.find((o) => o.value === activeChart)?.label || ''"
               :unit="chartUnit"
               accent-color="#3b82f6"
               embedded
@@ -188,9 +221,7 @@ function formatStatValue(value: number | null, type: string): string {
 
       <!-- Monthly Data Table -->
       <section class="mb-10 animate-fade-up-delay-2">
-        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-5">
-          Monthly Data
-        </h2>
+        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-5">Monthly Data</h2>
         <div class="overflow-x-auto rounded-xl border border-default">
           <table class="w-full text-sm">
             <thead class="bg-elevated text-muted">
@@ -206,11 +237,19 @@ function formatStatValue(value: number | null, type: string): string {
             <tbody class="divide-y divide-default">
               <tr v-for="s in stats.slice().reverse()" :key="s.period" class="hover:bg-elevated/50">
                 <td class="px-4 py-2.5 font-medium">{{ s.period }}</td>
-                <td class="px-4 py-2.5 text-right font-display font-bold">{{ formatStatValue(s.medianSalePrice, 'price') }}</td>
+                <td class="px-4 py-2.5 text-right font-display font-bold">
+                  {{ formatStatValue(s.medianSalePrice, 'price') }}
+                </td>
                 <td class="px-4 py-2.5 text-right">{{ formatStatValue(s.homesSold, 'count') }}</td>
-                <td class="px-4 py-2.5 text-right hidden sm:table-cell">{{ formatStatValue(s.newListings, 'count') }}</td>
-                <td class="px-4 py-2.5 text-right hidden sm:table-cell">{{ formatStatValue(s.inventory, 'count') }}</td>
-                <td class="px-4 py-2.5 text-right">{{ formatStatValue(s.daysOnMarket, 'count') }}</td>
+                <td class="px-4 py-2.5 text-right hidden sm:table-cell">
+                  {{ formatStatValue(s.newListings, 'count') }}
+                </td>
+                <td class="px-4 py-2.5 text-right hidden sm:table-cell">
+                  {{ formatStatValue(s.inventory, 'count') }}
+                </td>
+                <td class="px-4 py-2.5 text-right">
+                  {{ formatStatValue(s.daysOnMarket, 'count') }}
+                </td>
               </tr>
             </tbody>
           </table>

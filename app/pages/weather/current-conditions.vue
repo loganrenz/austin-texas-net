@@ -1,3 +1,4 @@
+<!-- eslint-disable atx/no-raw-tailwind-colors -- NWS severity-level colors for alert indicators -->
 <!-- eslint-disable atx/no-fetch-in-component -- SSR page data fetching -->
 <script setup lang="ts">
 /**
@@ -61,7 +62,8 @@ function formatTimestamp(ts: string): string {
 function getConditionIcon(description: string): string {
   const d = description.toLowerCase()
   if (d.includes('thunder') || d.includes('storm')) return 'i-lucide-cloud-lightning'
-  if (d.includes('rain') || d.includes('shower') || d.includes('drizzle')) return 'i-lucide-cloud-rain'
+  if (d.includes('rain') || d.includes('shower') || d.includes('drizzle'))
+    return 'i-lucide-cloud-rain'
   if (d.includes('snow') || d.includes('sleet') || d.includes('ice')) return 'i-lucide-snowflake'
   if (d.includes('fog') || d.includes('haze') || d.includes('mist')) return 'i-lucide-cloud-fog'
   if (d.includes('cloudy') || d.includes('overcast')) return 'i-lucide-cloud'
@@ -81,12 +83,28 @@ const statCards = computed(() => {
   const c = conditions.value
   if (!c) return []
   return [
-    { label: 'Humidity', value: c.humidity !== null ? `${c.humidity}%` : 'N/A', icon: 'i-lucide-droplets' },
+    {
+      label: 'Humidity',
+      value: c.humidity !== null ? `${c.humidity}%` : 'N/A',
+      icon: 'i-lucide-droplets',
+    },
     { label: 'Wind', value: `${c.windSpeed} ${c.windDirection}`, icon: 'i-lucide-wind' },
-    { label: 'Pressure', value: c.pressure !== null ? `${c.pressure} inHg` : 'N/A', icon: 'i-lucide-gauge' },
+    {
+      label: 'Pressure',
+      value: c.pressure !== null ? `${c.pressure} inHg` : 'N/A',
+      icon: 'i-lucide-gauge',
+    },
     { label: 'Visibility', value: c.visibility, icon: 'i-lucide-eye' },
-    { label: 'Dew Point', value: c.dewpoint !== null ? `${c.dewpoint}°F` : 'N/A', icon: 'i-lucide-thermometer' },
-    { label: 'Feels Like', value: c.feelsLike !== null ? `${c.feelsLike}°F` : 'N/A', icon: 'i-lucide-thermometer-sun' },
+    {
+      label: 'Dew Point',
+      value: c.dewpoint !== null ? `${c.dewpoint}°F` : 'N/A',
+      icon: 'i-lucide-thermometer',
+    },
+    {
+      label: 'Feels Like',
+      value: c.feelsLike !== null ? `${c.feelsLike}°F` : 'N/A',
+      icon: 'i-lucide-thermometer-sun',
+    },
   ]
 })
 </script>
@@ -119,7 +137,8 @@ const statCards = computed(() => {
           :key="alert.id"
           class="rounded-xl border-2 p-4"
           :class="{
-            'border-red-500/40 bg-red-50 dark:bg-red-950/20': alert.severity === 'Extreme' || alert.severity === 'Severe',
+            'border-red-500/40 bg-red-50 dark:bg-red-950/20':
+              alert.severity === 'Extreme' || alert.severity === 'Severe',
             'border-amber-500/40 bg-amber-50 dark:bg-amber-950/20': alert.severity === 'Moderate',
             'border-sky-500/40 bg-sky-50 dark:bg-sky-950/20': alert.severity === 'Minor',
           }"
@@ -128,11 +147,18 @@ const statCards = computed(() => {
             <UIcon name="i-lucide-alert-triangle" class="size-5 shrink-0 mt-0.5 text-amber-600" />
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-1">
-                <UBadge :color="alertSeverityColor(alert.severity)" variant="subtle" size="xs" :label="alert.event" />
+                <UBadge
+                  :color="alertSeverityColor(alert.severity)"
+                  variant="subtle"
+                  size="xs"
+                  :label="alert.event"
+                />
                 <span class="text-xs text-dimmed">{{ alert.senderName }}</span>
               </div>
               <p class="text-sm font-semibold mb-1">{{ alert.headline }}</p>
-              <p v-if="alert.instruction" class="text-xs text-muted leading-relaxed">{{ alert.instruction }}</p>
+              <p v-if="alert.instruction" class="text-xs text-muted leading-relaxed">
+                {{ alert.instruction }}
+              </p>
             </div>
           </div>
         </div>
@@ -147,17 +173,21 @@ const statCards = computed(() => {
             :class="category.color"
           />
           <div class="text-6xl sm:text-7xl font-extrabold font-display tracking-tight">
-            {{ conditions.temperature ?? '--' }}<span class="text-3xl font-bold text-muted">°F</span>
+            {{ conditions.temperature ?? '--'
+            }}<span class="text-3xl font-bold text-muted">°F</span>
           </div>
         </div>
         <div class="weather-hero-info">
           <p class="text-lg sm:text-xl font-bold mb-1">{{ conditions.description }}</p>
-          <p v-if="conditions.feelsLike !== null && conditions.feelsLike !== conditions.temperature" class="text-sm text-muted mb-2">
+          <p
+            v-if="conditions.feelsLike !== null && conditions.feelsLike !== conditions.temperature"
+            class="text-sm text-muted mb-2"
+          >
             Feels like {{ conditions.feelsLike }}°F
           </p>
           <p class="text-xs text-dimmed">
-            Updated {{ formatTimestamp(conditions.timestamp) }}
-            · NWS Station {{ conditions.station }}
+            Updated {{ formatTimestamp(conditions.timestamp) }} · NWS Station
+            {{ conditions.station }}
           </p>
         </div>
       </section>
@@ -169,14 +199,19 @@ const statCards = computed(() => {
       </section>
 
       <!-- Stat Cards -->
-      <section v-if="statCards.length > 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-10 animate-fade-up-delay-2">
+      <section
+        v-if="statCards.length > 0"
+        class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-10 animate-fade-up-delay-2"
+      >
         <div
           v-for="stat in statCards"
           :key="stat.label"
           class="flex flex-col items-center gap-2 rounded-xl border border-default bg-default p-4 text-center"
         >
           <UIcon :name="stat.icon" class="size-5 text-muted" />
-          <span class="text-xs font-bold uppercase tracking-widest text-dimmed">{{ stat.label }}</span>
+          <span class="text-xs font-bold uppercase tracking-widest text-dimmed">{{
+            stat.label
+          }}</span>
           <span class="text-lg font-extrabold font-display">{{ stat.value }}</span>
         </div>
       </section>
@@ -189,14 +224,17 @@ const statCards = computed(() => {
           </h2>
           <div class="text-sm text-muted leading-relaxed space-y-3">
             <p>
-              Austin weather data is provided by the <strong class="text-default">National Weather Service</strong>
-              from the <strong class="text-default">Camp Mabry observation station (KATT)</strong>, located in central
-              Austin. This is the same station used by local media and emergency services.
+              Austin weather data is provided by the
+              <strong class="text-default">National Weather Service</strong> from the
+              <strong class="text-default">Camp Mabry observation station (KATT)</strong>, located
+              in central Austin. This is the same station used by local media and emergency
+              services.
             </p>
             <p>
-              Austin's <strong class="text-default">subtropical climate</strong> features hot summers (100°F+ heat
-              waves from June–September), mild winters with occasional ice storms, and unpredictable
-              spring severe weather. Always check conditions before heading outdoors.
+              Austin's <strong class="text-default">subtropical climate</strong> features hot
+              summers (100°F+ heat waves from June–September), mild winters with occasional ice
+              storms, and unpredictable spring severe weather. Always check conditions before
+              heading outdoors.
             </p>
           </div>
         </div>

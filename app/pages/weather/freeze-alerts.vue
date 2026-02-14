@@ -1,3 +1,4 @@
+<!-- eslint-disable atx/no-raw-tailwind-colors -- NWS severity + freeze-risk indicator colors -->
 <!-- eslint-disable atx/no-fetch-in-component -- SSR page data fetching -->
 <script setup lang="ts">
 /**
@@ -50,9 +51,16 @@ const forecast = computed(() => forecastData.value?.periods ?? [])
 const freezeAlerts = computed(() => {
   return alerts.value.filter((a) => {
     const e = a.event.toLowerCase()
-    return e.includes('freeze') || e.includes('frost') || e.includes('winter') ||
-           e.includes('ice') || e.includes('cold') || e.includes('wind chill') ||
-           e.includes('blizzard') || e.includes('sleet')
+    return (
+      e.includes('freeze') ||
+      e.includes('frost') ||
+      e.includes('winter') ||
+      e.includes('ice') ||
+      e.includes('cold') ||
+      e.includes('wind chill') ||
+      e.includes('blizzard') ||
+      e.includes('sleet')
+    )
   })
 })
 
@@ -84,10 +92,19 @@ const upcomingLows = computed(() => {
 
 // Pipe protection tips
 const pipeProtectionTips = [
-  { icon: 'i-lucide-droplets', text: 'Let faucets drip slightly (cold & hot) when temps drop below 28°F.' },
-  { icon: 'i-lucide-home', text: 'Open cabinet doors under sinks to let warm air circulate around pipes.' },
+  {
+    icon: 'i-lucide-droplets',
+    text: 'Let faucets drip slightly (cold & hot) when temps drop below 28°F.',
+  },
+  {
+    icon: 'i-lucide-home',
+    text: 'Open cabinet doors under sinks to let warm air circulate around pipes.',
+  },
   { icon: 'i-lucide-thermometer', text: 'Keep thermostat at 55°F or higher, even when away.' },
-  { icon: 'i-lucide-wrench', text: 'Insulate exposed pipes in attics, garages, and along exterior walls.' },
+  {
+    icon: 'i-lucide-wrench',
+    text: 'Insulate exposed pipes in attics, garages, and along exterior walls.',
+  },
   { icon: 'i-lucide-droplet-off', text: 'Disconnect and drain outdoor garden hoses.' },
   { icon: 'i-lucide-shield', text: 'Cover outdoor faucets with insulated faucet covers.' },
 ]
@@ -143,7 +160,9 @@ function formatTimestamp(ts: string): string {
                 <span class="text-xs text-dimmed">{{ alert.senderName }}</span>
               </div>
               <p class="text-sm font-semibold mb-2">{{ alert.headline }}</p>
-              <p v-if="alert.instruction" class="text-xs text-muted leading-relaxed">{{ alert.instruction }}</p>
+              <p v-if="alert.instruction" class="text-xs text-muted leading-relaxed">
+                {{ alert.instruction }}
+              </p>
             </div>
           </div>
         </div>
@@ -162,7 +181,8 @@ function formatTimestamp(ts: string): string {
             />
           </div>
           <div class="text-5xl sm:text-6xl font-extrabold font-display tracking-tight mb-2">
-            {{ conditions.temperature ?? '--' }}<span class="text-2xl font-bold text-muted">°F</span>
+            {{ conditions.temperature ?? '--'
+            }}<span class="text-2xl font-bold text-muted">°F</span>
           </div>
           <p v-if="conditions.windChill !== null" class="text-sm text-muted">
             Wind chill: {{ conditions.windChill }}°F
@@ -175,9 +195,9 @@ function formatTimestamp(ts: string): string {
         <div class="flex-1 min-w-0">
           <p class="text-base text-muted leading-relaxed">
             Austin is generally warm, but <strong class="text-default">arctic cold fronts</strong>
-            (locally called "blue northers") can drop temperatures 30–40°F in hours. The February 2021
-            Winter Storm Uri brought record lows of -2°F and exposed the city's vulnerability to
-            prolonged freezes. Monitor this page during winter weather events.
+            (locally called "blue northers") can drop temperatures 30–40°F in hours. The February
+            2021 Winter Storm Uri brought record lows of -2°F and exposed the city's vulnerability
+            to prolonged freezes. Monitor this page during winter weather events.
           </p>
         </div>
       </section>
@@ -190,15 +210,19 @@ function formatTimestamp(ts: string): string {
 
       <!-- Upcoming Overnight Lows -->
       <section v-if="upcomingLows.length" class="mb-10 animate-fade-up-delay-2">
-        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-5">Upcoming Overnight Lows</h2>
+        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-5">
+          Upcoming Overnight Lows
+        </h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           <div
             v-for="night in upcomingLows"
             :key="night.name"
             class="flex flex-col items-center gap-2 rounded-xl border p-4 text-center"
-            :class="night.isFreezing
-              ? 'border-blue-500/30 bg-blue-50 dark:bg-blue-950/20'
-              : 'border-default bg-default'"
+            :class="
+              night.isFreezing
+                ? 'border-blue-500/30 bg-blue-50 dark:bg-blue-950/20'
+                : 'border-default bg-default'
+            "
           >
             <span class="text-sm font-bold">{{ night.name }}</span>
             <span
@@ -249,14 +273,15 @@ function formatTimestamp(ts: string): string {
               mid-morning.
             </p>
             <p>
-              However, <strong class="text-default">hard freeze events</strong> (sustained temperatures
-              below 28°F for 4+ hours) occur 2–5 times annually and pose the greatest risk to pipes,
-              plants, and outdoor pets. Bridges and overpasses freeze first.
+              However, <strong class="text-default">hard freeze events</strong> (sustained
+              temperatures below 28°F for 4+ hours) occur 2–5 times annually and pose the greatest
+              risk to pipes, plants, and outdoor pets. Bridges and overpasses freeze first.
             </p>
             <p>
               The NWS issues <strong class="text-default">Freeze Warnings</strong> when temperatures
-              are expected to drop to 32°F or below and <strong class="text-default">Hard Freeze
-              Warnings</strong> for temperatures at or below 28°F.
+              are expected to drop to 32°F or below and
+              <strong class="text-default">Hard Freeze Warnings</strong> for temperatures at or
+              below 28°F.
             </p>
           </div>
         </div>

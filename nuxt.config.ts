@@ -47,7 +47,7 @@ export default defineNuxtConfig({
     },
     css: {
       devSourcemap: true,
-  }
+    },
   },
 
   runtimeConfig: {
@@ -75,8 +75,6 @@ export default defineNuxtConfig({
     url: 'https://austin-texas.net',
     name: 'Austin Texas',
   },
-
-
 
   sitemap: {
     sources: ['/api/sitemap-urls'],
@@ -130,6 +128,7 @@ export default defineNuxtConfig({
           name: 'binary-import',
           load(id: string) {
             if (id.endsWith('.bin') || id.endsWith('.ttf.bin')) {
+              // eslint-disable-next-line @typescript-eslint/no-require-imports -- Rollup plugin runs at build time in Node.js
               const fs = require('node:fs')
               const buffer = fs.readFileSync(id)
               const base64 = buffer.toString('base64')

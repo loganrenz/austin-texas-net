@@ -1,4 +1,5 @@
 import { sql, and, gte, lte, desc } from 'drizzle-orm'
+import { z } from 'zod'
 import * as tables from '../../database/schema'
 
 /**
@@ -27,25 +28,31 @@ interface BluebonnetPoint {
 export default defineCachedEventHandler(
   async (event) => {
     const db = useDatabase()
-    const query = getQuery(event)
-    const year = query.year ? Number(query.year) : undefined
+    const query = await getValidatedQuery(
+      event,
+      z.object({ year: z.coerce.number().optional() }).parse,
+    )
+    const year = query.year
 
     const conditions = []
     if (year) {
-      conditions.push(and(
-        gte(tables.bluebonnetObservations.observedOn, `${year}-01-01`),
-        lte(tables.bluebonnetObservations.observedOn, `${year}-12-31`)
-      ))
+      conditions.push(
+        and(
+          gte(tables.bluebonnetObservations.observedOn, `${year}-01-01`),
+          lte(tables.bluebonnetObservations.observedOn, `${year}-12-31`),
+        ),
+      )
     }
 
-    const observations = await db.select()
+    const observations = await db
+      .select()
       .from(tables.bluebonnetObservations)
       .where(and(...conditions))
       .orderBy(desc(tables.bluebonnetObservations.observedOn))
       .all()
 
     // Map to frontend format
-    const points: BluebonnetPoint[] = observations.map(obs => ({
+    const points: BluebonnetPoint[] = observations.map((obs) => ({
       lat: obs.lat,
       lng: obs.lng,
       observed_on: obs.observedOn,
@@ -62,10 +69,13 @@ export default defineCachedEventHandler(
     // To support year selector, we should probably return min/max year from DB.
 
     // Let's get min/max year efficiently
-    const rangeResult = await db.select({
-      minDate: sql<string>`min(${tables.bluebonnetObservations.observedOn})`,
-      maxDate: sql<string>`max(${tables.bluebonnetObservations.observedOn})`
-    }).from(tables.bluebonnetObservations).get()
+    const rangeResult = await db
+      .select({
+        minDate: sql<string>`min(${tables.bluebonnetObservations.observedOn})`,
+        maxDate: sql<string>`max(${tables.bluebonnetObservations.observedOn})`,
+      })
+      .from(tables.bluebonnetObservations)
+      .get()
 
     let yearRange = { min: new Date().getFullYear(), max: new Date().getFullYear() }
     if (rangeResult && rangeResult.minDate && rangeResult.maxDate) {
@@ -85,7 +95,7 @@ export default defineCachedEventHandler(
     maxAge: 60 * 60 * 1, // 1 hour
     name: 'bluebonnet-observations-d1',
     getKey: (event) => {
-      const query = getQuery(event)
+      const query = getQuery(event) // eslint-disable-line atx/require-validated-query -- sync getKey callback, not handler
       return `bluebonnets-d1-${query.year || 'all'}`
     },
   },

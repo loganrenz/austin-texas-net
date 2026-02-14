@@ -11,7 +11,8 @@ function getCredentials() {
   if (!keyJson) {
     throw createError({
       statusCode: 500,
-      statusMessage: 'Google Service Account key not found in environment (GSC_SERVICE_ACCOUNT_JSON)',
+      statusMessage:
+        'Google Service Account key not found in environment (GSC_SERVICE_ACCOUNT_JSON)',
     })
   }
 
@@ -73,7 +74,7 @@ async function getGoogleAccessToken(scopes: string[]): Promise<string> {
     })
   }
 
-  const data: any = await response.json()
+  const data = (await response.json()) as { access_token: string }
   return data.access_token
 }
 
@@ -100,7 +101,7 @@ export async function googleApiFetch(url: string, scopes: string[], options?: Re
     })
   }
 
-  return response.json()
+  return response.json() as Promise<Record<string, unknown>>
 }
 
 // Google API scopes

@@ -1,5 +1,5 @@
+import { eq } from 'drizzle-orm'
 import { z } from 'zod'
-import { asc, desc, eq, sql } from 'drizzle-orm'
 import * as tables from '../../database/schema'
 
 // Ingest Bluebonnet observations from iNaturalist
@@ -41,8 +41,11 @@ export default defineEventHandler(async (event) => {
   }
 
   const db = useDatabase()
-  const query = getQuery(event)
-  const manualYear = query.year ? Number(query.year) : undefined
+  const query = await getValidatedQuery(
+    event,
+    z.object({ year: z.coerce.number().optional() }).parse,
+  )
+  const manualYear = query.year
 
   // Default: fetch current year or manual override
   const targetYear = manualYear || new Date().getFullYear()
@@ -52,8 +55,6 @@ export default defineEventHandler(async (event) => {
   let totalSkipped = 0
   let page = 1
   let hasMore = true
-
-  const consoleLog = []
 
   try {
     while (hasMore && page <= MAX_PAGES) {
@@ -99,7 +100,7 @@ export default defineEventHandler(async (event) => {
           const [lng, lat] = obs.geojson.coordinates
           // Build medium-size photo URL
           const photoUrl = obs.photos?.[0]?.url?.replace('/square.', '/medium.') ?? null
-          
+
           valuesToInsert.push({
             inatId: obs.id,
             lat,
@@ -109,42 +110,47 @@ export default defineEventHandler(async (event) => {
             observer: obs.user?.name || obs.user?.login || 'Anonymous',
             place: obs.place_guess || '',
             url: obs.uri || `https://www.inaturalist.org/observations/${obs.id}`,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
           })
         }
       }
 
       if (valuesToInsert.length > 0) {
         // Upsert logic (insert on conflict update)
-        // Drizzle sqlite doesn't support complex ON CONFLICT across all drivers well, 
+        // Drizzle sqlite doesn't support complex ON CONFLICT across all drivers well,
         // but explicit query builder does.
         // We will insert individually or batch insert with on conflict do update.
-        
+
         for (const row of valuesToInsert) {
-           try {
-             const existing = await db.select().from(tables.bluebonnetObservations).where(eq(tables.bluebonnetObservations.inatId, row.inatId)).get()
-             
-             if (existing) {
-               // Optional: Update if needed. For now, we assume observations don't change much.
-               // Maybe update photo url?
-               await db.update(tables.bluebonnetObservations)
-                 .set({ 
-                   photoUrl: row.photoUrl,
-                   place: row.place,
-                   observer: row.observer
-                 })
-                 .where(eq(tables.bluebonnetObservations.inatId, row.inatId))
-                 .run()
-               totalSkipped++ // Count as skipped/updated
-             } else {
-               await db.insert(tables.bluebonnetObservations).values(row).run()
-               totalInserted++
-             }
-           } catch (e) {
-             console.error('Insert Error', e)
-           }
+          try {
+            const existing = await db
+              .select()
+              .from(tables.bluebonnetObservations)
+              .where(eq(tables.bluebonnetObservations.inatId, row.inatId))
+              .get()
+
+            if (existing) {
+              // Optional: Update if needed. For now, we assume observations don't change much.
+              // Maybe update photo url?
+              await db
+                .update(tables.bluebonnetObservations)
+                .set({
+                  photoUrl: row.photoUrl,
+                  place: row.place,
+                  observer: row.observer,
+                })
+                .where(eq(tables.bluebonnetObservations.inatId, row.inatId))
+                .run()
+              totalSkipped++ // Count as skipped/updated
+            } else {
+              await db.insert(tables.bluebonnetObservations).values(row).run()
+              totalInserted++
+            }
+          } catch (e) {
+            console.error('Insert Error', e)
+          }
         }
-        
+
         totalFetched += valuesToInsert.length
       }
 
@@ -156,16 +162,16 @@ export default defineEventHandler(async (event) => {
         await new Promise((resolve) => setTimeout(resolve, 1000))
       }
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     return {
       success: false,
-      error: err.message,
-      stats: { totalFetched, totalInserted, totalSkipped }
+      error: err instanceof Error ? err.message : String(err),
+      stats: { totalFetched, totalInserted, totalSkipped },
     }
   }
 
   return {
     success: true,
-    stats: { totalFetched, totalInserted, totalSkipped }
+    stats: { totalFetched, totalInserted, totalSkipped },
   }
 })

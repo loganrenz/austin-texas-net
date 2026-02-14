@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console -- CLI script */
 /**
  * merge-npa-geojson.mjs
  *

@@ -9,7 +9,7 @@
  *   neighborhood — filter to a single neighborhood name
  */
 import { z } from 'zod'
-import { sql } from 'drizzle-orm'
+import { sql, isNotNull } from 'drizzle-orm'
 import { neighborhoodGrid } from '~~/server/database/schema'
 
 const querySchema = z.object({
@@ -21,7 +21,9 @@ const querySchema = z.object({
  * Compute convex hull of a set of 2D points using Graham scan.
  * Returns points in counter-clockwise order.
  */
-function convexHull(points: Array<{ lat: number; lng: number }>): Array<{ lat: number; lng: number }> {
+function convexHull(
+  points: Array<{ lat: number; lng: number }>,
+): Array<{ lat: number; lng: number }> {
   if (points.length < 3) return points
 
   // Find the bottom-most (min lat) point, break ties by min lng
@@ -34,7 +36,7 @@ function convexHull(points: Array<{ lat: number; lng: number }>): Array<{ lat: n
 
   // Sort by polar angle relative to pivot
   const sorted = points
-    .filter(p => p !== pivot)
+    .filter((p) => p !== pivot)
     .sort((a, b) => {
       const angleA = Math.atan2(a.lat - pivot.lat, a.lng - pivot.lng)
       const angleB = Math.atan2(b.lat - pivot.lat, b.lng - pivot.lng)
@@ -53,10 +55,7 @@ function convexHull(points: Array<{ lat: number; lng: number }>): Array<{ lat: n
     const current = sorted[i]!
 
     // While the turn from nextToTop → top → current is not counter-clockwise, pop
-    while (
-      hull.length >= 2 &&
-      cross(nextToTop, top, current) <= 0
-    ) {
+    while (hull.length >= 2 && cross(nextToTop, top, current) <= 0) {
       hull.pop()
       top = hull[hull.length - 1]!
       nextToTop = hull[hull.length - 2]!
@@ -68,7 +67,11 @@ function convexHull(points: Array<{ lat: number; lng: number }>): Array<{ lat: n
   return hull
 }
 
-function cross(o: { lat: number; lng: number }, a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+function cross(
+  o: { lat: number; lng: number },
+  a: { lat: number; lng: number },
+  b: { lat: number; lng: number },
+): number {
   return (a.lng - o.lng) * (b.lat - o.lat) - (a.lat - o.lat) * (b.lng - o.lng)
 }
 
@@ -79,7 +82,7 @@ export default defineEventHandler(async (event) => {
   const db = useDatabase()
 
   // Get all labeled points, optionally filtered
-  let condition = sql`neighborhood IS NOT NULL`
+  let condition = isNotNull(neighborhoodGrid.neighborhood)
   if (filterNeighborhood) {
     condition = sql`neighborhood = ${filterNeighborhood}`
   }
@@ -107,7 +110,13 @@ export default defineEventHandler(async (event) => {
   interface GeoJSONFeature {
     type: 'Feature'
     geometry: { type: string; coordinates: number[][][] }
-    properties: { name: string; pointCount: number; centerLat: number; centerLng: number; source: string }
+    properties: {
+      name: string
+      pointCount: number
+      centerLat: number
+      centerLng: number
+      source: string
+    }
   }
 
   const features: GeoJSONFeature[] = []
@@ -119,7 +128,7 @@ export default defineEventHandler(async (event) => {
     if (hull.length < 3) continue
 
     // Close the ring (GeoJSON requires first point = last point)
-    const ring = hull.map(p => [p.lng, p.lat])
+    const ring = hull.map((p) => [p.lng, p.lat])
     ring.push(ring[0]!)
 
     // Compute centroid

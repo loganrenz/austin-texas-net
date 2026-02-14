@@ -12,12 +12,12 @@ export default defineEventHandler(async (event) => {
   const query = await getValidatedQuery(event, querySchema.parse)
 
   const endDate = query.endDate || new Date().toISOString().split('T')[0]
-  const start = new Date(endDate)
+  const start = new Date(endDate || new Date().toISOString())
   start.setDate(start.getDate() - 30)
   const startDate = query.startDate || start.toISOString().split('T')[0]
 
   try {
-    const data: any = await googleApiFetch(
+    const data = await googleApiFetch(
       `https://analyticsdata.googleapis.com/v1beta/properties/${query.propertyId}:runReport`,
       GA_SCOPES,
       {
@@ -36,16 +36,20 @@ export default defineEventHandler(async (event) => {
       },
     )
 
+    const totals = data.totals as Array<{ metricValues?: Array<{ value: string }> }> | undefined
+    const rows = data.rows as Array<Record<string, unknown>> | undefined
+
     return {
-      totals: data.totals?.[0]?.metricValues || [],
-      rows: data.rows || [],
+      totals: totals?.[0]?.metricValues || [],
+      rows: rows || [],
       startDate,
       endDate,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { statusCode?: number; statusMessage?: string; message?: string }
     throw createError({
-      statusCode: error.statusCode || 500,
-      statusMessage: `GA4 Error: ${error.statusMessage || error.message}`,
+      statusCode: err.statusCode || 500,
+      statusMessage: `GA4 Error: ${err.statusMessage || err.message}`,
     })
   }
 })

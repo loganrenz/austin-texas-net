@@ -4,6 +4,18 @@ import { OgCategory } from '../../utils/og-templates/category'
 import { OgSubApp } from '../../utils/og-templates/sub-app'
 import { OgNeighborhood } from '../../utils/og-templates/neighborhood'
 
+import { z } from 'zod'
+
+const querySchema = z.object({
+  title: z.string().optional().default('Austin Texas'),
+  description: z.string().optional().default(''),
+  category: z.string().optional().default(''),
+  categoryColor: z.string().optional().default('#84cc16'),
+  region: z.string().optional().default(''),
+  city: z.string().optional().default(''),
+  zipCode: z.string().optional().default(''),
+})
+
 /**
  * Catch-all route for OG image generation.
  *
@@ -14,18 +26,12 @@ import { OgNeighborhood } from '../../utils/og-templates/neighborhood'
  */
 export default defineEventHandler(async (event) => {
   const params = getRouterParams(event)
-  const query = getQuery(event)
+  const query = await getValidatedQuery(event, querySchema.parse)
 
   // The catch-all param comes as the path segments after __og-image__
   const templateSlug = (params._ || 'default') as string
 
-  const title = String(query.title || 'Austin Texas')
-  const description = String(query.description || '')
-  const category = String(query.category || '')
-  const categoryColor = String(query.categoryColor || '#84cc16')
-  const region = String(query.region || '')
-  const city = String(query.city || '')
-  const zipCode = String(query.zipCode || '')
+  const { title, description, category, categoryColor, region, city, zipCode } = query
 
   let element: ReactElement
 
@@ -65,8 +71,7 @@ export default defineEventHandler(async (event) => {
 
     const buffer = await response.arrayBuffer()
     return Buffer.from(buffer)
-  }
-  catch {
+  } catch {
     // Dev-mode fallback: return a lightweight SVG placeholder
     const svg = `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
       <rect width="1200" height="630" fill="#0a1004"/>

@@ -1,5 +1,18 @@
 import { z } from 'zod'
 
+interface PHRawRecording {
+  id: string
+  start_time: string
+  end_time: string
+  recording_duration?: number
+  active_seconds?: number
+  click_count?: number
+  keypress_count?: number
+  start_url?: string
+  person?: { distinct_ids?: string[] }
+  distinct_id?: string
+}
+
 const POSTHOG_PROJECT_ID = '312295'
 
 const querySchema = z.object({
@@ -18,7 +31,7 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const res: any = await $fetch(
+    const res = await $fetch<{ results?: PHRawRecording[] }>(
       `https://us.posthog.com/api/projects/${POSTHOG_PROJECT_ID}/session_recordings/`,
       {
         method: 'GET',
@@ -32,7 +45,7 @@ export default defineEventHandler(async (event) => {
       },
     )
 
-    const recordings = (res.results || []).map((r: any) => ({
+    const recordings = (res.results || []).map((r: PHRawRecording) => ({
       id: r.id,
       startTime: r.start_time,
       endTime: r.end_time,
@@ -45,10 +58,11 @@ export default defineEventHandler(async (event) => {
     }))
 
     return { recordings }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { status?: number; statusCode?: number; message?: string }
     throw createError({
-      statusCode: error.status || error.statusCode || 500,
-      statusMessage: `PostHog Error: ${error.message}`,
+      statusCode: err.status || err.statusCode || 500,
+      statusMessage: `PostHog Error: ${err.message}`,
     })
   }
 })

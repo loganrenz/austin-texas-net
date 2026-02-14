@@ -1,3 +1,4 @@
+<!-- eslint-disable atx/no-raw-tailwind-colors -- NWS severity-level + radar UI colors -->
 <!-- eslint-disable atx/no-fetch-in-component -- SSR page data fetching -->
 <script setup lang="ts">
 /**
@@ -30,7 +31,8 @@ usePageSeo({
 useSchemaOrg([
   defineWebPage({
     name: 'Austin Weather Radar',
-    description: 'Live NEXRAD weather radar for Austin and Central Texas from the National Weather Service.',
+    description:
+      'Live NEXRAD weather radar for Austin and Central Texas from the National Weather Service.',
   }),
 ])
 
@@ -65,10 +67,12 @@ function alertSeverityColor(severity: string): 'error' | 'warning' | 'info' | 'n
         </div>
       </div>
 
-      <p class="text-base sm:text-lg text-muted max-w-2xl leading-relaxed mb-6 animate-fade-up-delay-1">
+      <p
+        class="text-base sm:text-lg text-muted max-w-2xl leading-relaxed mb-6 animate-fade-up-delay-1"
+      >
         Live NEXRAD radar for Central Texas from station
-        <strong class="text-default">{{ RADAR_STATION }}</strong>. Track rain, storms, and
-        precipitation in real time.
+        <strong class="text-default">{{ RADAR_STATION }}</strong
+        >. Track rain, storms, and precipitation in real time.
       </p>
 
       <!-- Active Alerts -->
@@ -78,14 +82,20 @@ function alertSeverityColor(severity: string): 'error' | 'warning' | 'info' | 'n
           :key="alert.id"
           class="rounded-xl border-2 p-4"
           :class="{
-            'border-red-500/40 bg-red-50 dark:bg-red-950/20': alert.severity === 'Extreme' || alert.severity === 'Severe',
+            'border-red-500/40 bg-red-50 dark:bg-red-950/20':
+              alert.severity === 'Extreme' || alert.severity === 'Severe',
             'border-amber-500/40 bg-amber-50 dark:bg-amber-950/20': alert.severity === 'Moderate',
             'border-sky-500/40 bg-sky-50 dark:bg-sky-950/20': alert.severity === 'Minor',
           }"
         >
           <div class="flex items-center gap-2">
             <UIcon name="i-lucide-alert-triangle" class="size-4 text-amber-600 shrink-0" />
-            <UBadge :color="alertSeverityColor(alert.severity)" variant="subtle" size="xs" :label="alert.event" />
+            <UBadge
+              :color="alertSeverityColor(alert.severity)"
+              variant="subtle"
+              size="xs"
+              :label="alert.event"
+            />
             <span class="text-sm font-semibold truncate">{{ alert.headline }}</span>
           </div>
         </div>
@@ -99,12 +109,12 @@ function alertSeverityColor(severity: string): 'error' | 'warning' | 'info' | 'n
               :src="RADAR_EMBED_URL"
               title="NWS NEXRAD Radar — Central Texas"
               class="w-full border-0"
-              style="height: 500px;"
+              style="height: 500px"
               loading="lazy"
               allowfullscreen
             />
             <template #fallback>
-              <div class="flex items-center justify-center bg-neutral-900" style="height: 500px;">
+              <div class="flex items-center justify-center bg-neutral-900" style="height: 500px">
                 <div class="text-center">
                   <UIcon name="i-lucide-radar" class="size-10 text-neutral-400 mb-2" />
                   <p class="text-sm text-neutral-400">Loading radar…</p>
@@ -138,16 +148,16 @@ function alertSeverityColor(severity: string): 'error' | 'warning' | 'info' | 'n
           </h2>
           <div class="text-sm text-muted leading-relaxed space-y-3">
             <p>
-              The <strong class="text-default">KGRK NEXRAD station</strong> at Fort Cavazos (formerly
-              Fort Hood) covers the entire Central Texas region including Austin, San Antonio, Waco,
-              and the Hill Country. It provides dual-polarization radar data that can distinguish
-              between rain, hail, and debris.
+              The <strong class="text-default">KGRK NEXRAD station</strong> at Fort Cavazos
+              (formerly Fort Hood) covers the entire Central Texas region including Austin, San
+              Antonio, Waco, and the Hill Country. It provides dual-polarization radar data that can
+              distinguish between rain, hail, and debris.
             </p>
             <p>
-              During <strong class="text-default">severe weather season</strong> (March–June), monitor
-              this radar for approaching supercells, squall lines, and tornado-producing storms.
-              Austin's position between the Edwards Plateau and the Coastal Plains creates a natural
-              convergence zone for severe weather.
+              During <strong class="text-default">severe weather season</strong> (March–June),
+              monitor this radar for approaching supercells, squall lines, and tornado-producing
+              storms. Austin's position between the Edwards Plateau and the Coastal Plains creates a
+              natural convergence zone for severe weather.
             </p>
           </div>
         </div>

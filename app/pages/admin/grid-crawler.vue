@@ -1,4 +1,6 @@
 <!-- eslint-disable atx/no-fetch-in-component -- Admin tool page -->
+<!-- eslint-disable atx/no-inline-hex -- Map overlay and palette colors -->
+<!-- eslint-disable atx/no-native-form, atx/no-native-input -- Admin tool checkbox toggles -->
 <script setup lang="ts">
 definePageMeta({ title: 'Grid Crawler', middleware: 'auth' })
 
@@ -11,8 +13,12 @@ await ensureLoaded()
 interface GridStatus {
   grid: { rows: number; cols: number; totalPoints: number; spacingMeters: number }
   progress: {
-    crawled: number; labeled: number; unlabeled: number
-    remaining: number; percent: string; estimatedDaysRemaining: number
+    crawled: number
+    labeled: number
+    unlabeled: number
+    remaining: number
+    percent: string
+    estimatedDaysRemaining: number
   }
   lastPosition: { row: number; col: number } | null
   neighborhoods: { uniqueCount: number; byName: Array<{ name: string; points: number }> }
@@ -37,7 +43,7 @@ onMounted(loadStatus)
 
 // ─── Crawl ────────────────────────────────────────────────────
 const batchSize = ref(500)
-const startLat = ref<number | null>(30.445)   // 7603 Bellflower Cove
+const startLat = ref<number | null>(30.445) // 7603 Bellflower Cove
 const startLng = ref<number | null>(-97.792)
 const resetGrid = ref(false)
 const crawlLoading = ref(false)
@@ -57,7 +63,7 @@ async function runCrawl() {
     }
     if (resetGrid.value) {
       body.reset = true
-      resetGrid.value = false  // auto-uncheck after use
+      resetGrid.value = false // auto-uncheck after use
     }
     const data = await $fetch('/api/admin/neighborhood-grid/crawl', {
       method: 'POST',
@@ -99,7 +105,11 @@ async function loadShapes() {
 onMounted(loadShapes)
 
 // ─── Crawled points for dot visualization ─────────────────────
-interface CrawledPoint { lat: number; lng: number; neighborhood: string | null }
+interface CrawledPoint {
+  lat: number
+  lng: number
+  neighborhood: string | null
+}
 const crawledPoints = ref<CrawledPoint[]>([])
 const showDots = ref(true)
 
@@ -114,7 +124,12 @@ async function loadPoints() {
 onMounted(loadPoints)
 
 // ─── Map annotation items (labels only) ─────────────────────────
-interface LabelItem { id: string; lat: number; lng: number; name: string }
+interface LabelItem {
+  id: string
+  lat: number
+  lng: number
+  name: string
+}
 
 // ─── Visibility toggles ──────────────────────────────────────
 const hiddenNeighborhoods = reactive(new Set<string>())
@@ -127,7 +142,9 @@ function toggleNeighborhood(name: string) {
   }
 }
 
-function showAll() { hiddenNeighborhoods.clear() }
+function showAll() {
+  hiddenNeighborhoods.clear()
+}
 function hideAll() {
   const all = shapes.value?.features?.map((f: any) => f.properties.name as string) || []
   for (const n of all) hiddenNeighborhoods.add(n)
@@ -157,7 +174,8 @@ const labelItems = computed<LabelItem[]>(() => {
 
 function createLabelElement(item: LabelItem) {
   const el = document.createElement('div')
-  el.style.cssText = 'font-size:12px;font-weight:700;color:#1e293b;white-space:nowrap;pointer-events:none;text-shadow:0 0 4px #fff,0 0 4px #fff,0 0 8px #fff'
+  el.style.cssText =
+    'font-size:12px;font-weight:700;color:#1e293b;white-space:nowrap;pointer-events:none;text-shadow:0 0 4px #fff,0 0 4px #fff,0 0 8px #fff'
   el.textContent = item.name
   return { element: el }
 }
@@ -168,7 +186,12 @@ const mapLatDelta = ref(0.15) // default: city-level zoom
 const viewportBounds = ref({ minLat: 30.1, maxLat: 30.5, minLng: -98.0, maxLng: -97.5 })
 
 let regionChangeTimer: ReturnType<typeof setTimeout> | null = null
-function onRegionChange(span: { latDelta: number; lngDelta: number; centerLat?: number; centerLng?: number }) {
+function onRegionChange(span: {
+  latDelta: number
+  lngDelta: number
+  centerLat?: number
+  centerLng?: number
+}) {
   if (regionChangeTimer) clearTimeout(regionChangeTimer)
   regionChangeTimer = setTimeout(() => {
     mapLatDelta.value = span.latDelta
@@ -191,20 +214,19 @@ const dotRadius = computed(() => {
   return Math.max(4, mapLatDelta.value * 350)
 })
 
-/* eslint-disable atx/no-inline-hex -- Circle overlay colors */
 const circleItems = computed(() => {
   if (!showDots.value || !crawledPoints.value.length) return []
   const radius = dotRadius.value
   const { minLat, maxLat, minLng, maxLng } = viewportBounds.value
   return crawledPoints.value
-    .filter(p => {
+    .filter((p) => {
       // Visibility toggle
       if (p.neighborhood && hiddenNeighborhoods.has(p.neighborhood)) return false
       // Viewport culling
       if (p.lat < minLat || p.lat > maxLat || p.lng < minLng || p.lng > maxLng) return false
       return true
     })
-    .map(p => ({
+    .map((p) => ({
       lat: p.lat,
       lng: p.lng,
       radius,
@@ -212,7 +234,6 @@ const circleItems = computed(() => {
       opacity: 0.6,
     }))
 })
-/* eslint-enable atx/no-inline-hex */
 
 // All neighborhoods from shapes for the checkbox list
 const allShapeNames = computed(() => {
@@ -220,14 +241,28 @@ const allShapeNames = computed(() => {
 })
 
 // Color palette for neighborhood polygons
-/* eslint-disable atx/no-inline-hex -- Color palette for map overlays */
 const NEIGHBORHOOD_COLORS = [
-  '#ef4444', '#f97316', '#eab308', '#22c55e', '#14b8a6',
-  '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7',
-  '#d946ef', '#ec4899', '#f43f5e', '#84cc16', '#0ea5e9',
-  '#7c3aed', '#c026d3', '#e11d48', '#059669', '#0284c7',
+  '#ef4444',
+  '#f97316',
+  '#eab308',
+  '#22c55e',
+  '#14b8a6',
+  '#06b6d4',
+  '#3b82f6',
+  '#6366f1',
+  '#8b5cf6',
+  '#a855f7',
+  '#d946ef',
+  '#ec4899',
+  '#f43f5e',
+  '#84cc16',
+  '#0ea5e9',
+  '#7c3aed',
+  '#c026d3',
+  '#e11d48',
+  '#059669',
+  '#0284c7',
 ]
-/* eslint-enable atx/no-inline-hex */
 
 function getNeighborhoodColor(name: string) {
   const allNames = shapes.value?.features?.map((f: any) => f.properties.name) || []
@@ -301,7 +336,9 @@ async function onMapClick(coords: { lat: number; lng: number }) {
   } finally {
     clickCrawlLoading.value = false
     // Clear status after 5s
-    setTimeout(() => { clickCrawlStatus.value = null }, 5000)
+    setTimeout(() => {
+      clickCrawlStatus.value = null
+    }, 5000)
   }
 }
 </script>
@@ -314,11 +351,19 @@ async function onMapClick(coords: { lat: number; lng: number }) {
         <UIcon name="i-lucide-grid-3x3" class="size-7 text-primary" />
         <div>
           <h1 class="text-2xl font-bold">Neighborhood Grid Crawler</h1>
-          <p class="text-sm text-dimmed">Reverse geocode Austin to discover neighborhood boundaries via dependentLocalities</p>
+          <p class="text-sm text-dimmed">
+            Reverse geocode Austin to discover neighborhood boundaries via dependentLocalities
+          </p>
         </div>
       </div>
       <div class="flex gap-2">
-        <UButton variant="outline" color="neutral" to="/admin/apple-maps" icon="i-lucide-map-pin" size="sm">
+        <UButton
+          variant="outline"
+          color="neutral"
+          to="/admin/apple-maps"
+          icon="i-lucide-map-pin"
+          size="sm"
+        >
           API Tester
         </UButton>
         <UButton variant="outline" color="neutral" to="/admin" icon="i-lucide-arrow-left" size="sm">
@@ -334,7 +379,9 @@ async function onMapClick(coords: { lat: number; lng: number }) {
           <div class="flex items-center gap-2">
             <UIcon name="i-lucide-map" class="size-4 text-primary" />
             <span class="font-semibold">Shape Preview</span>
-            <UBadge v-if="shapeCount" variant="subtle" color="success" size="xs">{{ shapeCount }} polygons</UBadge>
+            <UBadge v-if="shapeCount" variant="subtle" color="success" size="xs"
+              >{{ shapeCount }} polygons</UBadge
+            >
           </div>
           <div class="flex items-center gap-3">
             <label class="flex items-center gap-1.5 text-xs cursor-pointer select-none">
@@ -345,7 +392,14 @@ async function onMapClick(coords: { lat: number; lng: number }) {
               <input v-model="clickCrawlEnabled" type="checkbox" class="rounded" />
               <span>Click to crawl</span>
             </label>
-            <UButton size="xs" variant="soft" color="primary" icon="i-lucide-refresh-cw" :loading="shapesLoading" @click="loadShapes">
+            <UButton
+              size="xs"
+              variant="soft"
+              color="primary"
+              icon="i-lucide-refresh-cw"
+              :loading="shapesLoading"
+              @click="loadShapes"
+            >
               Refresh
             </UButton>
           </div>
@@ -354,7 +408,7 @@ async function onMapClick(coords: { lat: number; lng: number }) {
 
       <div class="flex flex-col gap-3">
         <!-- Map -->
-        <div class="rounded-lg overflow-hidden border border-default" style="height: 500px;">
+        <div class="rounded-lg overflow-hidden border border-default" style="height: 500px">
           <AppMapKit
             :items="labelItems"
             :create-pin-element="createLabelElement"
@@ -371,23 +425,34 @@ async function onMapClick(coords: { lat: number; lng: number }) {
         </div>
 
         <!-- Click-to-crawl status -->
-        <div v-if="clickCrawlLoading || clickCrawlStatus" class="flex items-center gap-2 text-sm px-1">
+        <div
+          v-if="clickCrawlLoading || clickCrawlStatus"
+          class="flex items-center gap-2 text-sm px-1"
+        >
           <div v-if="clickCrawlLoading" class="size-3 rounded-full bg-primary animate-pulse" />
           <UIcon v-else name="i-lucide-check" class="size-3.5 text-success" />
-          <span :class="clickCrawlLoading ? 'text-primary' : 'text-dimmed'">{{ clickCrawlStatus }}</span>
+          <span :class="clickCrawlLoading ? 'text-primary' : 'text-dimmed'">{{
+            clickCrawlStatus
+          }}</span>
         </div>
         <p v-else-if="clickCrawlEnabled && shapeCount" class="text-xs text-dimmed text-center">
-          💡 Click anywhere on the map to crawl that area at high resolution (0.5km radius, 100m step)
+          💡 Click anywhere on the map to crawl that area at high resolution (0.5km radius, 100m
+          step)
         </p>
 
         <!-- Selected neighborhood tooltip -->
-        <div v-if="selectedFeature" class="border border-primary/25 rounded-lg p-3 flex items-center justify-between bg-primary/5">
+        <div
+          v-if="selectedFeature"
+          class="border border-primary/25 rounded-lg p-3 flex items-center justify-between bg-primary/5"
+        >
           <div class="flex items-center gap-2">
             <UIcon name="i-lucide-map-pin" class="size-4 text-primary" />
             <span class="font-semibold">{{ selectedFeature.properties.name }}</span>
           </div>
           <div class="flex gap-2">
-            <UBadge variant="subtle" color="neutral" size="xs">{{ selectedFeature.properties.pointCount }} points</UBadge>
+            <UBadge variant="subtle" color="neutral" size="xs"
+              >{{ selectedFeature.properties.pointCount }} points</UBadge
+            >
             <UButton size="xs" variant="ghost" color="neutral" @click="selectedFeature = null">
               <UIcon name="i-lucide-x" class="size-3" />
             </UButton>
@@ -397,7 +462,9 @@ async function onMapClick(coords: { lat: number; lng: number }) {
         <!-- Neighborhood toggles -->
         <div v-if="allShapeNames.length" class="flex flex-col gap-2">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-dimmed">Toggle Neighborhoods ({{ allShapeNames.length }})</span>
+            <span class="text-xs font-semibold text-dimmed"
+              >Toggle Neighborhoods ({{ allShapeNames.length }})</span
+            >
             <div class="flex gap-2">
               <UButton size="xs" variant="ghost" color="neutral" @click="showAll">Show All</UButton>
               <UButton size="xs" variant="ghost" color="neutral" @click="hideAll">Hide All</UButton>
@@ -425,7 +492,8 @@ async function onMapClick(coords: { lat: number; lng: number }) {
         </div>
 
         <p v-if="!shapeCount" class="text-sm text-dimmed text-center py-2">
-          No shapes yet — run a crawl batch to discover neighborhoods, then shapes will appear here automatically.
+          No shapes yet — run a crawl batch to discover neighborhoods, then shapes will appear here
+          automatically.
         </p>
       </div>
     </UCard>
@@ -435,7 +503,14 @@ async function onMapClick(coords: { lat: number; lng: number }) {
       <template #header>
         <div class="flex justify-between items-center">
           <span class="font-semibold">Crawl Progress</span>
-          <UButton size="xs" variant="soft" color="neutral" icon="i-lucide-refresh-cw" :loading="statusLoading" @click="loadStatus">
+          <UButton
+            size="xs"
+            variant="soft"
+            color="neutral"
+            icon="i-lucide-refresh-cw"
+            :loading="statusLoading"
+            @click="loadStatus"
+          >
             Refresh
           </UButton>
         </div>
@@ -445,7 +520,10 @@ async function onMapClick(coords: { lat: number; lng: number }) {
         <!-- Progress bar -->
         <div>
           <div class="flex justify-between text-sm mb-1">
-            <span class="font-medium">{{ status.progress.crawled.toLocaleString() }} of {{ status.grid.totalPoints.toLocaleString() }} points</span>
+            <span class="font-medium"
+              >{{ status.progress.crawled.toLocaleString() }} of
+              {{ status.grid.totalPoints.toLocaleString() }} points</span
+            >
             <span class="text-dimmed">{{ status.progress.percent }}</span>
           </div>
           <div class="w-full bg-default rounded-full h-3 border border-default">
@@ -459,11 +537,15 @@ async function onMapClick(coords: { lat: number; lng: number }) {
         <!-- Stats grid -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div class="border border-default rounded-lg p-3 text-center">
-            <div class="text-2xl font-bold text-primary">{{ status.neighborhoods.uniqueCount }}</div>
+            <div class="text-2xl font-bold text-primary">
+              {{ status.neighborhoods.uniqueCount }}
+            </div>
             <div class="text-xs text-dimmed">Neighborhoods Found</div>
           </div>
           <div class="border border-default rounded-lg p-3 text-center">
-            <div class="text-2xl font-bold text-success">{{ status.progress.labeled.toLocaleString() }}</div>
+            <div class="text-2xl font-bold text-success">
+              {{ status.progress.labeled.toLocaleString() }}
+            </div>
             <div class="text-xs text-dimmed">Labeled Points</div>
           </div>
           <div class="border border-default rounded-lg p-3 text-center">
@@ -480,13 +562,13 @@ async function onMapClick(coords: { lat: number; lng: number }) {
         <div class="text-xs text-dimmed flex flex-wrap gap-4">
           <span>Grid: {{ status.grid.rows }} rows × {{ status.grid.cols }} cols</span>
           <span>Spacing: {{ status.grid.spacingMeters }}m</span>
-          <span v-if="status.lastPosition">Last: row {{ status.lastPosition.row }}, col {{ status.lastPosition.col }}</span>
+          <span v-if="status.lastPosition"
+            >Last: row {{ status.lastPosition.row }}, col {{ status.lastPosition.col }}</span
+          >
         </div>
       </div>
 
-      <div v-else class="text-center py-6 text-dimmed text-sm">
-        Loading status...
-      </div>
+      <div v-else class="text-center py-6 text-dimmed text-sm">Loading status...</div>
     </UCard>
 
     <!-- Crawl Controls -->
@@ -518,7 +600,10 @@ async function onMapClick(coords: { lat: number; lng: number }) {
             size="xs"
             variant="ghost"
             color="neutral"
-            @click="startLat = 30.445; startLng = -97.792"
+            @click="
+              startLat = 30.445
+              startLng = -97.792
+            "
           >
             📍 My Address
           </UButton>
@@ -526,7 +611,10 @@ async function onMapClick(coords: { lat: number; lng: number }) {
             size="xs"
             variant="ghost"
             color="neutral"
-            @click="startLat = 30.267; startLng = -97.743"
+            @click="
+              startLat = 30.267
+              startLng = -97.743
+            "
           >
             🏛️ Downtown
           </UButton>
@@ -534,7 +622,10 @@ async function onMapClick(coords: { lat: number; lng: number }) {
             size="xs"
             variant="ghost"
             color="neutral"
-            @click="startLat = null; startLng = null"
+            @click="
+              startLat = null
+              startLng = null
+            "
           >
             ↩ Auto-resume
           </UButton>
@@ -555,19 +646,13 @@ async function onMapClick(coords: { lat: number; lng: number }) {
             <input v-model="resetGrid" type="checkbox" class="rounded" />
             <span class="text-error">Reset grid first</span>
           </label>
-          <UButton
-            color="primary"
-            icon="i-lucide-play"
-            :loading="crawlLoading"
-            @click="runCrawl"
-          >
+          <UButton color="primary" icon="i-lucide-play" :loading="crawlLoading" @click="runCrawl">
             Start Crawl
           </UButton>
         </div>
         <p class="text-xs text-dimmed">
-          Grid: ~20K points (urban Austin only). Each point = 1 API call.
-          At 500 points with 50ms delay, a batch takes ~25s.
-          Leave lat/lng blank to auto-resume from last crawled position.
+          Grid: ~20K points (urban Austin only). Each point = 1 API call. At 500 points with 50ms
+          delay, a batch takes ~25s. Leave lat/lng blank to auto-resume from last crawled position.
         </p>
       </div>
     </UCard>
@@ -587,10 +672,18 @@ async function onMapClick(coords: { lat: number; lng: number }) {
       <div class="flex flex-col gap-3">
         <p class="text-sm">{{ crawlResult.message }}</p>
         <div class="flex flex-wrap gap-2">
-          <UBadge variant="subtle" color="success" size="xs">{{ crawlResult.crawled }} crawled</UBadge>
-          <UBadge variant="subtle" color="primary" size="xs">{{ crawlResult.withNeighborhood }} with neighborhood</UBadge>
-          <UBadge v-if="crawlResult.failed > 0" variant="subtle" color="error" size="xs">{{ crawlResult.failed }} failed</UBadge>
-          <UBadge variant="subtle" color="neutral" size="xs">{{ crawlResult.uniqueNeighborhoodsInBatch }} unique in batch</UBadge>
+          <UBadge variant="subtle" color="success" size="xs"
+            >{{ crawlResult.crawled }} crawled</UBadge
+          >
+          <UBadge variant="subtle" color="primary" size="xs"
+            >{{ crawlResult.withNeighborhood }} with neighborhood</UBadge
+          >
+          <UBadge v-if="crawlResult.failed > 0" variant="subtle" color="error" size="xs"
+            >{{ crawlResult.failed }} failed</UBadge
+          >
+          <UBadge variant="subtle" color="neutral" size="xs"
+            >{{ crawlResult.uniqueNeighborhoodsInBatch }} unique in batch</UBadge
+          >
         </div>
         <div v-if="crawlResult.neighborhoodsFound?.length" class="flex flex-wrap gap-1">
           <UBadge
@@ -609,7 +702,9 @@ async function onMapClick(coords: { lat: number; lng: number }) {
     <!-- Neighborhoods Found -->
     <UCard v-if="topNeighborhoods.length">
       <template #header>
-        <span class="font-semibold">Neighborhoods Discovered ({{ status?.neighborhoods.uniqueCount || 0 }})</span>
+        <span class="font-semibold"
+          >Neighborhoods Discovered ({{ status?.neighborhoods.uniqueCount || 0 }})</span
+        >
       </template>
       <div class="flex flex-wrap gap-2">
         <div

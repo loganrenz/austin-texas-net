@@ -18,7 +18,8 @@
     "prepare": "husky",
     "postbuild": "node scripts/patch-cf-process-proxy.mjs",
     "dev:kill": "pkill -f 'nuxt/bin/nuxt.mjs dev' ;pkill -f 'nuxt.*austin-texas-net' ; pkill -f 'pnpm.*austin-texas-net.*dev' ; pkill -f workerd ; echo 'Killed all austin-texas-net dev processes'",
-    "logs": "wrangler tail austin-texas-net"
+    "logs": "wrangler tail austin-texas-net",
+    "secrets:sync": "doppler secrets --json --project austin-texas-net --config prd | jq -c 'with_entries(.value = .value.computed)' | wrangler secret bulk"
   },
   "dependencies": {
     "@nuxt/content": "^3.11.2",

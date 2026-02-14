@@ -1,4 +1,9 @@
 import { sql } from 'drizzle-orm'
+import { z } from 'zod'
+
+const querySchema = z.object({
+  months: z.coerce.number().optional().default(24),
+})
 
 /**
  * GET /api/real-estate/market-trends
@@ -8,8 +13,8 @@ import { sql } from 'drizzle-orm'
  */
 export default defineEventHandler(async (event) => {
   const db = useDatabase()
-  const query = getQuery(event)
-  const months = parseInt(query.months as string) || 24
+  const query = await getValidatedQuery(event, querySchema.parse)
+  const months = query.months
 
   try {
     const result = await db.run(sql`
@@ -33,7 +38,7 @@ export default defineEventHandler(async (event) => {
 
     const rows = (result.results ?? []) as MarketStatRow[]
     return {
-      stats: rows.map(r => ({
+      stats: rows.map((r) => ({
         region: r.region,
         regionType: r.region_type,
         period: r.period,
@@ -47,8 +52,7 @@ export default defineEventHandler(async (event) => {
       })),
       source: 'db',
     }
-  }
-  catch {
+  } catch {
     return { stats: [], source: 'error' }
   }
 })

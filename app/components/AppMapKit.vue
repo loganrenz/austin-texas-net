@@ -1,3 +1,4 @@
+<!-- eslint-disable atx/no-fetch-in-component -- $fetch is used to load Texas outline GeoJSON for mask overlay -->
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare const mapkit: any
@@ -96,7 +97,9 @@ const emit = defineEmits<{
   /** Emitted when the map background is clicked (not a pin or overlay). */
   'map-click': [coords: { lat: number; lng: number }]
   /** Emitted when the visible map region changes (zoom/pan). */
-  'region-change': [span: { latDelta: number; lngDelta: number; centerLat: number; centerLng: number }]
+  'region-change': [
+    span: { latDelta: number; lngDelta: number; centerLat: number; centerLng: number },
+  ]
 }>()
 
 const selectedId = defineModel<string | null>('selectedId', { default: null })
@@ -115,7 +118,9 @@ let _texasCoords: Array<[number, number]> | null = null
 
 async function fetchTexasCoords(): Promise<Array<[number, number]>> {
   if (_texasCoords) return _texasCoords
-  const data = await $fetch<{ geometry: { coordinates: Array<Array<[number, number]>> } }>('/api/geo/texas-outline')
+  const data = await $fetch<{ geometry: { coordinates: Array<Array<[number, number]>> } }>(
+    '/api/geo/texas-outline',
+  )
   _texasCoords = data.geometry.coordinates[0] ?? []
   return _texasCoords!
 }
@@ -317,10 +322,7 @@ function createClusterElement(cluster: any): HTMLElement {
         map.region.span.latitudeDelta / 3,
         map.region.span.longitudeDelta / 3,
       )
-      map.setRegionAnimated(
-        new mapkit.CoordinateRegion(cluster.coordinate, span),
-        true,
-      )
+      map.setRegionAnimated(new mapkit.CoordinateRegion(cluster.coordinate, span), true)
     }
   })
   return el
@@ -349,15 +351,11 @@ function initMap() {
   // Register cluster annotation factory when clustering is enabled
   if (props.clusteringIdentifier) {
     mapOpts.annotationForCluster = (cluster: any) => {
-      return new mapkit.Annotation(
-        cluster.coordinate,
-        () => createClusterElement(cluster),
-        {
-          anchorOffset: new DOMPoint(0, 0),
-          size: { width: 44, height: 44 },
-          calloutEnabled: false,
-        },
-      )
+      return new mapkit.Annotation(cluster.coordinate, () => createClusterElement(cluster), {
+        anchorOffset: new DOMPoint(0, 0),
+        size: { width: 44, height: 44 },
+        calloutEnabled: false,
+      })
     }
   }
 

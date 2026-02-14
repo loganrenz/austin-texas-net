@@ -22,16 +22,18 @@ export default defineEventHandler(async (event) => {
 
   try {
     // Entry pages — first page viewed in a session
-    const entryRes: any = await $fetch(`https://us.posthog.com/api/projects/${POSTHOG_PROJECT_ID}/query/`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: {
-        query: {
-          kind: 'HogQLQuery',
-          query: `
+    const entryRes = await $fetch<{ results?: (string | number)[][] }>(
+      `https://us.posthog.com/api/projects/${POSTHOG_PROJECT_ID}/query/`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: {
+          query: {
+            kind: 'HogQLQuery',
+            query: `
             SELECT
               replaceRegexpAll(properties.$pathname, '\\\\?.*', '') AS page,
               count() AS entries
@@ -44,21 +46,24 @@ export default defineEventHandler(async (event) => {
             ORDER BY entries DESC
             LIMIT 10
           `,
+          },
         },
       },
-    })
+    )
 
     // Exit pages — approximate via last pageview per session
-    const exitRes: any = await $fetch(`https://us.posthog.com/api/projects/${POSTHOG_PROJECT_ID}/query/`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: {
-        query: {
-          kind: 'HogQLQuery',
-          query: `
+    const exitRes = await $fetch<{ results?: (string | number)[][] }>(
+      `https://us.posthog.com/api/projects/${POSTHOG_PROJECT_ID}/query/`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: {
+          query: {
+            kind: 'HogQLQuery',
+            query: `
             SELECT
               replaceRegexpAll(properties.$pathname, '\\\\?.*', '') AS page,
               count() AS exits
@@ -70,25 +75,27 @@ export default defineEventHandler(async (event) => {
             ORDER BY exits DESC
             LIMIT 10
           `,
+          },
         },
       },
-    })
+    )
 
-    const entryPages = (entryRes.results || []).map((row: any[]) => ({
+    const entryPages = (entryRes.results || []).map((row: (string | number)[]) => ({
       page: row[0] || '/',
       count: row[1] || 0,
     }))
 
-    const exitPages = (exitRes.results || []).map((row: any[]) => ({
+    const exitPages = (exitRes.results || []).map((row: (string | number)[]) => ({
       page: row[0] || '/',
       count: row[1] || 0,
     }))
 
     return { entryPages, exitPages }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { status?: number; statusCode?: number; message?: string }
     throw createError({
-      statusCode: error.status || error.statusCode || 500,
-      statusMessage: `PostHog Error: ${error.message}`,
+      statusCode: err.status || err.statusCode || 500,
+      statusMessage: `PostHog Error: ${err.message}`,
     })
   }
 })

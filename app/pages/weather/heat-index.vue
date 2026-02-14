@@ -1,3 +1,4 @@
+<!-- eslint-disable atx/no-raw-tailwind-colors -- NWS heat-index / wind-chill scale colors -->
 <!-- eslint-disable atx/no-fetch-in-component -- SSR page data fetching -->
 <script setup lang="ts">
 /**
@@ -59,19 +60,30 @@ const feelsLike = computed(() => {
 // Heat/cold safety level
 const safetyLevel = computed(() => {
   const fl = feelsLike.value
-  if (fl === null) return { level: 'Unknown', color: 'neutral' as const, icon: 'i-lucide-thermometer' }
+  if (fl === null)
+    return { level: 'Unknown', color: 'neutral' as const, icon: 'i-lucide-thermometer' }
 
   if (isHeatSeason.value) {
-    if (fl >= 125) return { level: 'Extreme Danger', color: 'error' as const, icon: 'i-lucide-flame' }
-    if (fl >= 105) return { level: 'Danger', color: 'error' as const, icon: 'i-lucide-alert-triangle' }
-    if (fl >= 90) return { level: 'Extreme Caution', color: 'warning' as const, icon: 'i-lucide-alert-triangle' }
+    if (fl >= 125)
+      return { level: 'Extreme Danger', color: 'error' as const, icon: 'i-lucide-flame' }
+    if (fl >= 105)
+      return { level: 'Danger', color: 'error' as const, icon: 'i-lucide-alert-triangle' }
+    if (fl >= 90)
+      return {
+        level: 'Extreme Caution',
+        color: 'warning' as const,
+        icon: 'i-lucide-alert-triangle',
+      }
     if (fl >= 80) return { level: 'Caution', color: 'warning' as const, icon: 'i-lucide-info' }
     return { level: 'Comfortable', color: 'success' as const, icon: 'i-lucide-check-circle' }
   } else {
-    if (fl <= 0) return { level: 'Extreme Cold', color: 'error' as const, icon: 'i-lucide-snowflake' }
+    if (fl <= 0)
+      return { level: 'Extreme Cold', color: 'error' as const, icon: 'i-lucide-snowflake' }
     if (fl <= 15) return { level: 'Very Cold', color: 'error' as const, icon: 'i-lucide-snowflake' }
-    if (fl <= 32) return { level: 'Cold — Freeze Risk', color: 'warning' as const, icon: 'i-lucide-snowflake' }
-    if (fl <= 45) return { level: 'Chilly', color: 'info' as const, icon: 'i-lucide-thermometer-snowflake' }
+    if (fl <= 32)
+      return { level: 'Cold — Freeze Risk', color: 'warning' as const, icon: 'i-lucide-snowflake' }
+    if (fl <= 45)
+      return { level: 'Chilly', color: 'info' as const, icon: 'i-lucide-thermometer-snowflake' }
     return { level: 'Comfortable', color: 'success' as const, icon: 'i-lucide-check-circle' }
   }
 })
@@ -87,7 +99,10 @@ const safetyTips = computed(() => {
     ]
     if (fl >= 105) {
       return [
-        { icon: 'i-lucide-house', text: 'Stay indoors in air conditioning. This is dangerous heat.' },
+        {
+          icon: 'i-lucide-house',
+          text: 'Stay indoors in air conditioning. This is dangerous heat.',
+        },
         { icon: 'i-lucide-car', text: 'Never leave children or pets in parked vehicles.' },
         ...base,
       ]
@@ -96,8 +111,14 @@ const safetyTips = computed(() => {
   } else {
     return [
       { icon: 'i-lucide-shirt', text: 'Dress in layers — Austin cold snaps can drop fast.' },
-      { icon: 'i-lucide-droplets', text: 'Protect pipes — drip faucets when temps dip below 28°F.' },
-      { icon: 'i-lucide-car', text: 'Watch for ice on bridges and overpasses, especially I-35 and MoPac.' },
+      {
+        icon: 'i-lucide-droplets',
+        text: 'Protect pipes — drip faucets when temps dip below 28°F.',
+      },
+      {
+        icon: 'i-lucide-car',
+        text: 'Watch for ice on bridges and overpasses, especially I-35 and MoPac.',
+      },
       { icon: 'i-lucide-home', text: 'Bring pets indoors when wind chill drops below freezing.' },
     ]
   }
@@ -158,7 +179,8 @@ function formatTimestamp(ts: string): string {
             {{ feelsLike ?? '--' }}<span class="text-3xl font-bold text-muted">°F</span>
           </div>
           <p class="text-sm text-muted mb-1">
-            {{ isHeatSeason ? 'Heat Index' : 'Wind Chill' }} · Actual temp {{ conditions.temperature }}°F
+            {{ isHeatSeason ? 'Heat Index' : 'Wind Chill' }} · Actual temp
+            {{ conditions.temperature }}°F
           </p>
           <div class="flex items-center gap-2 mt-3">
             <UBadge
@@ -178,8 +200,8 @@ function formatTimestamp(ts: string): string {
           <p class="text-base text-muted leading-relaxed">
             <template v-if="isHeatSeason">
               The heat index combines air temperature and humidity to show what the temperature
-              <strong class="text-default">actually feels like</strong> on your body. In Austin's humid summers,
-              the heat index can exceed the actual temperature by 10–20°F.
+              <strong class="text-default">actually feels like</strong> on your body. In Austin's
+              humid summers, the heat index can exceed the actual temperature by 10–20°F.
             </template>
             <template v-else>
               The wind chill factor combines air temperature and wind speed to show the
@@ -197,26 +219,43 @@ function formatTimestamp(ts: string): string {
       </section>
 
       <!-- Current Details -->
-      <section v-if="conditions" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10 animate-fade-up-delay-2">
-        <div class="flex flex-col items-center gap-2 rounded-xl border border-default bg-default p-4 text-center">
+      <section
+        v-if="conditions"
+        class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10 animate-fade-up-delay-2"
+      >
+        <div
+          class="flex flex-col items-center gap-2 rounded-xl border border-default bg-default p-4 text-center"
+        >
           <UIcon name="i-lucide-thermometer" class="size-5 text-muted" />
           <span class="text-xs font-bold uppercase tracking-widest text-dimmed">Actual Temp</span>
-          <span class="text-lg font-extrabold font-display">{{ conditions.temperature ?? '--' }}°F</span>
+          <span class="text-lg font-extrabold font-display"
+            >{{ conditions.temperature ?? '--' }}°F</span
+          >
         </div>
-        <div class="flex flex-col items-center gap-2 rounded-xl border border-default bg-default p-4 text-center">
+        <div
+          class="flex flex-col items-center gap-2 rounded-xl border border-default bg-default p-4 text-center"
+        >
           <UIcon name="i-lucide-droplets" class="size-5 text-muted" />
           <span class="text-xs font-bold uppercase tracking-widest text-dimmed">Humidity</span>
-          <span class="text-lg font-extrabold font-display">{{ conditions.humidity ?? '--' }}%</span>
+          <span class="text-lg font-extrabold font-display"
+            >{{ conditions.humidity ?? '--' }}%</span
+          >
         </div>
-        <div class="flex flex-col items-center gap-2 rounded-xl border border-default bg-default p-4 text-center">
+        <div
+          class="flex flex-col items-center gap-2 rounded-xl border border-default bg-default p-4 text-center"
+        >
           <UIcon name="i-lucide-wind" class="size-5 text-muted" />
           <span class="text-xs font-bold uppercase tracking-widest text-dimmed">Wind</span>
           <span class="text-lg font-extrabold font-display">{{ conditions.windSpeed }}</span>
         </div>
-        <div class="flex flex-col items-center gap-2 rounded-xl border border-default bg-default p-4 text-center">
+        <div
+          class="flex flex-col items-center gap-2 rounded-xl border border-default bg-default p-4 text-center"
+        >
           <UIcon name="i-lucide-thermometer-sun" class="size-5 text-muted" />
           <span class="text-xs font-bold uppercase tracking-widest text-dimmed">Dew Point</span>
-          <span class="text-lg font-extrabold font-display">{{ conditions.dewpoint ?? '--' }}°F</span>
+          <span class="text-lg font-extrabold font-display"
+            >{{ conditions.dewpoint ?? '--' }}°F</span
+          >
         </div>
       </section>
 

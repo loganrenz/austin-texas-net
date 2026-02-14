@@ -1,4 +1,11 @@
 import { sql } from 'drizzle-orm'
+import { z } from 'zod'
+
+const querySchema = z.object({
+  zip: z.string().optional(),
+  months: z.coerce.number().optional().default(24),
+  latest: z.enum(['true', 'false']).optional(),
+})
 
 /**
  * GET /api/real-estate/rent-trends
@@ -8,9 +15,9 @@ import { sql } from 'drizzle-orm'
  */
 export default defineEventHandler(async (event) => {
   const db = useDatabase()
-  const query = getQuery(event)
-  const zip = query.zip as string | undefined
-  const months = parseInt(query.months as string) || 24
+  const query = await getValidatedQuery(event, querySchema.parse)
+  const zip = query.zip
+  const months = query.months
   const latest = query.latest === 'true'
 
   try {
@@ -37,7 +44,7 @@ export default defineEventHandler(async (event) => {
 
       const rows = (result.results ?? []) as RentPriceRow[]
       return {
-        prices: rows.map(r => ({
+        prices: rows.map((r) => ({
           zipCode: r.zip_code,
           period: r.period,
           medianRent: r.median_rent,
@@ -66,7 +73,7 @@ export default defineEventHandler(async (event) => {
 
     const rows = (result.results ?? []) as RentPriceRow[]
     return {
-      prices: rows.map(r => ({
+      prices: rows.map((r) => ({
         zipCode: r.zip_code,
         period: r.period,
         medianRent: r.median_rent,
@@ -75,8 +82,7 @@ export default defineEventHandler(async (event) => {
       })),
       source: 'db',
     }
-  }
-  catch {
+  } catch {
     return { prices: [], source: 'error' }
   }
 })

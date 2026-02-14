@@ -2,6 +2,50 @@
 <script setup lang="ts">
 definePageMeta({ title: 'PostHog Analytics', middleware: 'auth' })
 
+interface PHAction {
+  math?: string
+}
+interface PHSeries {
+  action?: PHAction
+  count?: number
+  data?: number[]
+  labels?: string[]
+}
+interface PHInsights {
+  results: PHSeries[]
+  resolved_date_range?: { date_from: string; date_to: string }
+}
+interface PHPageRow {
+  page: string
+  pageviews: number
+  uniqueVisitors: number
+}
+interface PHReferrerRow {
+  referrer: string
+  visits: number
+  uniqueVisitors: number
+}
+interface PHDeviceRow {
+  device: string
+  pageviews: number
+  uniqueVisitors: number
+}
+interface PHEntryExitRow {
+  page: string
+  count: number
+}
+interface PHRecording {
+  id: string
+  startTime: string
+  endTime: string
+  duration: number
+  activeSeconds: number
+  clickCount: number
+  keypressCount: number
+  startUrl: string
+  personId: string
+}
+
 const { ensureLoaded } = useAuth()
 await ensureLoaded()
 
@@ -19,42 +63,51 @@ const insightParams = computed(() => ({ startDate: `-${dateRange.value}d` }))
 const dayParams = computed(() => ({ days: dateRange.value }))
 
 // Trends data (pageviews + DAU over time)
-const { data: posthogData, status } = await useFetch<any>('/api/admin/posthog/insights', {
+const { data: posthogData, status } = await useFetch<PHInsights>('/api/admin/posthog/insights', {
   query: insightParams,
   watch: [insightParams],
 })
 
 // Top pages
-const { data: pagesData } = await useFetch<{ rows: any[] }>('/api/admin/posthog/pages', {
+const { data: pagesData } = await useFetch<{ rows: PHPageRow[] }>('/api/admin/posthog/pages', {
   query: dayParams,
   watch: [dayParams],
 })
 
 // Top referrers
-const { data: referrersData } = await useFetch<{ rows: any[] }>('/api/admin/posthog/referrers', {
-  query: dayParams,
-  watch: [dayParams],
-})
-
-// Device breakdown
-const { data: devicesData } = await useFetch<{ rows: any[] }>('/api/admin/posthog/devices', {
-  query: dayParams,
-  watch: [dayParams],
-})
-
-// Entry/exit pages
-const { data: entryExitData } = await useFetch<{ entryPages: any[]; exitPages: any[] }>(
-  '/api/admin/posthog/entry-exit',
+const { data: referrersData } = await useFetch<{ rows: PHReferrerRow[] }>(
+  '/api/admin/posthog/referrers',
   {
     query: dayParams,
     watch: [dayParams],
   },
 )
 
-// Recent recordings
-const { data: recordingsData } = await useFetch<{ recordings: any[] }>('/api/admin/posthog/recordings', {
-  query: { limit: '10' },
+// Device breakdown
+const { data: devicesData } = await useFetch<{ rows: PHDeviceRow[] }>(
+  '/api/admin/posthog/devices',
+  {
+    query: dayParams,
+    watch: [dayParams],
+  },
+)
+
+// Entry/exit pages
+const { data: entryExitData } = await useFetch<{
+  entryPages: PHEntryExitRow[]
+  exitPages: PHEntryExitRow[]
+}>('/api/admin/posthog/entry-exit', {
+  query: dayParams,
+  watch: [dayParams],
 })
+
+// Recent recordings
+const { data: recordingsData } = await useFetch<{ recordings: PHRecording[] }>(
+  '/api/admin/posthog/recordings',
+  {
+    query: { limit: '10' },
+  },
+)
 
 const results = computed(() => posthogData.value?.results || [])
 const pages = computed(() => pagesData.value?.rows || [])
@@ -65,8 +118,10 @@ const exitPages = computed(() => entryExitData.value?.exitPages || [])
 const recordings = computed(() => recordingsData.value?.recordings || [])
 
 // Split results into Pageviews (total) and Unique Visitors (dau)
-const pageviewSeries = computed(() => results.value.find((r: any) => r.action?.math === 'total'))
-const dauSeries = computed(() => results.value.find((r: any) => r.action?.math === 'dau'))
+const pageviewSeries = computed(() =>
+  results.value.find((r: PHSeries) => r.action?.math === 'total'),
+)
+const dauSeries = computed(() => results.value.find((r: PHSeries) => r.action?.math === 'dau'))
 
 // Summary stats
 const totalPageviews = computed(() => pageviewSeries.value?.count || 0)
@@ -84,7 +139,9 @@ const pagesPerVisitor = computed(() => {
 })
 
 // Device stats
-const totalDevicePageviews = computed(() => devices.value.reduce((sum: number, d: any) => sum + d.pageviews, 0) || 1)
+const totalDevicePageviews = computed(
+  () => devices.value.reduce((sum: number, d: PHDeviceRow) => sum + d.pageviews, 0) || 1,
+)
 const deviceColors: Record<string, string> = {
   Desktop: 'bg-blue-500',
   Mobile: 'bg-emerald-500',
@@ -93,29 +150,32 @@ const deviceColors: Record<string, string> = {
 
 const formatLabel = (label: string) => {
   if (!label) return ''
-  const parts = label.split('-')
-  return parts.length === 3 ? `${parts[1]}/${parseInt(parts[2])}` : label
+  const parts = (label || '').split('-')
+  return parts.length === 3 ? `${parts[1]}/${parseInt(parts[2] || '0')}` : label
 }
 
 const dateRangeText = computed(() => {
   const range = posthogData.value?.resolved_date_range
   if (!range) return ''
-  const from = new Date(range.date_from).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  const from = new Date(range.date_from).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  })
   const to = new Date(range.date_to).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   return `${from} – ${to}`
 })
 
 const maxPageviews = computed(() =>
-  pages.value.length ? Math.max(...pages.value.map((p: any) => p.pageviews)) : 1,
+  pages.value.length ? Math.max(...pages.value.map((p: PHPageRow) => p.pageviews)) : 1,
 )
 const maxRefVisits = computed(() =>
-  referrers.value.length ? Math.max(...referrers.value.map((r: any) => r.visits)) : 1,
+  referrers.value.length ? Math.max(...referrers.value.map((r: PHReferrerRow) => r.visits)) : 1,
 )
 const maxEntries = computed(() =>
-  entryPages.value.length ? Math.max(...entryPages.value.map((p: any) => p.count)) : 1,
+  entryPages.value.length ? Math.max(...entryPages.value.map((p: PHEntryExitRow) => p.count)) : 1,
 )
 const maxExits = computed(() =>
-  exitPages.value.length ? Math.max(...exitPages.value.map((p: any) => p.count)) : 1,
+  exitPages.value.length ? Math.max(...exitPages.value.map((p: PHEntryExitRow) => p.count)) : 1,
 )
 
 const formatDuration = (seconds: number) => {
@@ -156,6 +216,7 @@ const posthogRecordingUrl = (id: string) =>
 
       <!-- Date range selector -->
       <div class="flex gap-1 bg-elevated border border-default rounded-xl p-1">
+        <!-- eslint-disable-next-line atx/no-native-button -- custom segmented tab selector -->
         <button
           v-for="opt in dateRangeOptions"
           :key="opt.value"
@@ -177,7 +238,10 @@ const posthogRecordingUrl = (id: string) =>
       <UIcon name="i-lucide-loader-2" class="size-10 animate-spin text-dimmed" />
     </div>
 
-    <div v-else-if="results.length === 0" class="h-96 flex flex-col items-center justify-center text-dimmed">
+    <div
+      v-else-if="results.length === 0"
+      class="h-96 flex flex-col items-center justify-center text-dimmed"
+    >
       <UIcon name="i-lucide-zap-off" class="size-16 mb-4 opacity-20" />
       <p>No PostHog data found</p>
       <p class="text-xs mt-1">Ensure the PostHog API key is configured</p>
@@ -195,22 +259,29 @@ const posthogRecordingUrl = (id: string) =>
         </UCard>
         <UCard>
           <div class="flex items-center gap-2 mb-2">
+            <!-- eslint-disable-next-line atx/no-raw-tailwind-colors -- analytics KPI accent -->
             <UIcon name="i-lucide-users" class="size-4 text-emerald-500" />
-            <span class="text-xs text-dimmed uppercase tracking-wider font-medium">Unique Visitors</span>
+            <span class="text-xs text-dimmed uppercase tracking-wider font-medium"
+              >Unique Visitors</span
+            >
           </div>
           <p class="text-3xl font-bold tabular-nums">{{ totalUniqueVisitors.toLocaleString() }}</p>
         </UCard>
         <UCard>
           <div class="flex items-center gap-2 mb-2">
             <UIcon name="i-lucide-trending-up" class="size-4 text-amber-500" />
-            <span class="text-xs text-dimmed uppercase tracking-wider font-medium">Avg / Active Day</span>
+            <span class="text-xs text-dimmed uppercase tracking-wider font-medium"
+              >Avg / Active Day</span
+            >
           </div>
           <p class="text-3xl font-bold tabular-nums">{{ avgPerDay.toLocaleString() }}</p>
         </UCard>
         <UCard>
           <div class="flex items-center gap-2 mb-2">
             <UIcon name="i-lucide-ratio" class="size-4 text-violet-500" />
-            <span class="text-xs text-dimmed uppercase tracking-wider font-medium">Pages / Visitor</span>
+            <span class="text-xs text-dimmed uppercase tracking-wider font-medium"
+              >Pages / Visitor</span
+            >
           </div>
           <p class="text-3xl font-bold tabular-nums">{{ pagesPerVisitor }}</p>
         </UCard>
@@ -230,13 +301,15 @@ const posthogRecordingUrl = (id: string) =>
                 <span class="text-sm text-dimmed">Unique Visitors</span>
               </div>
             </div>
-            <span class="text-sm text-dimmed tabular-nums">{{ totalPageviews.toLocaleString() }} total</span>
+            <span class="text-sm text-dimmed tabular-nums"
+              >{{ totalPageviews.toLocaleString() }} total</span
+            >
           </div>
         </template>
 
         <div class="h-44 flex items-end gap-[2px] relative">
           <div
-            v-for="(val, idx) in pageviewSeries.data"
+            v-for="(val, idx) in pageviewSeries.data || []"
             :key="idx"
             class="flex-1 relative group"
             :style="{ height: '100%' }"
@@ -245,7 +318,7 @@ const posthogRecordingUrl = (id: string) =>
             <div
               class="absolute bottom-0 left-0 right-0 bg-primary/25 hover:bg-primary/50 transition-all duration-150 rounded-t"
               :style="{
-                height: `${Math.max((val / Math.max(...pageviewSeries.data, 1)) * 100, val > 0 ? 2 : 0)}%`,
+                height: `${Math.max((val / Math.max(...(pageviewSeries.data || []), 1)) * 100, val > 0 ? 2 : 0)}%`,
               }"
             />
             <!-- DAU overlay bar -->
@@ -253,22 +326,30 @@ const posthogRecordingUrl = (id: string) =>
               v-if="dauSeries?.data?.[idx]"
               class="absolute bottom-0 left-[15%] right-[15%] bg-emerald-500/40 rounded-t pointer-events-none"
               :style="{
-                height: `${Math.max((dauSeries.data[idx] / Math.max(...pageviewSeries.data, 1)) * 100, dauSeries.data[idx] > 0 ? 2 : 0)}%`,
+                height: `${Math.max((dauSeries.data[idx] / Math.max(...(pageviewSeries.data || []), 1)) * 100, dauSeries.data[idx] > 0 ? 2 : 0)}%`,
               }"
             />
             <!-- Tooltip -->
             <div
               class="absolute -top-10 left-1/2 -translate-x-1/2 bg-inverted text-inverted text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10"
             >
-              {{ formatLabel(pageviewSeries.labels[idx]) }}: {{ val }}
-              <span v-if="dauSeries?.data?.[idx]" class="text-emerald-300"> · {{ dauSeries.data[idx] }} uv</span>
+              {{ formatLabel(pageviewSeries.labels?.[idx] || '') }}: {{ val }}
+              <span v-if="dauSeries?.data?.[idx]" class="text-emerald-300">
+                · {{ dauSeries.data[idx] }} uv</span
+              >
             </div>
           </div>
         </div>
         <div class="flex justify-between text-xs text-dimmed px-1 mt-2">
-          <span>{{ formatLabel(pageviewSeries.labels[0]) }}</span>
-          <span>{{ formatLabel(pageviewSeries.labels[Math.floor(pageviewSeries.labels.length / 2)]) }}</span>
-          <span>{{ formatLabel(pageviewSeries.labels[pageviewSeries.labels.length - 1]) }}</span>
+          <span>{{ formatLabel(pageviewSeries.labels?.[0] || '') }}</span>
+          <span>{{
+            formatLabel(
+              pageviewSeries.labels?.[Math.floor((pageviewSeries.labels?.length || 0) / 2)] || '',
+            )
+          }}</span>
+          <span>{{
+            formatLabel(pageviewSeries.labels?.[(pageviewSeries.labels?.length || 1) - 1] || '')
+          }}</span>
         </div>
       </UCard>
 
@@ -307,13 +388,20 @@ const posthogRecordingUrl = (id: string) =>
               :key="device.device"
               class="flex items-center gap-3 p-3 rounded-xl border border-default"
             >
-              <div class="size-3 rounded-full shrink-0" :class="deviceColors[device.device] || 'bg-neutral-400'" />
+              <div
+                class="size-3 rounded-full shrink-0"
+                :class="deviceColors[device.device] || 'bg-neutral-400'"
+              />
               <div class="flex-1">
                 <p class="text-sm font-medium">{{ device.device || 'Unknown' }}</p>
-                <p class="text-xs text-dimmed">{{ device.uniqueVisitors.toLocaleString() }} unique visitors</p>
+                <p class="text-xs text-dimmed">
+                  {{ device.uniqueVisitors.toLocaleString() }} unique visitors
+                </p>
               </div>
               <div class="text-right">
-                <p class="text-sm font-bold tabular-nums">{{ device.pageviews.toLocaleString() }}</p>
+                <p class="text-sm font-bold tabular-nums">
+                  {{ device.pageviews.toLocaleString() }}
+                </p>
                 <p class="text-xs text-dimmed tabular-nums">
                   {{ Math.round((device.pageviews / totalDevicePageviews) * 100) }}%
                 </p>
@@ -339,7 +427,9 @@ const posthogRecordingUrl = (id: string) =>
           <div v-else class="flex flex-col gap-2.5">
             <div v-for="page in pages.slice(0, 10)" :key="page.page">
               <div class="flex items-center justify-between text-sm mb-1">
-                <span class="truncate max-w-[240px] font-medium" :title="page.page">{{ page.page || '/' }}</span>
+                <span class="truncate max-w-[240px] font-medium" :title="page.page">{{
+                  page.page || '/'
+                }}</span>
                 <div class="flex items-center gap-3 text-dimmed shrink-0">
                   <span class="tabular-nums">{{ page.pageviews.toLocaleString() }}</span>
                   <span class="text-xs w-12 text-right tabular-nums">
@@ -371,7 +461,9 @@ const posthogRecordingUrl = (id: string) =>
           <div v-else class="flex flex-col gap-2.5">
             <div v-for="ref in referrers.slice(0, 10)" :key="ref.referrer">
               <div class="flex items-center justify-between text-sm mb-1">
-                <span class="truncate max-w-[240px] font-medium" :title="ref.referrer">{{ ref.referrer }}</span>
+                <span class="truncate max-w-[240px] font-medium" :title="ref.referrer">{{
+                  ref.referrer
+                }}</span>
                 <div class="flex items-center gap-3 text-dimmed shrink-0">
                   <span class="tabular-nums">{{ ref.visits.toLocaleString() }}</span>
                   <span class="text-xs w-12 text-right tabular-nums">
@@ -406,8 +498,12 @@ const posthogRecordingUrl = (id: string) =>
           <div v-else class="flex flex-col gap-2.5">
             <div v-for="page in entryPages.slice(0, 8)" :key="page.page">
               <div class="flex items-center justify-between text-sm mb-1">
-                <span class="truncate max-w-[240px] font-medium" :title="page.page">{{ page.page || '/' }}</span>
-                <span class="text-dimmed tabular-nums shrink-0">{{ page.count.toLocaleString() }}</span>
+                <span class="truncate max-w-[240px] font-medium" :title="page.page">{{
+                  page.page || '/'
+                }}</span>
+                <span class="text-dimmed tabular-nums shrink-0">{{
+                  page.count.toLocaleString()
+                }}</span>
               </div>
               <div class="h-1.5 rounded-full bg-default overflow-hidden">
                 <div
@@ -433,8 +529,12 @@ const posthogRecordingUrl = (id: string) =>
           <div v-else class="flex flex-col gap-2.5">
             <div v-for="page in exitPages.slice(0, 8)" :key="page.page">
               <div class="flex items-center justify-between text-sm mb-1">
-                <span class="truncate max-w-[240px] font-medium" :title="page.page">{{ page.page || '/' }}</span>
-                <span class="text-dimmed tabular-nums shrink-0">{{ page.count.toLocaleString() }}</span>
+                <span class="truncate max-w-[240px] font-medium" :title="page.page">{{
+                  page.page || '/'
+                }}</span>
+                <span class="text-dimmed tabular-nums shrink-0">{{
+                  page.count.toLocaleString()
+                }}</span>
               </div>
               <div class="h-1.5 rounded-full bg-default overflow-hidden">
                 <div
@@ -495,7 +595,9 @@ const posthogRecordingUrl = (id: string) =>
                 <UIcon name="i-lucide-mouse-pointer-click" class="size-3" />
                 {{ rec.clickCount }}
               </span>
-              <span class="font-medium text-default tabular-nums">{{ formatDuration(rec.duration) }}</span>
+              <span class="font-medium text-default tabular-nums">{{
+                formatDuration(rec.duration)
+              }}</span>
             </div>
           </a>
         </div>

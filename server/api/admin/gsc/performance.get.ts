@@ -3,7 +3,10 @@ import { z } from 'zod'
 const querySchema = z.object({
   startDate: z.string().optional(),
   endDate: z.string().optional(),
-  dimension: z.enum(['query', 'page', 'device', 'country', 'searchAppearance']).optional().default('query'),
+  dimension: z
+    .enum(['query', 'page', 'device', 'country', 'searchAppearance'])
+    .optional()
+    .default('query'),
 })
 
 const SITE_URL = 'https://austin-texas.net'
@@ -14,12 +17,12 @@ export default defineEventHandler(async (event) => {
   const query = await getValidatedQuery(event, querySchema.parse)
 
   const endDate = query.endDate || new Date().toISOString().split('T')[0]
-  const start = new Date(endDate)
+  const start = new Date(endDate || new Date().toISOString())
   start.setDate(start.getDate() - 30)
   const startDate = query.startDate || start.toISOString().split('T')[0]
 
   try {
-    const data: any = await googleApiFetch(
+    const data = await googleApiFetch(
       `https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(SITE_URL)}/searchAnalytics/query`,
       GSC_SCOPES,
       {
@@ -33,16 +36,19 @@ export default defineEventHandler(async (event) => {
       },
     )
 
+    const rows = data.rows as Array<Record<string, unknown>> | undefined
+
     return {
-      rows: data.rows || [],
+      rows: rows || [],
       startDate,
       endDate,
       dimension: query.dimension,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { statusCode?: number; statusMessage?: string; message?: string }
     throw createError({
-      statusCode: error.statusCode || 500,
-      statusMessage: `GSC performance error: ${error.statusMessage || error.message}`,
+      statusCode: err.statusCode || 500,
+      statusMessage: `GSC performance error: ${err.statusMessage || err.message}`,
     })
   }
 })

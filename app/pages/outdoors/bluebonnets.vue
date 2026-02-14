@@ -1,4 +1,5 @@
 <!-- eslint-disable atx/no-fetch-in-component -- SSR page data fetching -->
+<!-- eslint-disable atx/prefer-ulink -- External attribution links to iNaturalist -->
 <script setup lang="ts">
 /**
  * Bluebonnet Map — iNaturalist observation data visualization.
@@ -10,8 +11,6 @@
  * Follows the same pattern as food pages: clicking a dot replaces
  * the content below the map with observation detail + photo.
  */
-
- 
 
 // ── SEO ────────────────────────────────────────────────────
 // ── SEO ────────────────────────────────────────────────────
@@ -169,8 +168,8 @@ useSchemaOrg([
         </div>
 
         <p class="text-base sm:text-lg text-muted max-w-2xl leading-relaxed mb-5">
-          Texas bluebonnets (<em>Lupinus texensis</em>) are the state flower
-          and bloom across Central Texas every spring. This map shows
+          Texas bluebonnets (<em>Lupinus texensis</em>) are the state flower and bloom across
+          Central Texas every spring. This map shows
           <strong class="text-default">{{ totalCount.toLocaleString() }}</strong>
           citizen-science observations from
           <a
@@ -178,20 +177,19 @@ useSchemaOrg([
             target="_blank"
             rel="noopener"
             class="text-primary hover:underline"
-          >iNaturalist</a> across the entire state of Texas —
-          <strong class="text-default">tap any dot</strong> to see the photo.
+            >iNaturalist</a
+          >
+          across the entire state of Texas — <strong class="text-default">tap any dot</strong> to
+          see the photo.
         </p>
 
         <!-- Controls bar -->
         <div class="flex flex-wrap items-center gap-4">
-          <div class="flex items-center gap-2 rounded-xl border border-default bg-elevated px-3.5 py-2.5">
+          <div
+            class="flex items-center gap-2 rounded-xl border border-default bg-elevated px-3.5 py-2.5"
+          >
             <UIcon name="i-lucide-calendar" class="size-4 shrink-0 text-muted" />
-            <USelect
-              v-model="selectedYear"
-              :items="yearOptions"
-              size="sm"
-              class="min-w-[120px]"
-            />
+            <USelect v-model="selectedYear" :items="yearOptions" size="sm" class="min-w-[120px]" />
           </div>
 
           <div class="flex items-center gap-3 text-sm text-muted">
@@ -297,14 +295,17 @@ useSchemaOrg([
       </section>
 
       <!-- ─── Peak season info (only when no selection) ─── -->
-      <div v-if="!selectedObs" class="mb-8 rounded-2xl border border-default bg-elevated p-5 animate-fade-up-delay-1">
+      <div
+        v-if="!selectedObs"
+        class="mb-8 rounded-2xl border border-default bg-elevated p-5 animate-fade-up-delay-1"
+      >
         <div class="flex items-start gap-3">
           <UIcon name="i-lucide-info" class="size-5 shrink-0 text-primary mt-0.5" />
           <div class="text-sm text-muted leading-relaxed">
             <p class="font-semibold text-default mb-1">Peak Season: March – April</p>
             <p>
-              Bluebonnets typically begin appearing in late February and peak in mid-March through April.
-              The best spots cluster along roadsides, meadows, and open fields across the
+              Bluebonnets typically begin appearing in late February and peak in mid-March through
+              April. The best spots cluster along roadsides, meadows, and open fields across the
               Hill Country and eastern Travis County. Each dot represents a verified citizen-science
               observation from iNaturalist contributors.
             </p>
@@ -314,7 +315,9 @@ useSchemaOrg([
 
       <!-- Related sections -->
       <section v-if="siblings.length" class="mb-8 animate-fade-up-delay-2">
-        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-4">More in Outdoors</h2>
+        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-4">
+          More in Outdoors
+        </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <NuxtLink
             v-for="app in siblings"
@@ -366,15 +369,16 @@ useSchemaOrg([
             target="_blank"
             rel="noopener"
             class="text-primary hover:underline"
-          >iNaturalist</a>.
-          Observations are contributed by citizen scientists and may include
-          research-grade and needs-identification records for
+            >iNaturalist</a
+          >. Observations are contributed by citizen scientists and may include research-grade and
+          needs-identification records for
           <a
             href="https://www.inaturalist.org/taxa/49564-Lupinus-texensis"
             target="_blank"
             rel="noopener"
             class="text-primary hover:underline"
-          >Lupinus texensis</a>.
+            >Lupinus texensis</a
+          >.
         </p>
       </div>
     </UContainer>

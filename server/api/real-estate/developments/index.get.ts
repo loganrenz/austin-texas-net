@@ -1,4 +1,5 @@
 import { sql } from 'drizzle-orm'
+import { z } from 'zod'
 
 /**
  * GET /api/real-estate/developments
@@ -8,10 +9,14 @@ import { sql } from 'drizzle-orm'
  */
 export default defineEventHandler(async (event) => {
   const db = useDatabase()
-  const query = getQuery(event)
-  const limit = parseInt(query.limit as string) || 200
+  const query = await getValidatedQuery(
+    event,
+    z.object({ limit: z.coerce.number().optional().default(200) }).parse,
+  )
+  const limit = query.limit
 
   try {
+    // eslint-disable-next-line atx/prefer-drizzle-operators -- raw SQL query, not Drizzle query builder
     const result = await db.run(sql`
       SELECT * FROM development_permits
       WHERE lat IS NOT NULL AND lng IS NOT NULL
@@ -35,7 +40,7 @@ export default defineEventHandler(async (event) => {
 
     const rows = (result.results ?? []) as PermitRow[]
     return {
-      permits: rows.map(r => ({
+      permits: rows.map((r) => ({
         id: r.permit_number,
         name: r.description || `Permit ${r.permit_number}`,
         lat: r.lat,
@@ -48,12 +53,15 @@ export default defineEventHandler(async (event) => {
         status: r.status,
         address: r.address,
         neighborhood: r.neighborhood,
-        displayValue: r.units ? `${r.units} units` : r.valuation ? `$${Math.round(r.valuation / 1000)}K` : 'New',
+        displayValue: r.units
+          ? `${r.units} units`
+          : r.valuation
+            ? `$${Math.round(r.valuation / 1000)}K`
+            : 'New',
       })),
       source: 'db',
     }
-  }
-  catch {
+  } catch {
     return { permits: [], source: 'error' }
   }
 })
