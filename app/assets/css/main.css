@@ -359,6 +359,82 @@ h4,
   color: #fbbf24;
 }
 
+/* ── Map cluster bubble (annotation clustering) ────────────── */
+.mapkit-cluster {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mapkit-cluster-bubble {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #d97706, #92400e);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    0 0 0 3px white,
+    0 0 0 5px rgba(217, 119, 6, 0.2);
+  animation: cluster-pulse 2.5s ease-in-out infinite;
+  transition: transform 0.2s ease;
+}
+
+.mapkit-cluster-bubble:hover {
+  transform: scale(1.12);
+}
+
+.mapkit-cluster-count {
+  font-size: 14px;
+  font-weight: 800;
+  font-family: var(--font-display);
+  color: white;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+:is(.dark) .mapkit-cluster-bubble {
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.5),
+    0 0 0 3px #1c1c1e,
+    0 0 0 5px rgba(251, 191, 36, 0.2);
+  animation-name: cluster-pulse-dark;
+}
+
+@keyframes cluster-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.3),
+      0 0 0 3px white,
+      0 0 0 5px rgba(217, 119, 6, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.3),
+      0 0 0 3px white,
+      0 0 0 8px rgba(217, 119, 6, 0);
+  }
+}
+
+@keyframes cluster-pulse-dark {
+  0%,
+  100% {
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.5),
+      0 0 0 3px #1c1c1e,
+      0 0 0 5px rgba(251, 191, 36, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.5),
+      0 0 0 3px #1c1c1e,
+      0 0 0 8px rgba(251, 191, 36, 0);
+  }
+}
+
 /* ── Page transitions ──────────────────────────────────────── */
 .page-enter-active,
 .page-leave-active {

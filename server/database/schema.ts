@@ -131,6 +131,76 @@ export const lakeReadings = sqliteTable('lake_readings', {
   createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
 })
 
+// ─── Neighborhood Grid (Apple Maps reverse geocode crawler) ─
+export const neighborhoodGrid = sqliteTable('neighborhood_grid', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  lat: real('lat').notNull(),
+  lng: real('lng').notNull(),
+  neighborhood: text('neighborhood'),           // dependentLocalities[0]
+  allLocalities: text('all_localities'),         // JSON array of all dependentLocalities
+  locality: text('locality'),                    // city name
+  subLocality: text('sub_locality'),             // structuredAddress.subLocality
+  postCode: text('post_code'),
+  crawledAt: text('crawled_at').notNull(),
+  gridRow: integer('grid_row').notNull(),
+  gridCol: integer('grid_col').notNull(),
+})
+
+// ─── Home Prices (Zillow ZHVI by zip code) ──────────────────
+export const homePrices = sqliteTable('home_prices', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  zipCode: text('zip_code').notNull(),
+  period: text('period').notNull(),              // YYYY-MM
+  medianValue: real('median_value').notNull(),   // $
+  yoyChange: real('yoy_change'),                 // decimal, e.g. 0.054 = 5.4%
+  source: text('source').default('zillow'),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+})
+
+// ─── Market Stats (Redfin metro/city-level) ─────────────────
+export const marketStats = sqliteTable('market_stats', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  region: text('region').notNull(),              // "Austin, TX" or zip code
+  regionType: text('region_type').notNull(),     // "metro", "city", "zip"
+  period: text('period').notNull(),              // YYYY-MM
+  medianSalePrice: real('median_sale_price'),
+  homesSold: integer('homes_sold'),
+  newListings: integer('new_listings'),
+  inventory: integer('inventory'),
+  daysOnMarket: integer('days_on_market'),
+  saleToListRatio: real('sale_to_list_ratio'),   // e.g. 0.98
+  source: text('source').default('redfin'),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+})
+
+// ─── Rent Prices (Zillow ZORI by zip code) ──────────────────
+export const rentPrices = sqliteTable('rent_prices', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  zipCode: text('zip_code').notNull(),
+  period: text('period').notNull(),              // YYYY-MM
+  medianRent: real('median_rent').notNull(),     // $/month
+  yoyChange: real('yoy_change'),                 // decimal
+  source: text('source').default('zillow'),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+})
+
+// ─── Development Permits (City of Austin SODA API) ──────────
+export const developmentPermits = sqliteTable('development_permits', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  permitNumber: text('permit_number').notNull().unique(),
+  lat: real('lat'),
+  lng: real('lng'),
+  description: text('description'),
+  units: integer('units'),
+  valuation: real('valuation'),                  // $
+  issueDate: text('issue_date').notNull(),       // YYYY-MM-DD
+  workClass: text('work_class'),                 // "New", "Remodel", etc.
+  status: text('status'),
+  address: text('address'),
+  neighborhood: text('neighborhood'),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+})
+
 // ─── Type helpers ───────────────────────────────────────────
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
@@ -148,3 +218,13 @@ export type WaterReading = typeof waterReadings.$inferSelect
 export type NewWaterReading = typeof waterReadings.$inferInsert
 export type LakeReading = typeof lakeReadings.$inferSelect
 export type NewLakeReading = typeof lakeReadings.$inferInsert
+export type NeighborhoodGridPoint = typeof neighborhoodGrid.$inferSelect
+export type NewNeighborhoodGridPoint = typeof neighborhoodGrid.$inferInsert
+export type HomePrice = typeof homePrices.$inferSelect
+export type NewHomePrice = typeof homePrices.$inferInsert
+export type MarketStat = typeof marketStats.$inferSelect
+export type NewMarketStat = typeof marketStats.$inferInsert
+export type RentPrice = typeof rentPrices.$inferSelect
+export type NewRentPrice = typeof rentPrices.$inferInsert
+export type DevelopmentPermit = typeof developmentPermits.$inferSelect
+export type NewDevelopmentPermit = typeof developmentPermits.$inferInsert

@@ -77,9 +77,11 @@ async function loadStaticGeoJSON(): Promise<StaticFeatureCollection> {
   if (_cachedGeo) return _cachedGeo
 
   try {
-    // Use Nitro's built-in $fetch to read from public/data/
-    // This works reliably in dev, preview, and Cloudflare Pages
-    const raw = await $fetch<StaticFeatureCollection>('/data/austin-neighborhoods.geojson')
+    // Read from server/assets/ via Nitro storage (edge-compatible).
+    // $fetch('/data/...') causes a 404 during SSR because Nitro does not
+    // serve public/ files through its internal fetch mechanism.
+    const storage = useStorage('assets:server')
+    const raw = await storage.getItem<StaticFeatureCollection>('data/austin-neighborhoods.geojson')
     if (raw && typeof raw === 'object' && Array.isArray(raw.features)) {
       _cachedGeo = raw
     } else {

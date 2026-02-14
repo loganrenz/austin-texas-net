@@ -15,8 +15,7 @@ import {
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler)
 
 /**
- * PollenChart — Pollen trend chart supporting 7d to 2yr ranges.
- * For ranges >90d, data is expected to be pre-aggregated (weekly).
+ * PollenChart — Pollen trend chart supporting 7d to 60d ranges.
  */
 
 const props = withDefaults(
@@ -42,9 +41,7 @@ const periods = [
   { days: 7, label: '7d' },
   { days: 14, label: '14d' },
   { days: 30, label: '30d' },
-  { days: 90, label: '90d' },
-  { days: 365, label: '1yr' },
-  { days: 730, label: '2yr' },
+  { days: 60, label: '60d' },
 ]
 
 function switchPeriod(days: number) {
@@ -59,16 +56,10 @@ function getSeverityColor(count: number): string {
 const isDark = computed(() => colorMode.value === 'dark')
 
 const chartData = computed(() => {
-  const dataSlice = activePeriod.value <= 30 ? props.data.slice(-activePeriod.value) : props.data
-
-  const isWeekly = activePeriod.value > 90
+  const dataSlice = props.data
 
   const labels = dataSlice.map((d) => {
     const parts = d.date.split('-')
-    if (isWeekly) {
-      // Show month/day for weekly data
-      return `${parts[1]}/${parts[2]}`
-    }
     return `${parts[1]}/${parts[2]}`
   })
 
@@ -79,11 +70,11 @@ const chartData = computed(() => {
     labels,
     datasets: [
       {
-        label: isWeekly ? 'Avg Pollen Count' : 'Pollen Count',
+        label: 'Pollen Count',
         data: values,
         borderColor: POLLEN_ACCENT,
         borderWidth: 2,
-        pointRadius: dataSlice.length > 60 ? 0 : dataSlice.length > 30 ? 2 : 4,
+        pointRadius: dataSlice.length > 45 ? 0 : dataSlice.length > 20 ? 2 : 4,
         pointHoverRadius: 6,
         pointBackgroundColor: pointColors,
         pointBorderColor: 'transparent',
@@ -106,8 +97,7 @@ const chartData = computed(() => {
 
 const chartOptions = computed(() => {
   const dark = isDark.value
-  const dataSlice = activePeriod.value <= 30 ? props.data.slice(-activePeriod.value) : props.data
-  const maxVal = Math.max(...dataSlice.map((d) => d.count), 1000)
+  const maxVal = Math.max(...props.data.map((d) => d.count), 1000)
   const yMax = Math.ceil(maxVal / 1000) * 1000 + 1000
 
   return {
@@ -138,8 +128,7 @@ const chartOptions = computed(() => {
             else if (val >= 1500) level = 'Very High'
             else if (val >= 500) level = 'High'
             else if (val >= 50) level = 'Medium'
-            const suffix = activePeriod.value > 90 ? ' (weekly avg)' : ''
-            return `${val.toLocaleString()} grains/m³ — ${level}${suffix}`
+            return `${val.toLocaleString()} grains/m³ — ${level}`
           },
         },
       },
@@ -153,7 +142,7 @@ const chartOptions = computed(() => {
           color: dark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.4)',
           font: { size: 10 },
           maxRotation: 0,
-          maxTicksLimit: activePeriod.value > 365 ? 12 : activePeriod.value > 90 ? 8 : 10,
+          maxTicksLimit: activePeriod.value > 30 ? 12 : 10,
         },
         border: { display: false },
       },
@@ -219,12 +208,6 @@ const chartOptions = computed(() => {
       </div>
     </div>
 
-    <!-- Aggregation notice -->
-    <p
-      v-if="activePeriod > 90 && !loading && data.length > 0"
-      class="mt-2 text-[0.7rem] text-muted text-center opacity-70"
-    >
-      Showing weekly averages for {{ activePeriod > 365 ? '2-year' : '1-year' }} view
-    </p>
+
   </div>
 </template>

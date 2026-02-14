@@ -10,6 +10,7 @@ export default defineNuxtConfig({
     '@nuxtjs/sitemap',
     '@nuxtjs/robots',
     'nuxt-schema-org',
+    'nuxt-og-image',
     'nitro-cloudflare-dev',
   ],
   css: ['~/assets/css/main.css'],
@@ -65,6 +66,20 @@ export default defineNuxtConfig({
   site: {
     url: 'https://austin-texas.net',
     name: 'Austin Texas',
+  },
+
+  ogImage: {
+    defaults: {
+      component: 'OgImageDefault',
+      width: 1200,
+      height: 630,
+    },
+    fonts: [
+      'Inter:400',
+      'Inter:700',
+      'Outfit:700',
+      'Outfit:900',
+    ],
   },
 
   sitemap: {

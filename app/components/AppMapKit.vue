@@ -64,26 +64,39 @@ const props = withDefaults(
     geojson?: GeoJSONFeatureCollection | null
     /** Custom style function for each GeoJSON overlay polygon. */
     overlayStyleFn?: (properties: GeoJSONFeatureProperties) => OverlayStyle
+    /** Lightweight circle overlays for rendering large point clouds. */
+    circles?: Array<{ lat: number; lng: number; radius: number; color: string; opacity?: number }>
+    /** When set, nearby annotations merge into cluster bubbles at low zoom. */
+    clusteringIdentifier?: string
     annotationSize?: { width: number; height: number }
     zoomSpan?: { lat: number; lng: number }
     boundingPadding?: number
     fallbackCenter?: { lat: number; lng: number }
+    /** When true, draws a semi-transparent overlay outside the Texas border. */
+    texasMask?: boolean
   }>(),
   {
     items: () => [] as any,
     createPinElement: undefined,
     geojson: null,
     overlayStyleFn: undefined,
+    circles: () => [],
+    clusteringIdentifier: undefined,
     annotationSize: () => ({ width: 100, height: 56 }),
     zoomSpan: () => ({ lat: 0.002, lng: 0.0025 }),
     boundingPadding: 0.05,
     fallbackCenter: () => ({ lat: 30.2672, lng: -97.7431 }),
+    texasMask: false,
   },
 )
 
 const emit = defineEmits<{
   /** Emitted when a GeoJSON polygon overlay is clicked. */
   'feature-select': [feature: GeoJSONFeature]
+  /** Emitted when the map background is clicked (not a pin or overlay). */
+  'map-click': [coords: { lat: number; lng: number }]
+  /** Emitted when the visible map region changes (zoom/pan). */
+  'region-change': [span: { latDelta: number; lngDelta: number; centerLat: number; centerLng: number }]
 }>()
 
 const selectedId = defineModel<string | null>('selectedId', { default: null })
@@ -95,6 +108,76 @@ const pinCleanups: Array<() => void> = []
 let map: any = null
 let overviewRegion: any = null
 const overlayFeatureMap = new WeakMap<any, GeoJSONFeature>()
+
+// ── Texas mask ───────────────────────────────────────────────
+let texasMaskOverlay: any = null
+let _texasCoords: Array<[number, number]> | null = null
+
+async function fetchTexasCoords(): Promise<Array<[number, number]>> {
+  if (_texasCoords) return _texasCoords
+  const data = await $fetch<{ geometry: { coordinates: Array<Array<[number, number]>> } }>('/api/geo/texas-outline')
+  _texasCoords = data.geometry.coordinates[0] ?? []
+  return _texasCoords!
+}
+
+function getTexasMaskStyle(): { fillColor: string; fillOpacity: number } {
+  const isDark = document.documentElement.classList.contains('dark')
+  /* eslint-disable atx/no-inline-hex -- MapKit overlay mask colours */
+  return isDark
+    ? { fillColor: '#111827', fillOpacity: 0.7 }
+    : { fillColor: '#ffffff', fillOpacity: 0.6 }
+  /* eslint-enable atx/no-inline-hex */
+}
+
+async function addTexasMask() {
+  if (!map || !props.texasMask) return
+  removeTexasMask()
+
+  const coords = await fetchTexasCoords()
+  if (!coords?.length) return
+
+  // World-bounding outer ring (CW) — covers the whole visible area
+  const worldRing = [
+    new mapkit.Coordinate(-85, -180),
+    new mapkit.Coordinate(-85, 180),
+    new mapkit.Coordinate(85, 180),
+    new mapkit.Coordinate(85, -180),
+    new mapkit.Coordinate(-85, -180),
+  ]
+
+  // Texas inner ring (CCW) — punches a hole in the overlay.
+  // GeoJSON is [lng, lat]; MapKit wants Coordinate(lat, lng).
+  // Reverse the ring so it winds opposite to the outer ring.
+  const texasRing = coords
+    .map(([lng, lat]: [number, number]) => new mapkit.Coordinate(lat, lng))
+    .reverse()
+
+  const { fillColor, fillOpacity } = getTexasMaskStyle()
+  const style = new mapkit.Style({
+    fillColor,
+    fillOpacity,
+    strokeOpacity: 0,
+    lineWidth: 0,
+  })
+
+  texasMaskOverlay = new mapkit.PolygonOverlay([worldRing, texasRing], { style })
+  texasMaskOverlay.enabled = false // not selectable / interactive
+  map.addOverlay(texasMaskOverlay)
+}
+
+function removeTexasMask() {
+  if (texasMaskOverlay && map) {
+    map.removeOverlay(texasMaskOverlay)
+    texasMaskOverlay = null
+  }
+}
+
+function updateTexasMaskStyle() {
+  if (!texasMaskOverlay) return
+  const { fillColor, fillOpacity } = getTexasMaskStyle()
+  texasMaskOverlay.style.fillColor = fillColor
+  texasMaskOverlay.style.fillOpacity = fillOpacity
+}
 
 // ── Bounding region ──────────────────────────────────────────
 
@@ -219,12 +302,36 @@ function buildPolygonRings(geometry: GeoJSONGeometry): Array<any[]> {
 
 // ── Map initialization ───────────────────────────────────────
 
+function createClusterElement(cluster: any): HTMLElement {
+  const count = cluster.memberAnnotations?.length ?? 0
+  const el = document.createElement('div')
+  el.className = 'mapkit-cluster'
+  el.setAttribute('data-map-pin', '')
+  el.innerHTML = `<div class="mapkit-cluster-bubble"><span class="mapkit-cluster-count">${count}</span></div>`
+  el.style.cursor = 'pointer'
+  el.addEventListener('click', (e) => {
+    e.stopPropagation()
+    // Zoom in to reveal individual pins
+    if (map && cluster.coordinate) {
+      const span = new mapkit.CoordinateSpan(
+        map.region.span.latitudeDelta / 3,
+        map.region.span.longitudeDelta / 3,
+      )
+      map.setRegionAnimated(
+        new mapkit.CoordinateRegion(cluster.coordinate, span),
+        true,
+      )
+    }
+  })
+  return el
+}
+
 function initMap() {
   if (!mapContainer.value) return
 
   overviewRegion = computeBoundingRegion()
 
-  map = new mapkit.Map(mapContainer.value, {
+  const mapOpts: any = {
     center: overviewRegion.center,
     region: overviewRegion,
     showsCompass: mapkit.FeatureVisibility.Hidden,
@@ -235,17 +342,75 @@ function initMap() {
       ? mapkit.Map.ColorSchemes.Dark
       : mapkit.Map.ColorSchemes.Light,
     padding: new mapkit.Padding(10, 10, 10, 10),
-  })
+    isZoomEnabled: true,
+    isScrollEnabled: true,
+  }
 
-  // Click on map background (not a pin) clears selection
+  // Register cluster annotation factory when clustering is enabled
+  if (props.clusteringIdentifier) {
+    mapOpts.annotationForCluster = (cluster: any) => {
+      return new mapkit.Annotation(
+        cluster.coordinate,
+        () => createClusterElement(cluster),
+        {
+          anchorOffset: new DOMPoint(0, 0),
+          size: { width: 44, height: 44 },
+          calloutEnabled: false,
+        },
+      )
+    }
+  }
+
+  map = new mapkit.Map(mapContainer.value, mapOpts)
+
+  // Click on map background (not a pin) clears selection + emits coordinates
+  // Use a delay to avoid firing on double-click-to-zoom
+  let clickTimer: ReturnType<typeof setTimeout> | null = null
   map.element.addEventListener('click', (e: MouseEvent) => {
     const target = e.target as HTMLElement
     if (target.closest('[data-map-pin]')) return
-    if (selectedId.value) selectedId.value = null
+
+    if (clickTimer) clearTimeout(clickTimer)
+    clickTimer = setTimeout(() => {
+      if (selectedId.value) selectedId.value = null
+
+      // Convert page coordinates to map coordinates
+      try {
+        const point = new DOMPoint(e.pageX, e.pageY)
+        const coord = map.convertPointOnPageToCoordinate(point)
+        if (coord) {
+          emit('map-click', {
+            lat: Math.round(coord.latitude * 1e6) / 1e6,
+            lng: Math.round(coord.longitude * 1e6) / 1e6,
+          })
+        }
+      } catch {
+        // Silently ignore if conversion fails
+      }
+    }, 250)
+  })
+
+  map.element.addEventListener('dblclick', () => {
+    if (clickTimer) clearTimeout(clickTimer)
   })
 
   addAnnotations()
   addOverlays()
+  addCircles()
+  addTexasMask()
+
+  // Emit region changes for zoom-responsive behavior
+  map.addEventListener('region-change-end', () => {
+    const region = map.region
+    if (region) {
+      emit('region-change', {
+        latDelta: region.span.latitudeDelta,
+        lngDelta: region.span.longitudeDelta,
+        centerLat: region.center.latitude,
+        centerLng: region.center.longitude,
+      })
+    }
+  })
 }
 
 // ── Pin annotations ──────────────────────────────────────────
@@ -260,6 +425,15 @@ function addAnnotations() {
 
   const annotations = props.items.map((item) => {
     const coord = new mapkit.Coordinate(item.lat, item.lng)
+    const opts: any = {
+      anchorOffset: new DOMPoint(0, -6),
+      calloutEnabled: false,
+      size: props.annotationSize,
+      data: { id: item.id },
+    }
+    if (props.clusteringIdentifier) {
+      opts.clusteringIdentifier = props.clusteringIdentifier
+    }
     return new mapkit.Annotation(
       coord,
       () => {
@@ -279,12 +453,7 @@ function addAnnotations() {
 
         return wrapper
       },
-      {
-        anchorOffset: new DOMPoint(0, -6),
-        calloutEnabled: false,
-        size: props.annotationSize,
-        data: { id: item.id },
-      },
+      opts,
     )
   })
   map.addAnnotations(annotations)
@@ -342,6 +511,34 @@ function clearOverlays() {
   map.removeOverlays(map.overlays)
 }
 
+// ── Circle overlays (lightweight dots) ──────────────────────────
+const circleOverlayRefs: any[] = []
+
+function addCircles() {
+  if (!map || !props.circles?.length) return
+  for (const c of props.circles) {
+    const center = new mapkit.Coordinate(c.lat, c.lng)
+    const style = new mapkit.Style({
+      fillColor: c.color,
+      fillOpacity: c.opacity ?? 0.7,
+      strokeColor: c.color,
+      strokeOpacity: 0,
+      lineWidth: 0,
+    })
+    const circle = new mapkit.CircleOverlay(center, c.radius, { style })
+    circleOverlayRefs.push(circle)
+    map.addOverlay(circle)
+  }
+}
+
+function clearCircles() {
+  if (!map) return
+  for (const c of circleOverlayRefs) {
+    map.removeOverlay(c)
+  }
+  circleOverlayRefs.length = 0
+}
+
 // ── Zoom behavior ────────────────────────────────────────────
 
 function zoomToItem(item: T) {
@@ -370,7 +567,7 @@ watch(selectedId, (newId) => {
   }
 })
 
-// Re-render and re-fit when items change
+// Re-render annotations and zoom to fit when items change
 watch(
   () => props.items,
   () => {
@@ -379,21 +576,30 @@ watch(
     clearPinCleanups()
     map.removeAnnotations(map.annotations)
     overviewRegion = computeBoundingRegion()
+    map.setRegionAnimated(overviewRegion, true)
     addAnnotations()
-    if (overviewRegion) map.setRegionAnimated(overviewRegion, true)
   },
   { deep: false },
 )
 
-// Re-render overlays when geojson changes
+// Re-render overlays when geojson changes (preserve zoom)
 watch(
   () => props.geojson,
   () => {
     if (!map) return
     clearOverlays()
-    overviewRegion = computeBoundingRegion()
     addOverlays()
-    if (overviewRegion) map.setRegionAnimated(overviewRegion, true)
+  },
+  { deep: false },
+)
+
+// Re-render circles when circles change (preserve zoom)
+watch(
+  () => props.circles,
+  () => {
+    if (!map) return
+    clearCircles()
+    addCircles()
   },
   { deep: false },
 )
@@ -406,6 +612,7 @@ watch(
     if (map) {
       map.colorScheme =
         mode === 'dark' ? mapkit.Map.ColorSchemes.Dark : mapkit.Map.ColorSchemes.Light
+      updateTexasMaskStyle()
     }
   },
 )
@@ -420,6 +627,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   clearPinCleanups()
+  removeTexasMask()
   if (map) {
     map.destroy()
     map = null

@@ -1,0 +1,11 @@
+{
+  "name": "real-estate-cron",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-01-01",
+  "triggers": {
+    "crons": ["0 6 16 * *"]
+  },
+  "vars": {
+    "INGEST_URL": "https://austin-texas.net"
+  }
+}

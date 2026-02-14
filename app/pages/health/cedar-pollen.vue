@@ -12,6 +12,7 @@ const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('health')!
 const siblings = category.subApps.filter((a) => a.slug !== 'cedar-pollen')
 const crossLinks = categories.filter((c) => c.slug !== 'health').slice(0, 4)
+const { items: breadcrumbs } = useBreadcrumbs()
 
 usePageSeo({
   title: 'Austin Cedar Pollen Count — Live Tracker & Forecast',
@@ -130,62 +131,69 @@ const healthTips = computed(() => {
 <template>
   <div>
     <UContainer class="py-8 md:py-12">
+      <!-- Breadcrumbs -->
+      <UBreadcrumb
+        v-if="breadcrumbs.length > 0"
+        :items="breadcrumbs"
+        class="mb-6"
+      />
+
       <!-- Header -->
-      <div class="flex items-center gap-3 mb-8 animate-fade-up">
-        <div class="flex items-center justify-center size-12 rounded-2xl" :class="category.bgColor">
-          <UIcon :name="category.icon" class="size-6" :class="category.color" />
+      <div class="mb-8 animate-fade-up">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="flex items-center justify-center size-12 rounded-2xl" :class="category.bgColor">
+            <UIcon :name="category.icon" class="size-6" :class="category.color" />
+          </div>
+          <div>
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight font-display">
+              Cedar Pollen Tracker
+            </h1>
+          </div>
         </div>
-        <div>
-          <NuxtLink
-            to="/health/"
-            class="text-xs font-medium text-muted hover:text-default transition-colors"
-          >
-            ← Health
-          </NuxtLink>
-          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight font-display">
-            Cedar Pollen Tracker
-          </h1>
-        </div>
+        <p class="text-base sm:text-lg text-muted max-w-2xl leading-relaxed">
+          {{ current?.description || 'Live cedar pollen counts for Austin, TX. Track mountain cedar levels, view forecasts, and get health tips.' }}
+        </p>
       </div>
 
-      <!-- ══════ Hero: Severity Ring + Current ══════ -->
-      <section class="cedar-hero mb-10 animate-fade-up-delay-1">
-        <div class="cedar-hero-ring">
-          <PollenSeverityRing
-            v-if="current"
-            :count="current.count"
-            :size="180"
-            label="Cedar Pollen"
-          />
-          <div v-else class="cedar-hero-placeholder">
-            <UIcon name="i-lucide-loader" class="size-10 text-muted animate-spin" />
-          </div>
-        </div>
-
-        <div class="cedar-hero-info">
-          <div class="flex items-center gap-3 mb-2">
-            <UBadge
-              :color="trendColor"
-              variant="subtle"
-              size="md"
-              :icon="trendIcon"
-              :label="trendLabel"
+      <!-- ══════ Current Level Banner + Chart ══════ -->
+      <section class="mb-10 animate-fade-up-delay-1">
+        <!-- Compact current-level banner -->
+        <div class="cedar-banner mb-4">
+          <div class="cedar-banner-ring">
+            <PollenSeverityRing
+              v-if="current"
+              :count="current.count"
+              :size="80"
+              label="Cedar"
             />
-            <span v-if="current" class="text-xs text-dimmed"> Updated {{ current.date }} </span>
+            <div v-else class="flex items-center justify-center size-20">
+              <UIcon name="i-lucide-loader" class="size-6 text-muted animate-spin" />
+            </div>
           </div>
-
-          <p class="text-base sm:text-lg text-muted leading-relaxed max-w-lg">
-            {{ current?.description || 'Loading current pollen conditions...' }}
-          </p>
-
-          <!-- Source label -->
-          <p v-if="current" class="text-xs text-dimmed mt-3">
-            Source:
-            {{
-              current.source === 'kxan-live' ? 'KXAN / Georgetown Allergy Center' : current.source
-            }}
-          </p>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-sm font-bold">Current Level</span>
+              <UBadge
+                :color="trendColor"
+                variant="subtle"
+                size="xs"
+                :icon="trendIcon"
+                :label="trendLabel"
+              />
+            </div>
+            <p v-if="current" class="text-xs text-dimmed mt-1">
+              Updated {{ current.date }}
+              · {{ current.source === 'kxan-live' ? 'KXAN / Georgetown Allergy Center' : current.source }}
+            </p>
+          </div>
         </div>
+
+        <!-- Chart -->
+        <PollenChart
+          :data="chartData"
+          :loading="historyStatus === 'pending'"
+          @period-change="onPeriodChange"
+        />
       </section>
 
       <!-- ══════ Stat Cards ══════ -->
@@ -241,16 +249,6 @@ const healthTips = computed(() => {
             :in-season="day.inSeason ?? false"
           />
         </div>
-      </section>
-
-      <!-- ══════ Historical Chart ══════ -->
-      <section class="mb-10 animate-fade-up-delay-3">
-        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-5">Pollen Trend</h2>
-        <PollenChart
-          :data="chartData"
-          :loading="historyStatus === 'pending'"
-          @period-change="onPeriodChange"
-        />
       </section>
 
       <!-- ══════ Allergen Breakdown ══════ -->
@@ -394,45 +392,23 @@ const healthTips = computed(() => {
 </template>
 
 <style scoped>
-/* ── Hero layout ────────────────────────────────────── */
-.cedar-hero {
+/* ── Compact current-level banner ──────────────────── */
+.cedar-banner {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 24px;
-  padding: 32px 24px;
-  border-radius: 20px;
+  gap: 16px;
+  padding: 12px 16px;
+  border-radius: 16px;
   border: 1px solid var(--ui-border);
   background: var(--ui-bg);
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.04);
 }
 
-@media (min-width: 640px) {
-  .cedar-hero {
-    flex-direction: row;
-    padding: 36px 40px;
-    gap: 40px;
-  }
+:is(.dark) .cedar-banner {
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.2);
 }
 
-:is(.dark) .cedar-hero {
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.2);
-}
-
-.cedar-hero-ring {
+.cedar-banner-ring {
   flex-shrink: 0;
-}
-
-.cedar-hero-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.cedar-hero-placeholder {
-  width: 180px;
-  height: 180px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 </style>

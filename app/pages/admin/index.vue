@@ -70,6 +70,12 @@ async function handleLogout() {
         <UButton color="primary" variant="soft" to="/admin/radar" icon="i-lucide-radar">
           Search Radar
         </UButton>
+        <UButton color="primary" variant="soft" to="/admin/apple-maps" icon="i-lucide-map-pin">
+          Maps API Tester
+        </UButton>
+        <UButton color="primary" variant="soft" to="/admin/grid-crawler" icon="i-lucide-grid-3x3">
+          Grid Crawler
+        </UButton>
         <UButton color="error" variant="soft" icon="i-lucide-log-out" @click="handleLogout">
           Sign Out
         </UButton>

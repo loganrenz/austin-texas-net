@@ -53,5 +53,6 @@ defineExpose({ scrollToSpot })
     :items="spots"
     :create-pin-element="createPinElement"
     :fallback-center="config.mapCenter"
+    :clustering-identifier="`map-spots-${config.parentCategory}`"
   />
 </template>
