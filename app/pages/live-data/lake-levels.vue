@@ -90,6 +90,7 @@ function createPinElement(
   isSelected: boolean,
 ): { element: HTMLElement; cleanup?: () => void } {
   const pct = spot.percentFull != null ? Math.round(spot.percentFull) : null
+
   const fillColor =
     pct != null ? (pct >= 80 ? '#22c55e' : pct >= 50 ? '#f59e0b' : '#ef4444') : '#06b6d4'
 
@@ -156,10 +157,8 @@ function percentFullBg(pct: number | null): string {
       <!-- Header -->
       <div v-if="!selectedSpot" class="mb-8 animate-fade-up">
         <div class="flex items-center gap-3 mb-4">
-          <div
-            class="flex items-center justify-center size-12 rounded-2xl bg-blue-100 dark:bg-blue-900/30"
-          >
-            <UIcon name="i-lucide-waves" class="size-6 text-blue-600 dark:text-blue-400" />
+          <div class="flex items-center justify-center size-12 rounded-2xl bg-primary/10">
+            <UIcon name="i-lucide-waves" class="size-6 text-primary" />
           </div>
           <div>
             <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight font-display">

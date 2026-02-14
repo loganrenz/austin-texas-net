@@ -71,25 +71,25 @@ interface GeoJSONFeatureCollection {
 }
 
 /** Lazily cached static GeoJSON (loaded once per cold start). */
-let staticGeoJSON: StaticFeatureCollection | null = null
+let _cachedGeo: StaticFeatureCollection | null = null
 
 async function loadStaticGeoJSON(): Promise<StaticFeatureCollection> {
-  if (staticGeoJSON) return staticGeoJSON
+  if (_cachedGeo) return _cachedGeo
 
   try {
     // Use Nitro's built-in $fetch to read from public/data/
     // This works reliably in dev, preview, and Cloudflare Pages
     const raw = await $fetch<StaticFeatureCollection>('/data/austin-neighborhoods.geojson')
     if (raw && typeof raw === 'object' && Array.isArray(raw.features)) {
-      staticGeoJSON = raw
+      _cachedGeo = raw
     } else {
-      staticGeoJSON = { type: 'FeatureCollection', features: [] }
+      _cachedGeo = { type: 'FeatureCollection', features: [] }
     }
   } catch {
-    staticGeoJSON = { type: 'FeatureCollection', features: [] }
+    _cachedGeo = { type: 'FeatureCollection', features: [] }
   }
 
-  return staticGeoJSON
+  return _cachedGeo
 }
 
 export default defineEventHandler(async (event): Promise<GeoJSONFeatureCollection> => {
