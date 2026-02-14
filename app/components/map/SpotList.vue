@@ -26,6 +26,7 @@ const { getIconPaths } = useMapIcons()
   <section class="mb-10 animate-fade-up-delay-1">
     <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-5">The Rankings</h2>
     <div class="space-y-3">
+      <!-- eslint-disable-next-line atx/no-native-button -- complex card layout -->
       <button
         v-for="spot in spots"
         :key="spot.slug"
@@ -44,6 +45,7 @@ const { getIconPaths } = useMapIcons()
                 : undefined
             "
           >
+            <!-- eslint-disable-next-line atx/no-inline-svg -- dynamic icon paths from useMapIcons() -->
             <svg
               class="map-list-svg"
               viewBox="0 0 24 24"
@@ -69,16 +71,20 @@ const { getIconPaths } = useMapIcons()
               size="xs"
             />
           </div>
+          <!-- eslint-disable-next-line atx/no-raw-tailwind-colors -->
           <p class="text-xs sm:text-sm text-muted truncate">
+            <!-- eslint-disable-next-line atx/no-raw-tailwind-colors -->
             <span class="font-medium text-amber-600 dark:text-amber-400">{{ spot.knownFor }}</span>
             <span class="mx-1.5 text-dimmed">·</span>
             {{ spot.neighborhood }}
           </p>
         </div>
         <div v-if="spot.rating" class="map-list-rating shrink-0">
+          <!-- eslint-disable-next-line atx/no-raw-tailwind-colors -->
           <UIcon name="i-lucide-star" class="size-3.5 text-amber-400" />
           <span>{{ spot.rating }}</span>
         </div>
+        <!-- eslint-disable-next-line atx/no-raw-tailwind-colors -->
         <UIcon
           name="i-lucide-map-pin"
           class="size-4 text-muted group-hover:text-amber-500 transition-colors shrink-0"

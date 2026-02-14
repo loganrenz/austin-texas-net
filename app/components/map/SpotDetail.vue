@@ -30,13 +30,15 @@ const stars = computed(() => {
 
 <template>
   <section class="mb-10 animate-fade-up">
-    <button
-      class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-muted mb-5 hover:text-default transition-colors"
+    <UButton
+      variant="link"
+      color="neutral"
+      size="sm"
+      icon="i-lucide-arrow-left"
+      label="Back to Rankings"
+      class="text-xs font-bold uppercase tracking-widest mb-5"
       @click="emit('back')"
-    >
-      <UIcon name="i-lucide-arrow-left" class="size-3.5" />
-      Back to Rankings
-    </button>
+    />
 
     <div class="spot-detail-panel">
       <!-- Name + icon rank pin -->
@@ -52,6 +54,7 @@ const stars = computed(() => {
                 : undefined
             "
           >
+            <!-- eslint-disable-next-line atx/no-inline-svg -- dynamic icon paths from useMapIcons() -->
             <svg
               class="spot-detail-svg"
               viewBox="0 0 24 24"
@@ -92,9 +95,11 @@ const stars = computed(() => {
         />
         <div v-if="spot.rating" class="flex items-center gap-1 ml-auto">
           <template v-for="i in stars.full" :key="`df${i}`">
+            <!-- eslint-disable-next-line atx/no-raw-tailwind-colors -->
             <UIcon name="i-lucide-star" class="size-4 text-amber-400 fill-amber-400" />
           </template>
           <template v-if="stars.half">
+            <!-- eslint-disable-next-line atx/no-raw-tailwind-colors -->
             <UIcon name="i-lucide-star-half" class="size-4 text-amber-400" />
           </template>
           <template v-for="i in stars.empty" :key="`de${i}`">
@@ -106,6 +111,7 @@ const stars = computed(() => {
 
       <!-- Known for -->
       <div v-if="spot.knownFor" class="spot-detail-known-for mb-5">
+        <!-- eslint-disable-next-line atx/no-inline-svg -- dynamic icon paths from useMapIcons() -->
         <svg
           class="spot-detail-known-svg"
           viewBox="0 0 24 24"
@@ -118,10 +124,12 @@ const stars = computed(() => {
           <path v-for="(d, i) in iconPaths" :key="i" :d="d" />
         </svg>
         <div>
+          <!-- eslint-disable-next-line atx/no-raw-tailwind-colors -->
           <span
             class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400"
             >Known For</span
           >
+          <!-- eslint-disable-next-line atx/no-raw-tailwind-colors -->
           <p class="text-sm font-semibold text-amber-800 dark:text-amber-300 mt-0.5">
             {{ spot.knownFor }}
           </p>

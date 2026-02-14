@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-v-html -->
 <script setup lang="ts">
 /**
  * MapContentPage — Full page wrapper for the Map Content Type pattern.
