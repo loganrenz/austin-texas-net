@@ -1,11 +1,11 @@
 {
+  "$schema": "https://raw.githubusercontent.com/cloudflare/workers-sdk/main/packages/wrangler/schemas/config/wrangler.json",
   "name": "real-estate-cron",
   "main": "src/index.ts",
-  "compatibility_date": "2025-01-01",
+  "compatibility_date": "2025-07-15",
   "triggers": {
-    "crons": ["0 6 16 * *"]
-  },
-  "vars": {
-    "INGEST_URL": "https://austin-texas.net"
+    "crons": [
+      "0 6 16 * *"
+    ]
   }
 }

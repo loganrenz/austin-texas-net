@@ -74,12 +74,6 @@ export default defineNuxtConfig({
       width: 1200,
       height: 630,
     },
-    fonts: [
-      'Inter:400',
-      'Inter:700',
-      'Outfit:700',
-      'Outfit:900',
-    ],
   },
 
   sitemap: {

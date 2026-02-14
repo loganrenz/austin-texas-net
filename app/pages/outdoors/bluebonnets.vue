@@ -6,6 +6,9 @@
  * Renders thousands of Lupinus texensis (Texas Bluebonnet) sightings
  * as circle overlays on an Apple MapKit map. Data sourced from
  * iNaturalist's citizen-science platform.
+ *
+ * Follows the same pattern as food pages: clicking a dot replaces
+ * the content below the map with observation detail + photo.
  */
 
 const { getCategoryBySlug, categories } = useSiteData()
@@ -20,7 +23,6 @@ const selectedYear = ref<string>(String(currentYear))
 
 const yearOptions = computed(() => {
   const opts = [{ label: 'All Time', value: 'all' }]
-  // Recent 5 years
   for (let y = currentYear; y >= currentYear - 4; y--) {
     opts.push({ label: String(y), value: String(y) })
   }
@@ -57,7 +59,6 @@ const totalCount = computed(() => data.value?.total ?? 0)
 const selectedObs = ref<ObservationPoint | null>(null)
 
 function handleMapClick(coords: { lat: number; lng: number }) {
-  // Find the nearest observation to the click point
   let best: ObservationPoint | null = null
   let bestDist = Infinity
 
@@ -78,6 +79,11 @@ function handleMapClick(coords: { lat: number; lng: number }) {
     selectedObs.value = null
   }
 }
+
+// Clear selection when year changes
+watch(selectedYear, () => {
+  selectedObs.value = null
+})
 
 // ── Circle overlays for the map ────────────────────────────
 /* eslint-disable atx/no-inline-hex -- MapKit circle overlay colors */
@@ -116,6 +122,7 @@ useSchemaOrg([
         :circles="circles"
         :fallback-center="{ lat: 31.0, lng: -99.5 }"
         :bounding-padding="0.08"
+        texas-mask
         @map-click="handleMapClick"
       />
       <template #fallback>
@@ -128,68 +135,17 @@ useSchemaOrg([
       </template>
     </ClientOnly>
 
-    <!-- Selected observation photo card -->
-    <div
-      v-if="selectedObs"
-      class="relative z-10 -mt-2 mx-auto max-w-md px-4"
-    >
-      <div class="rounded-2xl border border-default bg-elevated shadow-lg overflow-hidden animate-fade-up">
-        <button
-          class="absolute top-3 right-3 z-10 flex items-center justify-center size-7 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
-          @click="selectedObs = null"
-        >
-          <UIcon name="i-lucide-x" class="size-4" />
-        </button>
-        <img
-          v-if="selectedObs.photo_url"
-          :src="selectedObs.photo_url"
-          alt="Bluebonnet observation photo"
-          class="w-full h-48 sm:h-56 object-cover"
-          loading="lazy"
-        />
-        <div class="p-4">
-          <div class="flex items-center gap-2 mb-2">
-            <UIcon name="i-lucide-flower-2" class="size-4 text-primary" />
-            <span class="text-sm font-semibold">Texas Bluebonnet</span>
-          </div>
-          <div class="space-y-1 text-xs text-muted">
-            <p v-if="selectedObs.place">
-              <UIcon name="i-lucide-map-pin" class="inline size-3 mr-1" />
-              {{ selectedObs.place }}
-            </p>
-            <p v-if="selectedObs.observed_on">
-              <UIcon name="i-lucide-calendar" class="inline size-3 mr-1" />
-              {{ selectedObs.observed_on }}
-            </p>
-            <p>
-              <UIcon name="i-lucide-user" class="inline size-3 mr-1" />
-              {{ selectedObs.observer }}
-            </p>
-          </div>
-          <a
-            :href="selectedObs.url"
-            target="_blank"
-            rel="noopener"
-            class="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
-          >
-            View on iNaturalist
-            <UIcon name="i-lucide-external-link" class="size-3" />
-          </a>
-        </div>
-      </div>
-    </div>
-
     <!-- Content below map -->
     <UContainer class="py-8 md:py-12">
-      <!-- Breadcrumbs -->
+      <!-- Breadcrumbs (hidden when viewing a detail) -->
       <UBreadcrumb
-        v-if="breadcrumbs.length > 0"
+        v-if="breadcrumbs.length > 0 && !selectedObs"
         :items="breadcrumbs"
         class="mb-6"
       />
 
-      <!-- Header -->
-      <div class="mb-8 animate-fade-up">
+      <!-- ─── Header + intro (hidden when a sighting is selected) ─── -->
+      <div v-if="!selectedObs" class="mb-8 animate-fade-up">
         <div class="flex items-center gap-3 mb-4">
           <div
             class="flex items-center justify-center size-12 rounded-2xl"
@@ -214,12 +170,12 @@ useSchemaOrg([
             target="_blank"
             rel="noopener"
             class="text-primary hover:underline"
-          >iNaturalist</a> across the entire state of Texas — tap the year filter to explore seasonal patterns.
+          >iNaturalist</a> across the entire state of Texas —
+          <strong class="text-default">tap any dot</strong> to see the photo.
         </p>
 
         <!-- Controls bar -->
         <div class="flex flex-wrap items-center gap-4">
-          <!-- Year filter -->
           <div class="flex items-center gap-2 rounded-xl border border-default bg-elevated px-3.5 py-2.5">
             <UIcon name="i-lucide-calendar" class="size-4 shrink-0 text-muted" />
             <USelect
@@ -230,7 +186,6 @@ useSchemaOrg([
             />
           </div>
 
-          <!-- Stats -->
           <div class="flex items-center gap-3 text-sm text-muted">
             <div v-if="status === 'pending'" class="flex items-center gap-1.5">
               <div class="size-3 rounded-full bg-primary/40 animate-pulse" />
@@ -248,8 +203,93 @@ useSchemaOrg([
         </div>
       </div>
 
-      <!-- Peak season info card -->
-      <div class="mb-8 rounded-2xl border border-default bg-elevated p-5 animate-fade-up-delay-1">
+      <!-- ─── Selected observation detail (replaces intro) ─── -->
+      <section v-if="selectedObs" class="mb-10 animate-fade-up">
+        <UButton
+          variant="link"
+          color="neutral"
+          size="sm"
+          icon="i-lucide-arrow-left"
+          label="Back to Map"
+          class="text-xs font-bold uppercase tracking-widest mb-5"
+          @click="selectedObs = null"
+        />
+
+        <div class="spot-detail-panel">
+          <!-- Photo -->
+          <img
+            v-if="selectedObs.photo_url"
+            :src="selectedObs.photo_url"
+            alt="Bluebonnet observation"
+            class="w-full rounded-xl mb-5 max-h-[400px] object-cover"
+            loading="lazy"
+          />
+          <div
+            v-else
+            class="w-full h-48 rounded-xl mb-5 bg-elevated flex items-center justify-center"
+          >
+            <UIcon name="i-lucide-image-off" class="size-10 text-dimmed" />
+          </div>
+
+          <!-- Title + icon -->
+          <div class="flex items-start gap-4 mb-4">
+            <div
+              class="flex items-center justify-center size-11 rounded-full shrink-0"
+              :class="category.bgColor"
+            >
+              <UIcon name="i-lucide-flower-2" class="size-5" :class="category.color" />
+            </div>
+            <div class="min-w-0 flex-1">
+              <h2 class="text-xl sm:text-2xl font-extrabold font-display leading-tight mb-1">
+                Texas Bluebonnet
+              </h2>
+              <p v-if="selectedObs.place" class="text-sm text-muted">
+                {{ selectedObs.place }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Meta badges -->
+          <div class="flex flex-wrap items-center gap-2 mb-5">
+            <UBadge
+              v-if="selectedObs.observed_on"
+              :label="selectedObs.observed_on"
+              color="neutral"
+              variant="subtle"
+              size="sm"
+              icon="i-lucide-calendar"
+            />
+            <UBadge
+              :label="selectedObs.observer"
+              color="neutral"
+              variant="subtle"
+              size="sm"
+              icon="i-lucide-user"
+            />
+            <UBadge
+              label="Lupinus texensis"
+              color="success"
+              variant="subtle"
+              size="sm"
+              icon="i-lucide-leaf"
+            />
+          </div>
+
+          <!-- Link to iNaturalist -->
+          <a
+            :href="selectedObs.url"
+            target="_blank"
+            rel="noopener"
+            class="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+          >
+            View full observation on iNaturalist
+            <UIcon name="i-lucide-external-link" class="size-4" />
+          </a>
+        </div>
+      </section>
+
+      <!-- ─── Peak season info (only when no selection) ─── -->
+      <div v-if="!selectedObs" class="mb-8 rounded-2xl border border-default bg-elevated p-5 animate-fade-up-delay-1">
         <div class="flex items-start gap-3">
           <UIcon name="i-lucide-info" class="size-5 shrink-0 text-primary mt-0.5" />
           <div class="text-sm text-muted leading-relaxed">
@@ -332,3 +372,18 @@ useSchemaOrg([
     </UContainer>
   </div>
 </template>
+
+<!-- eslint-disable atx/no-style-block-layout -->
+<style scoped>
+.spot-detail-panel {
+  padding: 20px 24px;
+  border-radius: 16px;
+  border: 1px solid var(--ui-border);
+  background: var(--ui-bg);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+:is(.dark) .spot-detail-panel {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+</style>
