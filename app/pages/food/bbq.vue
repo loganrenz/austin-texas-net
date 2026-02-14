@@ -38,7 +38,12 @@ usePageSeo({
   },
 })
 
-useSchemaOrg([defineWebPage({ name: config.title, description: config.description })])
+useSchemaOrg([
+  defineWebPage({
+    name: 'Top 10 BBQ in Austin — Best Brisket, Ribs & Smokehouses',
+    description: config.description,
+  }),
+])
 
 const { data: apiData } = await useFetch<{ spots: MapSpot[] }>(config.apiEndpoint!)
 const spots = computed<MapSpot[]>(() => {

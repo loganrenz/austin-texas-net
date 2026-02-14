@@ -16,6 +16,7 @@ const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('weather')!
 const siblings = category.subApps.filter((a) => a.slug !== 'current-conditions')
 const crossLinks = categories.filter((c) => c.slug !== 'weather').slice(0, 4)
+const { items: breadcrumbs } = useBreadcrumbs()
 
 usePageSeo({
   title: 'Austin Weather Now — Current Conditions, Temperature & Wind',
@@ -30,7 +31,7 @@ usePageSeo({
 
 useSchemaOrg([
   defineWebPage({
-    name: 'Austin Current Weather Conditions',
+    name: 'Austin Weather Now — Current Conditions, Temperature & Wind',
     description: 'Live weather conditions for Austin, Texas from the National Weather Service.',
   }),
 ])
@@ -112,18 +113,15 @@ const statCards = computed(() => {
 <template>
   <div>
     <UContainer class="py-8 md:py-12">
+      <!-- Breadcrumbs -->
+      <UBreadcrumb v-if="breadcrumbs.length > 0" :items="breadcrumbs" class="mb-6" />
+
       <!-- Header -->
       <div class="flex items-center gap-3 mb-8 animate-fade-up">
         <div class="flex items-center justify-center size-12 rounded-2xl" :class="category.bgColor">
           <UIcon :name="category.icon" class="size-6" :class="category.color" />
         </div>
         <div>
-          <NuxtLink
-            to="/weather/"
-            class="text-xs font-medium text-muted hover:text-default transition-colors"
-          >
-            ← Weather
-          </NuxtLink>
           <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight font-display">
             Current Conditions
           </h1>

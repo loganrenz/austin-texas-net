@@ -31,3 +31,6 @@ logs
 # Playwright
 test-results/
 playwright-report/
+
+# Content pipeline dry-run output
+scripts/content-output/

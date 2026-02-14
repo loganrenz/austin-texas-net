@@ -10,7 +10,8 @@ export default defineConfig({
   testDir: './e2e',
   timeout: 30_000,
   retries: 1,
-  workers: 4,
+  workers: 8,
+  fullyParallel: true,
 
   use: {
     baseURL: 'http://localhost:12233',
@@ -19,11 +20,13 @@ export default defineConfig({
   },
 
   webServer: {
-    command: 'doppler run --project austin-texas-net --config dev -- nuxt dev --port 12233',
-    url: 'http://localhost:12233',  // Wait for HTTP 200, not just port open
+    //command: 'doppler run --project austin-texas-net --config dev -- pnpm nuxt dev --port 12233',
+    command: 'pnpm dev --port 12233',
+    url: 'http://localhost:12233', // Wait for HTTP 200, not just port open
     reuseExistingServer: !process.env.CI,
-    timeout: 180_000, // 3 min — Nuxt cold start + SSR warm-up
+    timeout: 60_000, // 3 min — Nuxt cold start + SSR warm-up
     stdout: 'ignore',
+    //stdout: 'pipe',
     stderr: 'pipe',
   },
 

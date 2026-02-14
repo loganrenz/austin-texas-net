@@ -14,6 +14,7 @@ const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('weather')!
 const siblings = category.subApps.filter((a) => a.slug !== '7-day-forecast')
 const crossLinks = categories.filter((c) => c.slug !== 'weather').slice(0, 4)
+const { items: breadcrumbs } = useBreadcrumbs()
 
 usePageSeo({
   title: 'Austin 7-Day Forecast — Daily Highs, Lows & Conditions',
@@ -28,8 +29,9 @@ usePageSeo({
 
 useSchemaOrg([
   defineWebPage({
-    name: 'Austin 7-Day Weather Forecast',
-    description: 'Extended weather forecast for Austin, Texas — daily and nightly conditions from the NWS.',
+    name: 'Austin 7-Day Forecast — Daily Highs, Lows & Conditions',
+    description:
+      'Extended weather forecast for Austin, Texas — daily and nightly conditions from the NWS.',
   }),
 ])
 
@@ -53,7 +55,7 @@ const dayPairs = computed(() => {
 
   while (i < p.length) {
     const day = p[i]!
-    const night = (i + 1 < p.length && !p[i + 1]!.isDaytime) ? p[i + 1]! : null
+    const night = i + 1 < p.length && !p[i + 1]!.isDaytime ? p[i + 1]! : null
     pairs.push({ day, night })
     i += night ? 2 : 1
   }
@@ -64,7 +66,8 @@ const dayPairs = computed(() => {
 function getConditionIcon(shortForecast: string): string {
   const d = shortForecast.toLowerCase()
   if (d.includes('thunder') || d.includes('storm')) return 'i-lucide-cloud-lightning'
-  if (d.includes('rain') || d.includes('shower') || d.includes('drizzle')) return 'i-lucide-cloud-rain'
+  if (d.includes('rain') || d.includes('shower') || d.includes('drizzle'))
+    return 'i-lucide-cloud-rain'
   if (d.includes('snow') || d.includes('sleet') || d.includes('ice')) return 'i-lucide-snowflake'
   if (d.includes('fog') || d.includes('haze') || d.includes('mist')) return 'i-lucide-cloud-fog'
   if (d.includes('cloudy') || d.includes('overcast')) return 'i-lucide-cloud'
@@ -79,26 +82,26 @@ function getConditionIcon(shortForecast: string): string {
   <div>
     <UContainer class="py-8 md:py-12">
       <!-- Header -->
+      <!-- Breadcrumbs -->
+      <UBreadcrumb v-if="breadcrumbs.length > 0" :items="breadcrumbs" class="mb-6" />
+
       <div class="flex items-center gap-3 mb-8 animate-fade-up">
         <div class="flex items-center justify-center size-12 rounded-2xl" :class="category.bgColor">
           <UIcon :name="category.icon" class="size-6" :class="category.color" />
         </div>
         <div>
-          <NuxtLink
-            to="/weather/"
-            class="text-xs font-medium text-muted hover:text-default transition-colors"
-          >
-            ← Weather
-          </NuxtLink>
           <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight font-display">
             7-Day Forecast
           </h1>
         </div>
       </div>
 
-      <p class="text-base sm:text-lg text-muted max-w-2xl leading-relaxed mb-8 animate-fade-up-delay-1">
-        Extended forecast for Austin from the <strong class="text-default">National Weather Service</strong>.
-        Includes day and night conditions, precipitation chances, and wind.
+      <p
+        class="text-base sm:text-lg text-muted max-w-2xl leading-relaxed mb-8 animate-fade-up-delay-1"
+      >
+        Extended forecast for Austin from the
+        <strong class="text-default">National Weather Service</strong>. Includes day and night
+        conditions, precipitation chances, and wind.
       </p>
 
       <!-- Loading -->
@@ -116,12 +119,21 @@ function getConditionIcon(shortForecast: string): string {
         >
           <!-- Day period -->
           <div class="flex items-start gap-4 p-4 sm:p-5">
-            <div class="flex items-center justify-center size-12 rounded-xl shrink-0" :class="category.bgColor">
-              <UIcon :name="getConditionIcon(pair.day.shortForecast)" class="size-6" :class="category.color" />
+            <div
+              class="flex items-center justify-center size-12 rounded-xl shrink-0"
+              :class="category.bgColor"
+            >
+              <UIcon
+                :name="getConditionIcon(pair.day.shortForecast)"
+                class="size-6"
+                :class="category.color"
+              />
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-1 flex-wrap">
-                <h2 class="text-base sm:text-lg font-extrabold font-display">{{ pair.day.name }}</h2>
+                <h2 class="text-base sm:text-lg font-extrabold font-display">
+                  {{ pair.day.name }}
+                </h2>
                 <UBadge
                   v-if="pair.day.probabilityOfPrecipitation"
                   color="info"
@@ -150,7 +162,8 @@ function getConditionIcon(shortForecast: string): string {
           <div class="px-4 sm:px-5 pb-4 sm:pb-5 border-t border-default pt-3">
             <p class="text-xs text-muted leading-relaxed">{{ pair.day.detailedForecast }}</p>
             <p v-if="pair.night" class="text-xs text-muted leading-relaxed mt-2">
-              <strong class="text-dimmed">{{ pair.night.name }}:</strong> {{ pair.night.detailedForecast }}
+              <strong class="text-dimmed">{{ pair.night.name }}:</strong>
+              {{ pair.night.detailedForecast }}
             </p>
           </div>
         </div>
@@ -164,13 +177,18 @@ function getConditionIcon(shortForecast: string): string {
           </h2>
           <div class="text-sm text-muted leading-relaxed space-y-3">
             <p>
-              This forecast is provided by the <strong class="text-default">NWS Austin/San Antonio office (EWX)</strong>
-              and is the same data used by local TV stations and emergency management.
-              It covers the greater Austin metro area.
+              This forecast is provided by the
+              <strong class="text-default">NWS Austin/San Antonio office (EWX)</strong>
+              and is the same data used by local TV stations and emergency management. It covers the
+              greater Austin metro area.
             </p>
             <p>
               Forecasts are updated multiple times per day. For the most current short-term
-              conditions, visit our <NuxtLink to="/weather/current-conditions/" class="text-primary hover:underline">Current Conditions</NuxtLink> page.
+              conditions, visit our
+              <NuxtLink to="/weather/current-conditions/" class="text-primary hover:underline"
+                >Current Conditions</NuxtLink
+              >
+              page.
             </p>
           </div>
         </div>

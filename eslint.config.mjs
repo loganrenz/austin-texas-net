@@ -13,16 +13,16 @@ export default withNuxt(
     rules: {
 
       // Consistent component naming (PascalCase)
-      'vue/component-name-in-template-casing': ['warn', 'PascalCase'],
+      'vue/component-name-in-template-casing': ['error', 'PascalCase'],
 
       // Require multi-word component names (Nuxt auto-imports bypass this)
       'vue/multi-word-component-names': 'off',
 
       // No console in production code
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'no-console': ['error', { allow: ['warn', 'error'] }],
 
       // Align void element self-closing with prettier (prettier adds />)
-      'vue/html-self-closing': ['warn', {
+      'vue/html-self-closing': ['error', {
         html: { void: 'always', normal: 'always', component: 'always' },
       }],
     },
@@ -95,5 +95,10 @@ export default withNuxt(
     rules: {
       'atx/no-fetch-in-component': 'off',
     },
+  },
+  // CLI scripts — console.log is the primary output mechanism
+  {
+    files: ['scripts/**/*.ts'],
+    rules: { 'no-console': 'off' },
   }
 )

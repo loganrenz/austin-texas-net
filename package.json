@@ -19,7 +19,8 @@
     "postbuild": "node scripts/patch-cf-process-proxy.mjs",
     "dev:kill": "pkill -f 'nuxt/bin/nuxt.mjs dev' ;pkill -f 'nuxt.*austin-texas-net' ; pkill -f 'pnpm.*austin-texas-net.*dev' ; pkill -f workerd ; echo 'Killed all austin-texas-net dev processes'",
     "logs": "wrangler tail austin-texas-net",
-    "secrets:sync": "doppler secrets --json --project austin-texas-net --config prd | jq -c 'with_entries(.value = .value.computed)' | wrangler secret bulk"
+    "secrets:sync": "doppler secrets --json --project austin-texas-net --config prd | jq -c 'with_entries(.value = .value.computed)' | wrangler secret bulk",
+    "content:refresh": "tsx scripts/content-pipeline.ts"
   },
   "dependencies": {
     "@nuxt/content": "^3.11.2",
@@ -51,13 +52,17 @@
     "@nuxtjs/robots": "^5.7.0",
     "@nuxtjs/sitemap": "^7.6.0",
     "@playwright/test": "^1.58.2",
+    "@tavily/core": "^0.7.1",
     "@types/node": "^22.15.0",
     "@types/react": "^19.2.14",
+    "dotenv": "^17.3.1",
     "eslint": "^9.39.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "nitro-cloudflare-dev": "^0.2.2",
+    "openai": "^6.22.0",
     "prettier": "^3.8.1",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "wrangler": "^4.20.0"
   },

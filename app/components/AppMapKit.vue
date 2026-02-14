@@ -75,6 +75,8 @@ const props = withDefaults(
     fallbackCenter?: { lat: number; lng: number }
     /** When true, draws a semi-transparent overlay outside the Texas border. */
     texasMask?: boolean
+    /** When true, keeps the current map region when items change instead of auto-zooming to fit. */
+    preserveRegion?: boolean
   }>(),
   {
     items: () => [] as any,
@@ -88,6 +90,7 @@ const props = withDefaults(
     boundingPadding: 0.05,
     fallbackCenter: () => ({ lat: 30.2672, lng: -97.7431 }),
     texasMask: false,
+    preserveRegion: false,
   },
 )
 
@@ -573,8 +576,10 @@ watch(
     selectedId.value = null
     clearPinCleanups()
     map.removeAnnotations(map.annotations)
-    overviewRegion = computeBoundingRegion()
-    map.setRegionAnimated(overviewRegion, true)
+    if (!props.preserveRegion) {
+      overviewRegion = computeBoundingRegion()
+      map.setRegionAnimated(overviewRegion, true)
+    }
     addAnnotations()
   },
   { deep: false },
@@ -636,7 +641,19 @@ function scrollIntoView() {
   mapContainer.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
-defineExpose({ scrollIntoView })
+function setRegion(center: { lat: number; lng: number }, span?: { lat: number; lng: number }) {
+  if (!map) return
+  const coord = new mapkit.Coordinate(center.lat, center.lng)
+  const s = new mapkit.CoordinateSpan(span?.lat ?? 0.01, span?.lng ?? 0.01)
+  map.setRegionAnimated(new mapkit.CoordinateRegion(coord, s), true)
+}
+function zoomToFit() {
+  if (!map) return
+  const region = computeBoundingRegion()
+  if (region) map.setRegionAnimated(region, true)
+}
+
+defineExpose({ scrollIntoView, setRegion, zoomToFit })
 </script>
 
 <template>

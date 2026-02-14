@@ -61,6 +61,8 @@ export default defineNuxtConfig({
     ingestApiKey: process.env.INGEST_API_KEY || '',
     googleServiceAccountKey: process.env.GSC_SERVICE_ACCOUNT_JSON || '',
     posthogApiKey: process.env.POSTHOG_PERSONAL_API_KEY || '',
+    openaiApiKey: process.env.OPENAI_API_KEY || '',
+    tavilyApiKey: process.env.TAVILY_API_KEY || '',
     public: {
       appUrl: process.env.SITE_URL || 'https://austin-texas.net',
       mapkitToken: process.env.MAPKIT_TOKEN || '',

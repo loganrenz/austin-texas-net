@@ -435,6 +435,212 @@ h4,
   }
 }
 
+/* ── Admin Apple Maps tester ───────────────────────────────── */
+.amt-view-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ui-text-dimmed);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.amt-view-tab:not(:last-child) {
+  border-right: 1px solid var(--ui-border);
+}
+
+.amt-view-tab:hover {
+  color: var(--ui-text);
+  background: var(--ui-bg-elevated);
+}
+
+.amt-view-tab.active {
+  color: var(--ui-primary);
+  background: var(--ui-bg-elevated);
+}
+
+.amt-kv-grid {
+  display: grid;
+  grid-template-columns: minmax(120px, auto) 1fr;
+  gap: 0;
+  font-size: 0.75rem;
+}
+
+.amt-kv-grid.nested {
+  font-size: 0.7rem;
+}
+
+.amt-kv-key {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--ui-text-dimmed);
+  padding: 0.375rem 0.625rem;
+  border-bottom: 1px solid var(--ui-border);
+  display: flex;
+  align-items: baseline;
+}
+
+.amt-kv-val {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.72rem;
+  padding: 0.375rem 0.625rem;
+  border-bottom: 1px solid var(--ui-border);
+  word-break: break-word;
+  display: flex;
+  align-items: baseline;
+}
+
+.amt-val-string {
+  color: var(--ui-text);
+}
+
+.amt-val-number {
+  color: var(--ui-info);
+  font-weight: 600;
+}
+
+.amt-val-boolean {
+  color: var(--ui-warning);
+  font-weight: 600;
+}
+
+.amt-val-null {
+  color: var(--ui-text-dimmed);
+  font-style: italic;
+}
+
+.amt-val-array {
+  color: var(--ui-success);
+}
+
+.amt-val-object {
+  color: var(--ui-text-muted);
+}
+
+.amt-result-card {
+  border: 1px solid var(--ui-border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.amt-result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.625rem 0.75rem;
+  background: var(--ui-bg-elevated);
+  border-bottom: 1px solid var(--ui-border);
+  gap: 0.75rem;
+}
+
+.amt-raw-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--ui-border);
+  color: var(--ui-text-dimmed);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.amt-raw-toggle:hover {
+  color: var(--ui-text);
+  border-color: var(--ui-text-dimmed);
+}
+
+.amt-raw-toggle.active {
+  color: var(--ui-primary);
+  border-color: var(--ui-primary);
+}
+
+.amt-expand-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ui-text-dimmed);
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-weight: 600;
+  font-size: 0.68rem;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.amt-expand-btn:hover {
+  color: var(--ui-primary);
+}
+
+.amt-expand-hint {
+  font-weight: 400;
+  opacity: 0.6;
+  font-size: 0.6rem;
+}
+
+.amt-nested-block {
+  padding: 0.5rem 0.5rem 0.5rem 1.25rem;
+  border-bottom: 1px solid var(--ui-border);
+  background: color-mix(in srgb, var(--ui-bg-elevated) 30%, transparent);
+}
+
+.amt-nested-item {
+  padding: 0.375rem 0;
+  border-bottom: 1px solid var(--ui-border);
+}
+
+.amt-nested-item:last-child {
+  border-bottom: none;
+}
+
+.amt-raw-json {
+  background: var(--ui-bg-elevated);
+  border: 1px solid var(--ui-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  font-size: 0.7rem;
+  max-height: 600px;
+  overflow: auto;
+  white-space: pre-wrap;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  line-height: 1.6;
+}
+
+/* Map panel for admin tester */
+.amt-map-wrapper {
+  position: relative;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.amt-map-wrapper .mapkit-wrapper {
+  height: 550px;
+  min-height: 400px;
+  max-height: 550px;
+  border-bottom: none;
+  border-radius: 0.5rem;
+}
+
+.amt-search-area-btn {
+  position: absolute;
+  top: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
 /* ── Page transitions ──────────────────────────────────────── */
 .page-enter-active,
 .page-leave-active {

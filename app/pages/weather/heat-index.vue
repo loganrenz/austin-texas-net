@@ -15,6 +15,7 @@ const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('weather')!
 const siblings = category.subApps.filter((a) => a.slug !== 'heat-index')
 const crossLinks = categories.filter((c) => c.slug !== 'weather').slice(0, 4)
+const { items: breadcrumbs } = useBreadcrumbs()
 
 usePageSeo({
   title: 'Austin Heat Index — Feels-Like Temperature & Safety Tips',
@@ -29,7 +30,7 @@ usePageSeo({
 
 useSchemaOrg([
   defineWebPage({
-    name: 'Austin Heat Index',
+    name: 'Austin Heat Index — Feels-Like Temperature & Safety Tips',
     description: 'Heat index and feels-like temperature tracker for Austin, Texas.',
   }),
 ])
@@ -155,17 +156,14 @@ function formatTimestamp(ts: string): string {
   <div>
     <UContainer class="py-8 md:py-12">
       <!-- Header -->
+      <!-- Breadcrumbs -->
+      <UBreadcrumb v-if="breadcrumbs.length > 0" :items="breadcrumbs" class="mb-6" />
+
       <div class="flex items-center gap-3 mb-8 animate-fade-up">
         <div class="flex items-center justify-center size-12 rounded-2xl" :class="category.bgColor">
           <UIcon :name="category.icon" class="size-6" :class="category.color" />
         </div>
         <div>
-          <NuxtLink
-            to="/weather/"
-            class="text-xs font-medium text-muted hover:text-default transition-colors"
-          >
-            ← Weather
-          </NuxtLink>
           <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight font-display">
             {{ isHeatSeason ? 'Heat Index' : 'Wind Chill' }}
           </h1>

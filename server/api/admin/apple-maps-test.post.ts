@@ -39,7 +39,8 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = await readBody(event)
-  const { endpoint, query, lat, lng, limit, resultTypeFilter, includeAddressCategories } = bodySchema.parse(body)
+  const { endpoint, query, lat, lng, limit, resultTypeFilter, includeAddressCategories } =
+    bodySchema.parse(body)
 
   const accessToken = await getAppleMapsAccessToken()
   const startTime = Date.now()
@@ -54,7 +55,7 @@ export default defineEventHandler(async (event) => {
       if (resultTypeFilter) params.set('resultTypeFilter', resultTypeFilter)
       if (includeAddressCategories) params.set('includeAddressCategories', includeAddressCategories)
       if (lat && lng) params.set('searchLocation', `${lat},${lng}`)
-      params.set('searchRegion', AUSTIN_REGION)
+      else params.set('searchRegion', AUSTIN_REGION)
       params.set('limitToCountries', 'US')
       if (limit) params.set('limit', String(limit))
       url = `https://maps-api.apple.com/v1/search?${params.toString()}`
@@ -62,7 +63,8 @@ export default defineEventHandler(async (event) => {
     }
 
     case 'geocode': {
-      if (!query) throw createError({ statusCode: 400, statusMessage: 'query required for geocode' })
+      if (!query)
+        throw createError({ statusCode: 400, statusMessage: 'query required for geocode' })
       params.set('q', query)
       params.set('searchRegion', AUSTIN_REGION)
       params.set('limitToCountries', 'US')
@@ -71,14 +73,16 @@ export default defineEventHandler(async (event) => {
     }
 
     case 'reverseGeocode': {
-      if (!lat || !lng) throw createError({ statusCode: 400, statusMessage: 'lat/lng required for reverseGeocode' })
+      if (!lat || !lng)
+        throw createError({ statusCode: 400, statusMessage: 'lat/lng required for reverseGeocode' })
       params.set('loc', `${lat},${lng}`)
       url = `https://maps-api.apple.com/v1/reverseGeocode?${params.toString()}`
       break
     }
 
     case 'neighborhood': {
-      if (!query) throw createError({ statusCode: 400, statusMessage: 'query required for neighborhood' })
+      if (!query)
+        throw createError({ statusCode: 400, statusMessage: 'query required for neighborhood' })
       params.set('q', `${query}, Austin, TX`)
       params.set('resultTypeFilter', 'Address')
       params.set('includeAddressCategories', 'SubLocality')
@@ -89,7 +93,8 @@ export default defineEventHandler(async (event) => {
     }
 
     case 'searchAddress': {
-      if (!query) throw createError({ statusCode: 400, statusMessage: 'query required for searchAddress' })
+      if (!query)
+        throw createError({ statusCode: 400, statusMessage: 'query required for searchAddress' })
       params.set('q', `${query}, Austin, TX`)
       params.set('resultTypeFilter', 'Address')
       params.set('limitToCountries', 'US')

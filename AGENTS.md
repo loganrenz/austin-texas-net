@@ -53,3 +53,7 @@
 - **No placeholder content.** If you need an image, generate one. If you need data, use realistic mock data.
 - **Keep files focused.** One component per file, one API route per file. Extract shared logic into `server/utils/` or `app/composables/`.
 - **Delete dead code.** Don't leave commented-out blocks or unused imports.
+
+## Finally
+
+- **Run `pnpm typecheck` and `pnpm lint` before calling it done.** No errors or warnings allowed.
