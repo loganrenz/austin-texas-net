@@ -45,13 +45,16 @@ async function onPeriodChange(days: number) {
 }
 
 // ─── Computed ──────────────────────────────────────────
-const current = computed(() => currentData.value?.current ?? null)
-const trend = computed(() => currentData.value?.trend ?? 'stable')
-const season = computed(
-  () => currentData.value?.season ?? { peakCount: 0, avgCount: 0, highDays: 0 },
+const pollenData = computed(() =>
+  currentData.value && 'trend' in currentData.value ? currentData.value : null,
 )
-const allergens = computed(() => currentData.value?.allergens ?? null)
-const forecast = computed(() => currentData.value?.forecast ?? [])
+const current = computed(() => pollenData.value?.current ?? null)
+const trend = computed(() => pollenData.value?.trend ?? 'stable')
+const season = computed(
+  () => pollenData.value?.season ?? { peakCount: 0, avgCount: 0, highDays: 0 },
+)
+const allergens = computed(() => pollenData.value?.allergens ?? null)
+const forecast = computed(() => pollenData.value?.forecast ?? [])
 
 const chartData = computed(() => {
   const readings = historyData.value?.readings
