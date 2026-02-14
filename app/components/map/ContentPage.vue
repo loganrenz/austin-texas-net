@@ -26,7 +26,7 @@ const { items: breadcrumbs } = useBreadcrumbs()
 const mapView = ref<InstanceType<typeof import('~/components/map/ContentView.vue').default> | null>(null)
 
 // ── Area / Region filter ───────────────────────────────────────
-const selectedRegion = ref('')
+const selectedRegion = ref('all')
 
 // Fetch neighborhoods to build neighborhood-name → region lookup
 const { data: neighborhoodData } = await useFetch<{ neighborhoods: { name: string; region: string }[] }>('/api/neighborhoods')
@@ -55,12 +55,12 @@ const availableRegions = computed(() => {
 })
 
 const regionOptions = computed(() => [
-  { label: 'All Areas', value: '' },
+  { label: 'All Areas', value: 'all' },
   ...availableRegions.value.map((r) => ({ label: r, value: r })),
 ])
 
 const filteredSpots = computed<MapSpot[]>(() => {
-  if (!selectedRegion.value) return props.spots
+  if (selectedRegion.value === 'all') return props.spots
   return props.spots.filter((s) => spotRegion(s) === selectedRegion.value)
 })
 
@@ -91,9 +91,9 @@ watch(selectedRegion, () => clearSelection())
     <ClientOnly>
       <MapContentView ref="mapView" :spots="filteredSpots" :config="config" />
       <template #fallback>
-        <div class="map-placeholder">
+        <div class="flex h-[50vh] min-h-[360px] max-h-[600px] w-full items-center justify-center border-b border-default bg-elevated">
           <div class="text-center">
-            <UIcon name="i-lucide-map" class="size-10 text-muted mb-2" />
+            <UIcon name="i-lucide-map" class="mb-2 size-10 text-muted" />
             <p class="text-sm text-muted">Loading map…</p>
           </div>
         </div>
@@ -125,15 +125,15 @@ watch(selectedRegion, () => clearSelection())
         <p class="text-base sm:text-lg text-muted max-w-2xl leading-relaxed mb-5" v-html="config.introText" />
 
         <!-- Area filter -->
-        <div v-if="regionOptions.length > 2" class="area-filter">
-          <UIcon name="i-lucide-map-pin" class="size-4 text-muted shrink-0" />
+        <div v-if="regionOptions.length > 2" class="flex w-fit items-center gap-2 rounded-xl border border-default bg-elevated px-3.5 py-2.5">
+          <UIcon name="i-lucide-map-pin" class="size-4 shrink-0 text-muted" />
           <USelect
             v-model="selectedRegion"
             :items="regionOptions"
             size="sm"
-            class="area-filter-select"
+            class="min-w-[140px] max-w-[200px]"
           />
-          <span v-if="selectedRegion" class="text-xs text-muted">
+          <span v-if="selectedRegion !== 'all'" class="text-xs text-muted">
             {{ filteredSpots.length }} of {{ spots.length }} spots
           </span>
         </div>
@@ -163,32 +163,3 @@ watch(selectedRegion, () => clearSelection())
   </div>
 </template>
 
-<style scoped>
-.area-filter {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 1px solid var(--ui-border);
-  background: var(--ui-bg-elevated);
-  width: fit-content;
-}
-
-.area-filter-select {
-  min-width: 140px;
-  max-width: 200px;
-}
-
-.map-placeholder {
-  width: 100%;
-  height: 50vh;
-  min-height: 360px;
-  max-height: 600px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--ui-bg-elevated);
-  border-bottom: 1px solid var(--ui-border);
-}
-</style>
