@@ -1,27 +1,77 @@
 <script setup lang="ts">
+import type {
+  GeoJSONFeature,
+  GeoJSONFeatureCollection,
+  GeoJSONFeatureProperties,
+  OverlayStyle,
+} from '~/components/AppMapKit.vue'
+
 /**
  * neighborhoods/index.vue — Data-driven neighborhood directory.
  * Fetches all neighborhoods from the API, with search + region/city filters.
- * Uses UInput (text search) and USelect (dropdowns) — both iPhone-friendly.
+ * Shows an interactive polygon boundary map via the shared AppMapKit component.
  */
 const { getCategoryBySlug } = useSiteData()
 const category = getCategoryBySlug('neighborhoods')!
 
 usePageSeo({
   title: 'Austin Neighborhoods — Every Corner of the ATX Metro',
-  description: 'Explore 80+ Austin neighborhoods from Leander to Buda — Downtown, South Congress, East Austin, Mueller, and more. Find your perfect area.',
+  description:
+    'Explore 80+ Austin neighborhoods from Leander to Buda — Downtown, South Congress, East Austin, Mueller, and more. Find your perfect area.',
 })
 
 useSchemaOrg([
   defineWebPage({
     name: 'Austin Neighborhoods — Every Corner of the ATX Metro',
-    description: 'Explore 80+ Austin neighborhoods from Leander to Buda — Downtown, South Congress, East Austin, Mueller, and more.',
+    description:
+      'Explore 80+ Austin neighborhoods from Leander to Buda — Downtown, South Congress, East Austin, Mueller, and more.',
   }),
 ])
 
 const { items: breadcrumbs } = useBreadcrumbs()
 
 const { data } = await useFetch('/api/neighborhoods')
+
+// ── GeoJSON boundary data ────────────────────────────────────
+const { data: geojson } = await useFetch<GeoJSONFeatureCollection>(
+  '/data/austin-neighborhoods.geojson',
+  { key: 'neighborhoods-geojson' },
+)
+
+const REGION_COLORS: Record<string, { stroke: string; fill: string }> = {
+  'Far North': { stroke: '#1d4ed8', fill: '#3b82f6' },
+  North: { stroke: '#6d28d9', fill: '#8b5cf6' },
+  'North Austin': { stroke: '#0e7490', fill: '#06b6d4' },
+  'North-Central': { stroke: '#0f766e', fill: '#14b8a6' },
+  Central: { stroke: '#b45309', fill: '#f59e0b' },
+  East: { stroke: '#be123c', fill: '#f43f5e' },
+  'South-Central': { stroke: '#c2410c', fill: '#f97316' },
+  South: { stroke: '#15803d', fill: '#22c55e' },
+  'Far South': { stroke: '#4d7c0f', fill: '#84cc16' },
+  West: { stroke: '#7e22ce', fill: '#a855f7' },
+}
+
+const DEFAULT_OVERLAY = { stroke: '#6b7280', fill: '#9ca3af' }
+
+function overlayStyleFn(properties: GeoJSONFeatureProperties): OverlayStyle {
+  const regionColor = REGION_COLORS[properties.region ?? ''] ?? DEFAULT_OVERLAY
+  return {
+    strokeColor: regionColor.stroke,
+    strokeOpacity: 0.8,
+    fillColor: regionColor.fill,
+    fillOpacity: 0.2,
+    lineWidth: 1.5,
+  }
+}
+
+const router = useRouter()
+
+function onFeatureSelect(feature: GeoJSONFeature) {
+  const slug = feature.properties.slug
+  if (slug) {
+    router.push(`/neighborhoods/${slug}/`)
+  }
+}
 
 interface Neighborhood {
   id: number
@@ -57,25 +107,21 @@ const regionOrder = [
 // Derive unique cities from data
 const cityOptions = computed(() => {
   const neighborhoods = (data.value?.neighborhoods ?? []) as Neighborhood[]
-  const cities = [...new Set(neighborhoods.map(n => n.city).filter(Boolean))]
+  const cities = [...new Set(neighborhoods.map((n) => n.city).filter(Boolean))]
   return cities.sort()
 })
 
 // Derive region options from data (only regions that have neighborhoods)
 const regionOptions = computed(() => {
   const neighborhoods = (data.value?.neighborhoods ?? []) as Neighborhood[]
-  const existingRegions = new Set(neighborhoods.map(n => n.region).filter(Boolean))
-  return regionOrder.filter(r => existingRegions.has(r))
+  const existingRegions = new Set(neighborhoods.map((n) => n.region).filter(Boolean))
+  return regionOrder.filter((r) => existingRegions.has(r))
 })
 
 // Items for USelect — no empty-value "All" item (use placeholder prop instead)
-const regionSelectItems = computed(() =>
-  regionOptions.value.map(r => ({ label: r, value: r })),
-)
+const regionSelectItems = computed(() => regionOptions.value.map((r) => ({ label: r, value: r })))
 
-const citySelectItems = computed(() =>
-  cityOptions.value.map(c => ({ label: c, value: c })),
-)
+const citySelectItems = computed(() => cityOptions.value.map((c) => ({ label: c, value: c })))
 
 // ── Filtered + grouped data ──────────────────────────────────
 const filteredNeighborhoods = computed(() => {
@@ -85,7 +131,7 @@ const filteredNeighborhoods = computed(() => {
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.trim().toLowerCase()
     neighborhoods = neighborhoods.filter(
-      n =>
+      (n) =>
         n.name.toLowerCase().includes(q) ||
         n.city?.toLowerCase().includes(q) ||
         n.region?.toLowerCase().includes(q) ||
@@ -95,12 +141,12 @@ const filteredNeighborhoods = computed(() => {
 
   // Region filter
   if (selectedRegion.value) {
-    neighborhoods = neighborhoods.filter(n => n.region === selectedRegion.value)
+    neighborhoods = neighborhoods.filter((n) => n.region === selectedRegion.value)
   }
 
   // City filter
   if (selectedCity.value) {
-    neighborhoods = neighborhoods.filter(n => n.city === selectedCity.value)
+    neighborhoods = neighborhoods.filter((n) => n.city === selectedCity.value)
   }
 
   return neighborhoods
@@ -130,10 +176,13 @@ const groupedByRegion = computed(() => {
   return Array.from(grouped.entries()).filter(([, items]) => items.length > 0)
 })
 
-const totalCount = computed(() => (data.value?.neighborhoods as Neighborhood[] | undefined)?.length ?? 0)
+const totalCount = computed(
+  () => (data.value?.neighborhoods as Neighborhood[] | undefined)?.length ?? 0,
+)
 const filteredCount = computed(() => filteredNeighborhoods.value.length)
 const hasActiveFilters = computed(
-  () => searchQuery.value.trim() !== '' || selectedRegion.value != null || selectedCity.value != null,
+  () =>
+    searchQuery.value.trim() !== '' || selectedRegion.value != null || selectedCity.value != null,
 )
 
 function clearFilters() {
@@ -143,16 +192,13 @@ function clearFilters() {
 }
 
 // Load Nuxt Content overview
-const { data: content } = await useAsyncData(
-  'category-content-neighborhoods',
-  () => queryCollection('categories').where('slug', '=', 'neighborhoods').first(),
+const { data: content } = await useAsyncData('category-content-neighborhoods', () =>
+  queryCollection('categories').where('slug', '=', 'neighborhoods').first(),
 )
 
 // Cross-link categories
 const { categories } = useSiteData()
-const crossLinks = computed(() =>
-  categories.filter(c => c.slug !== 'neighborhoods').slice(0, 4),
-)
+const crossLinks = computed(() => categories.filter((c) => c.slug !== 'neighborhoods').slice(0, 4))
 </script>
 
 <template>
@@ -165,7 +211,7 @@ const crossLinks = computed(() =>
           <div
             class="size-16 rounded-[18px] inline-flex items-center justify-center mb-4"
             :class="category.color"
-            style="background: currentColor;"
+            style="background: currentColor"
           >
             <UIcon :name="category.icon" class="size-8 text-white" />
           </div>
@@ -175,6 +221,42 @@ const crossLinks = computed(() =>
           <p class="text-[0.95rem] text-muted max-w-[520px] mx-auto leading-[1.6]">
             {{ totalCount }} neighborhoods from Leander to Buda — find your corner of the ATX metro.
           </p>
+        </div>
+      </section>
+
+      <!-- Neighborhood Boundaries Map -->
+      <section
+        class="mb-6 -mx-4 sm:-mx-6 lg:mx-0 lg:rounded-2xl lg:overflow-hidden lg:border lg:border-default"
+      >
+        <ClientOnly>
+          <AppMapKit
+            :geojson="geojson"
+            :overlay-style-fn="overlayStyleFn"
+            @feature-select="onFeatureSelect"
+          />
+          <template #fallback>
+            <div class="mapkit-placeholder">
+              <div class="mapkit-spinner" />
+              <p class="text-sm text-muted mt-3">Loading map…</p>
+            </div>
+          </template>
+        </ClientOnly>
+      </section>
+
+      <!-- Region legend -->
+      <section v-if="geojson" class="mb-6">
+        <div class="flex flex-wrap gap-x-4 gap-y-1.5 justify-center">
+          <span
+            v-for="(colors, region) in REGION_COLORS"
+            :key="region"
+            class="inline-flex items-center gap-1.5 text-[0.7rem] text-muted"
+          >
+            <span
+              class="size-2.5 rounded-full shrink-0 border"
+              :style="{ backgroundColor: colors.fill, borderColor: colors.stroke, opacity: 0.8 }"
+            />
+            {{ region }}
+          </span>
         </div>
       </section>
 
@@ -212,10 +294,7 @@ const crossLinks = computed(() =>
           </div>
 
           <!-- Active filter summary -->
-          <div
-            v-if="hasActiveFilters"
-            class="flex items-center justify-between px-1"
-          >
+          <div v-if="hasActiveFilters" class="flex items-center justify-between px-1">
             <p class="text-xs text-muted">
               <span class="font-semibold text-default">{{ filteredCount }}</span>
               of {{ totalCount }} neighborhoods
@@ -242,14 +321,9 @@ const crossLinks = computed(() =>
       </section>
 
       <!-- No results -->
-      <section
-        v-if="filteredCount === 0 && hasActiveFilters"
-        class="text-center py-12"
-      >
+      <section v-if="filteredCount === 0 && hasActiveFilters" class="text-center py-12">
         <UIcon name="i-lucide-search-x" class="size-10 text-dimmed mb-3" />
-        <p class="text-sm text-muted mb-3">
-          No neighborhoods match your filters.
-        </p>
+        <p class="text-sm text-muted mb-3">No neighborhoods match your filters.</p>
         <UButton
           label="Clear filters"
           variant="soft"
@@ -261,17 +335,14 @@ const crossLinks = computed(() =>
       </section>
 
       <!-- Neighborhoods grouped by region -->
-      <section
-        v-for="[region, neighborhoods] in groupedByRegion"
-        :key="region"
-        class="mb-8"
-      >
+      <section v-for="[region, neighborhoods] in groupedByRegion" :key="region" class="mb-8">
         <div class="flex items-center gap-3 mb-4">
           <h2 class="text-xs font-bold uppercase tracking-[0.08em] text-muted">
             {{ region }}
           </h2>
           <span class="text-xs text-dimmed font-medium">
-            {{ neighborhoods.length }} {{ neighborhoods.length === 1 ? 'neighborhood' : 'neighborhoods' }}
+            {{ neighborhoods.length }}
+            {{ neighborhoods.length === 1 ? 'neighborhood' : 'neighborhoods' }}
           </span>
         </div>
 
@@ -296,7 +367,8 @@ const crossLinks = computed(() =>
               {{ n.description }}
             </p>
             <p v-else class="text-[0.8rem] text-muted leading-normal mb-3">
-              Explore {{ n.name }}{{ n.city !== 'Austin' ? `, ${n.city}` : '' }} — local guide, dining, and area info.
+              Explore {{ n.name }}{{ n.city !== 'Austin' ? `, ${n.city}` : '' }} — local guide,
+              dining, and area info.
             </p>
 
             <div class="flex items-center justify-between">

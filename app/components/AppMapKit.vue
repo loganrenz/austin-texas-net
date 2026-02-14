@@ -7,32 +7,84 @@ declare const mapkit: any
 /**
  * AppMapKit — Reusable Apple MapKit JS map component.
  *
- * Handles MapKit loading, map initialization, bounding region calculation,
- * pin annotations with selection, zoom behavior, dark mode sync, and cleanup.
+ * Supports two rendering modes (can be combined):
+ *   1. Pin annotations — pass `items` + `createPinElement`
+ *   2. GeoJSON polygon overlays — pass `geojson` + optional `overlayStyleFn`
  *
- * Consumers provide items and a pin factory function. The component handles
- * all map lifecycle management.
+ * Handles MapKit loading, map initialization, bounding region calculation,
+ * pin annotations with selection, polygon overlays, zoom behavior, dark mode
+ * sync, and cleanup.
  */
+
+export interface GeoJSONGeometry {
+  type: string
+  coordinates: unknown
+}
+
+export interface GeoJSONFeatureProperties {
+  name?: string
+  slug?: string
+  region?: string
+  city?: string
+  centerLat?: number | null
+  centerLng?: number | null
+  source?: string
+  [key: string]: unknown
+}
+
+export interface GeoJSONFeature {
+  type: 'Feature'
+  geometry: GeoJSONGeometry
+  properties: GeoJSONFeatureProperties
+}
+
+export interface GeoJSONFeatureCollection {
+  type: 'FeatureCollection'
+  features: GeoJSONFeature[]
+}
+
+export interface OverlayStyle {
+  strokeColor: string
+  strokeOpacity?: number
+  fillColor: string
+  fillOpacity?: number
+  lineWidth: number
+}
 
 const props = withDefaults(
   defineProps<{
-    items: T[]
-    createPinElement: (
+    /** Pin annotation items (optional when using geojson-only mode). */
+    items?: T[]
+    /** Factory to create pin DOM elements. Required when items are provided. */
+    createPinElement?: (
       item: T,
       isSelected: boolean,
     ) => { element: HTMLElement; cleanup?: () => void }
+    /** GeoJSON FeatureCollection with Polygon/MultiPolygon features. */
+    geojson?: GeoJSONFeatureCollection | null
+    /** Custom style function for each GeoJSON overlay polygon. */
+    overlayStyleFn?: (properties: GeoJSONFeatureProperties) => OverlayStyle
     annotationSize?: { width: number; height: number }
     zoomSpan?: { lat: number; lng: number }
     boundingPadding?: number
     fallbackCenter?: { lat: number; lng: number }
   }>(),
   {
+    items: () => [] as any,
+    createPinElement: undefined,
+    geojson: null,
+    overlayStyleFn: undefined,
     annotationSize: () => ({ width: 100, height: 56 }),
     zoomSpan: () => ({ lat: 0.002, lng: 0.0025 }),
     boundingPadding: 0.05,
     fallbackCenter: () => ({ lat: 30.2672, lng: -97.7431 }),
   },
 )
+
+const emit = defineEmits<{
+  /** Emitted when a GeoJSON polygon overlay is clicked. */
+  'feature-select': [feature: GeoJSONFeature]
+}>()
 
 const selectedId = defineModel<string | null>('selectedId', { default: null })
 
@@ -42,25 +94,48 @@ const mapContainer = ref<HTMLElement | null>(null)
 const pinCleanups: Array<() => void> = []
 let map: any = null
 let overviewRegion: any = null
+const overlayFeatureMap = new WeakMap<any, GeoJSONFeature>()
 
-function computeBoundingRegion(items: T[]): any {
-  if (items.length > 0) {
-    let minLat = Infinity,
-      maxLat = -Infinity
-    let minLng = Infinity,
-      maxLng = -Infinity
-    for (const s of items) {
-      if (s.lat < minLat) minLat = s.lat
-      if (s.lat > maxLat) maxLat = s.lat
-      if (s.lng < minLng) minLng = s.lng
-      if (s.lng > maxLng) maxLng = s.lng
+// ── Bounding region ──────────────────────────────────────────
+
+function computeBoundingRegion(): any {
+  let minLat = Infinity,
+    maxLat = -Infinity
+  let minLng = Infinity,
+    maxLng = -Infinity
+  let hasPoints = false
+
+  // From pin items
+  for (const s of props.items) {
+    if (s.lat < minLat) minLat = s.lat
+    if (s.lat > maxLat) maxLat = s.lat
+    if (s.lng < minLng) minLng = s.lng
+    if (s.lng > maxLng) maxLng = s.lng
+    hasPoints = true
+  }
+
+  // From GeoJSON features
+  if (props.geojson?.features) {
+    for (const feat of props.geojson.features) {
+      const points = extractAllPoints(feat.geometry)
+      for (const [lng, lat] of points) {
+        if (lat < minLat) minLat = lat
+        if (lat > maxLat) maxLat = lat
+        if (lng < minLng) minLng = lng
+        if (lng > maxLng) maxLng = lng
+        hasPoints = true
+      }
     }
+  }
+
+  if (hasPoints) {
     const pad = props.boundingPadding
     const latDelta = Math.max((maxLat - minLat) * (1 + pad), 0.005)
     const lngDelta = Math.max((maxLng - minLng) * (1 + pad), 0.006)
     const center = new mapkit.Coordinate((minLat + maxLat) / 2, (minLng + maxLng) / 2)
     return new mapkit.CoordinateRegion(center, new mapkit.CoordinateSpan(latDelta, lngDelta))
   }
+
   const { lat, lng } = props.fallbackCenter
   return new mapkit.CoordinateRegion(
     new mapkit.Coordinate(lat, lng),
@@ -68,10 +143,84 @@ function computeBoundingRegion(items: T[]): any {
   )
 }
 
+// ── GeoJSON helpers ──────────────────────────────────────────
+
+function extractAllPoints(geometry: GeoJSONGeometry): Array<[number, number]> {
+  const coords = geometry.coordinates
+  if (!Array.isArray(coords)) return []
+
+  const points: Array<[number, number]> = []
+
+  if (geometry.type === 'Polygon') {
+    const outer = coords[0]
+    if (Array.isArray(outer)) {
+      for (const pt of outer) {
+        if (Array.isArray(pt) && pt.length >= 2) {
+          points.push([pt[0] as number, pt[1] as number])
+        }
+      }
+    }
+  } else if (geometry.type === 'MultiPolygon') {
+    for (const polygon of coords) {
+      if (!Array.isArray(polygon)) continue
+      const outer = polygon[0]
+      if (!Array.isArray(outer)) continue
+      for (const pt of outer) {
+        if (Array.isArray(pt) && pt.length >= 2) {
+          points.push([pt[0] as number, pt[1] as number])
+        }
+      }
+    }
+  }
+
+  return points
+}
+
+function defaultOverlayStyle(): OverlayStyle {
+  return {
+    strokeColor: '#065f46',
+    strokeOpacity: 1,
+    fillColor: '#10b981',
+    fillOpacity: 0.2,
+    lineWidth: 1.5,
+  }
+}
+
+function buildPolygonRings(geometry: GeoJSONGeometry): Array<any[]> {
+  const coords = geometry.coordinates
+  if (!Array.isArray(coords)) return []
+
+  const rings: Array<any[]> = []
+
+  if (geometry.type === 'Polygon') {
+    const outer = coords[0]
+    if (Array.isArray(outer)) {
+      const ring = outer
+        .filter((pt: unknown) => Array.isArray(pt) && (pt as number[]).length >= 2)
+        .map((pt: unknown) => new mapkit.Coordinate((pt as number[])[1], (pt as number[])[0]))
+      if (ring.length >= 3) rings.push(ring)
+    }
+  } else if (geometry.type === 'MultiPolygon') {
+    for (const polygon of coords) {
+      if (!Array.isArray(polygon)) continue
+      const outer = polygon[0]
+      if (!Array.isArray(outer)) continue
+      const ring = outer
+        .filter((pt: unknown) => Array.isArray(pt) && (pt as number[]).length >= 2)
+        .map((pt: unknown) => new mapkit.Coordinate((pt as number[])[1], (pt as number[])[0]))
+      if (ring.length >= 3) rings.push(ring)
+    }
+  }
+
+  return rings
+}
+
+// ── Map initialization ───────────────────────────────────────
+
 function initMap() {
   if (!mapContainer.value) return
 
-  overviewRegion = computeBoundingRegion(props.items)
+  overviewRegion = computeBoundingRegion()
 
   map = new mapkit.Map(mapContainer.value, {
     center: overviewRegion.center,
@@ -94,7 +243,10 @@ function initMap() {
   })
 
   addAnnotations()
+  addOverlays()
 }
+
+// ── Pin annotations ──────────────────────────────────────────
 
 function clearPinCleanups() {
   for (const fn of pinCleanups) fn()
@@ -102,14 +254,15 @@ function clearPinCleanups() {
 }
 
 function addAnnotations() {
-  if (!map) return
+  if (!map || !props.items.length || !props.createPinElement) return
+
   const annotations = props.items.map((item) => {
     const coord = new mapkit.Coordinate(item.lat, item.lng)
     return new mapkit.Annotation(
       coord,
       () => {
         const isSelected = selectedId.value === item.id
-        const { element, cleanup } = props.createPinElement(item, isSelected)
+        const { element, cleanup } = props.createPinElement!(item, isSelected)
 
         const wrapper = document.createElement('div')
         wrapper.setAttribute('data-map-pin', '')
@@ -142,6 +295,53 @@ function rebuildAnnotations() {
   addAnnotations()
 }
 
+// ── Polygon overlays ─────────────────────────────────────────
+
+function addOverlays() {
+  if (!map || !props.geojson?.features?.length) return
+
+  for (const feature of props.geojson.features) {
+    const rings = buildPolygonRings(feature.geometry)
+    if (rings.length === 0) continue
+
+    const styleCfg = props.overlayStyleFn
+      ? props.overlayStyleFn(feature.properties)
+      : defaultOverlayStyle()
+
+    const style = new mapkit.Style({
+      strokeColor: styleCfg.strokeColor,
+      strokeOpacity: styleCfg.strokeOpacity ?? 1,
+      fillColor: styleCfg.fillColor,
+      fillOpacity: styleCfg.fillOpacity ?? 0.2,
+      lineWidth: styleCfg.lineWidth,
+    })
+
+    for (const ring of rings) {
+      const overlay = new mapkit.PolygonOverlay(ring, { style })
+      overlay.enabled = true
+      overlayFeatureMap.set(overlay, feature)
+      map.addOverlay(overlay)
+    }
+  }
+
+  // Listen for overlay selection
+  map.addEventListener('select', (event: any) => {
+    const overlay = event.overlay
+    if (!overlay) return
+    const feature = overlayFeatureMap.get(overlay)
+    if (feature) {
+      emit('feature-select', feature)
+    }
+  })
+}
+
+function clearOverlays() {
+  if (!map) return
+  map.removeOverlays(map.overlays)
+}
+
+// ── Zoom behavior ────────────────────────────────────────────
+
 function zoomToItem(item: T) {
   if (!map) return
   const center = new mapkit.Coordinate(item.lat, item.lng)
@@ -153,6 +353,8 @@ function zoomOut() {
   if (!map || !overviewRegion) return
   map.setRegionAnimated(overviewRegion, true)
 }
+
+// ── Watchers ─────────────────────────────────────────────────
 
 // Re-render annotations and handle zoom when selection changes
 watch(selectedId, (newId) => {
@@ -174,10 +376,21 @@ watch(
     selectedId.value = null
     clearPinCleanups()
     map.removeAnnotations(map.annotations)
-    if (props.items.length > 0) {
-      overviewRegion = computeBoundingRegion(props.items)
-    }
+    overviewRegion = computeBoundingRegion()
     addAnnotations()
+    if (overviewRegion) map.setRegionAnimated(overviewRegion, true)
+  },
+  { deep: false },
+)
+
+// Re-render overlays when geojson changes
+watch(
+  () => props.geojson,
+  () => {
+    if (!map) return
+    clearOverlays()
+    overviewRegion = computeBoundingRegion()
+    addOverlays()
     if (overviewRegion) map.setRegionAnimated(overviewRegion, true)
   },
   { deep: false },
