@@ -42,6 +42,20 @@ const tools = [
     color: 'text-violet-500',
     desc: 'Neighborhood grid scanning',
   },
+  {
+    label: 'Manage Categories',
+    to: '/admin/categories',
+    icon: 'i-lucide-layers',
+    color: 'text-blue-500',
+    desc: 'Update site hierarchy & SEO',
+  },
+  {
+    label: 'Neighborhoods',
+    to: '/admin/neighborhoods',
+    icon: 'i-lucide-map',
+    color: 'text-teal-500',
+    desc: 'Manage boundaries & tiers',
+  },
 ]
 
 const analytics = [

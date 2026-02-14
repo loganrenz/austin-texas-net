@@ -5,11 +5,9 @@
  * Bluebonnet Map — iNaturalist observation data visualization.
  *
  * Renders thousands of Lupinus texensis (Texas Bluebonnet) sightings
- * as circle overlays on an Apple MapKit map. Data sourced from
- * iNaturalist's citizen-science platform.
- *
- * Follows the same pattern as food pages: clicking a dot replaces
- * the content below the map with observation detail + photo.
+ * as bluebonnet flower icon annotations on an Apple MapKit map.
+ * Uses MapKit clustering to group nearby sightings at low zoom.
+ * Data sourced from iNaturalist's citizen-science platform.
  */
 
 // ── SEO ────────────────────────────────────────────────────
@@ -18,7 +16,7 @@ import { getCategoryHexColor } from '~/utils/categoryHexColors'
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('outdoors')!
 const siblings = category.subApps.filter((a) => a.slug !== 'bluebonnets')
-const crossLinks = categories.filter((c) => c.slug !== 'outdoors').slice(0, 4)
+const crossLinks = categories.value.filter((c) => c.slug !== 'outdoors').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
 
 // ── Year filter ────────────────────────────────────────────
@@ -47,6 +45,7 @@ interface ObservationPoint {
   observer: string
   place: string
   url: string
+  quality_grade: string
 }
 
 const { data, status } = await useFetch<{
@@ -59,47 +58,91 @@ const { data, status } = await useFetch<{
 const observations = computed(() => data.value?.observations ?? [])
 const totalCount = computed(() => data.value?.total ?? 0)
 
-// ── Selected observation (click-to-view) ───────────────────
-const selectedObs = ref<ObservationPoint | null>(null)
-
-function handleMapClick(coords: { lat: number; lng: number }) {
-  let best: ObservationPoint | null = null
-  let bestDist = Infinity
-
-  for (const obs of observations.value) {
-    const dlat = obs.lat - coords.lat
-    const dlng = obs.lng - coords.lng
-    const dist = dlat * dlat + dlng * dlng
-    if (dist < bestDist) {
-      bestDist = dist
-      best = obs
-    }
-  }
-
-  // Only select if within a reasonable distance (~0.02 degrees ≈ 2km)
-  if (best && bestDist < 0.02 * 0.02) {
-    selectedObs.value = best
-  } else {
-    selectedObs.value = null
-  }
+// ── Map items (pin annotations) ────────────────────────────
+interface BluebonnetItem {
+  id: string
+  lat: number
+  lng: number
+  quality_grade: string
+  has_photo: boolean
 }
+
+const mapItems = computed<BluebonnetItem[]>(() =>
+  observations.value.map((obs, i) => ({
+    id: `bb-${i}`,
+    lat: obs.lat,
+    lng: obs.lng,
+    quality_grade: obs.quality_grade || 'needs_id',
+    has_photo: !!obs.photo_url,
+  })),
+)
+
+// ── Selected observation (click-to-view) ───────────────────
+const selectedId = ref<string | null>(null)
+const hasEverSelected = ref(false)
+
+const selectedObs = computed<ObservationPoint | null>(() => {
+  if (!selectedId.value) return null
+  const idx = parseInt(selectedId.value.replace('bb-', ''))
+  return observations.value[idx] ?? null
+})
+
+watch(selectedId, (id) => {
+  if (id) hasEverSelected.value = true
+})
 
 // Clear selection when year changes
 watch(selectedYear, () => {
-  selectedObs.value = null
+  selectedId.value = null
 })
 
-// ── Circle overlays for the map ────────────────────────────
-/* eslint-disable atx/no-inline-hex -- MapKit circle overlay colors */
-const circles = computed(() =>
-  observations.value.map((obs) => ({
-    lat: obs.lat,
-    lng: obs.lng,
-    radius: 500,
-    color: '#6366f1',
-    opacity: 0.7,
-  })),
-)
+// ── Bluebonnet pin factory ─────────────────────────────────
+
+const BLUEBONNET_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="28" height="28">
+  <g transform="translate(16,14)">
+    <ellipse cx="0" cy="-7" rx="3.5" ry="6" fill="#5b5fc7" />
+    <ellipse cx="6.5" cy="-2" rx="3.5" ry="6" fill="#6e72d4" transform="rotate(72)" />
+    <ellipse cx="4" cy="5.5" rx="3.5" ry="6" fill="#5b5fc7" transform="rotate(144)" />
+    <ellipse cx="-4" cy="5.5" rx="3.5" ry="6" fill="#6e72d4" transform="rotate(216)" />
+    <ellipse cx="-6.5" cy="-2" rx="3.5" ry="6" fill="#5b5fc7" transform="rotate(288)" />
+    <circle cx="0" cy="0" r="3" fill="#f7c948" />
+  </g>
+  <rect x="14.5" y="22" width="3" height="8" rx="1.5" fill="#3d9a50" />
+  <ellipse cx="12" cy="26" rx="4" ry="2" fill="#3d9a50" transform="rotate(-30 12 26)" />
+</svg>`
+
+function createBluebonnetPin(
+  item: BluebonnetItem,
+  _isSelected: boolean,
+): { element: HTMLElement; cleanup?: () => void } {
+  const wrapper = document.createElement('div')
+  wrapper.innerHTML = BLUEBONNET_SVG
+  wrapper.style.cursor = 'pointer'
+
+  // Opacity based on quality grade
+  if (item.quality_grade === 'research') {
+    wrapper.style.opacity = '1'
+  } else if (item.has_photo) {
+    wrapper.style.opacity = '0.7'
+  } else {
+    wrapper.style.opacity = '0.45'
+  }
+
+  // Subtle drop shadow for depth
+  wrapper.style.filter = 'drop-shadow(0 1px 2px rgba(0,0,0,0.25))'
+
+  return { element: wrapper }
+}
+
+/** Format ISO date string as human-readable (e.g. "March 15, 2025") */
+function formatObsDate(iso: string): string {
+  try {
+    const d = new Date(iso + 'T00:00:00')
+    return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+  } catch {
+    return iso
+  }
+}
 
 usePageSeo({
   title: 'Bluebonnet Map — Texas Wildflower Sightings Across the State',
@@ -123,24 +166,39 @@ useSchemaOrg([
 
 <template>
   <div>
-    <!-- Map -->
-    <ClientOnly>
-      <AppMapKit
-        :circles="circles"
-        :fallback-center="{ lat: 31.0, lng: -99.5 }"
-        :bounding-padding="0.08"
-        texas-mask
-        @map-click="handleMapClick"
-      />
-      <template #fallback>
-        <div class="mapkit-placeholder">
-          <div class="text-center">
-            <UIcon name="i-lucide-flower-2" class="mb-2 size-10 text-muted" />
-            <p class="text-sm text-muted">Loading bluebonnet map…</p>
+    <!-- Map + hint overlay -->
+    <div class="relative">
+      <ClientOnly>
+        <AppMapKit
+          v-model:selected-id="selectedId"
+          :items="mapItems"
+          :create-pin-element="createBluebonnetPin"
+          clustering-identifier="bluebonnets"
+          :annotation-size="{ width: 28, height: 28 }"
+          :fallback-center="{ lat: 31.0, lng: -99.5 }"
+          :bounding-padding="0.3"
+          :zoom-span="{ lat: 0.15, lng: 0.2 }"
+          preserve-region
+          texas-mask
+        />
+        <template #fallback>
+          <div class="mapkit-placeholder">
+            <div class="text-center">
+              <UIcon name="i-lucide-flower-2" class="mb-2 size-10 text-muted" />
+              <p class="text-sm text-muted">Loading bluebonnet map…</p>
+            </div>
           </div>
+        </template>
+      </ClientOnly>
+
+      <!-- Interaction hint -->
+      <Transition name="fade">
+        <div v-if="!hasEverSelected && observations.length > 0" class="hint-chip">
+          <UIcon name="i-lucide-mouse-pointer-click" class="size-4" />
+          <span>Tap a flower to see the photo</span>
         </div>
-      </template>
-    </ClientOnly>
+      </Transition>
+    </div>
 
     <!-- Content below map -->
     <UContainer class="py-8 md:py-12">
@@ -179,7 +237,7 @@ useSchemaOrg([
             class="text-primary hover:underline"
             >iNaturalist</a
           >
-          across the entire state of Texas — <strong class="text-default">tap any dot</strong> to
+          across the entire state of Texas — <strong class="text-default">tap any flower</strong> to
           see the photo.
         </p>
 
@@ -218,79 +276,89 @@ useSchemaOrg([
           icon="i-lucide-arrow-left"
           label="Back to Map"
           class="text-xs font-bold uppercase tracking-widest mb-5"
-          @click="selectedObs = null"
+          @click="selectedId = null"
         />
 
         <div class="spot-detail-panel">
-          <!-- Photo -->
-          <img
-            v-if="selectedObs.photo_url"
-            :src="selectedObs.photo_url"
-            alt="Bluebonnet observation"
-            class="w-full rounded-xl mb-5 max-h-[400px] object-cover"
-            loading="lazy"
-          />
+          <!-- Hero photo with gradient -->
+          <div v-if="selectedObs.photo_url" class="spot-hero-wrapper">
+            <img
+              :src="selectedObs.photo_url"
+              alt="Bluebonnet observation"
+              class="spot-hero-img"
+              loading="lazy"
+            />
+            <div class="spot-hero-gradient" />
+          </div>
           <div
             v-else
-            class="w-full h-48 rounded-xl mb-5 bg-elevated flex items-center justify-center"
+            class="w-full h-48 rounded-t-2xl bg-elevated flex items-center justify-center"
           >
             <UIcon name="i-lucide-image-off" class="size-10 text-dimmed" />
           </div>
 
-          <!-- Title + icon -->
-          <div class="flex items-start gap-4 mb-4">
-            <div
-              class="flex items-center justify-center size-11 rounded-full shrink-0"
-              :class="category.bgColor"
-            >
-              <UIcon name="i-lucide-flower-2" class="size-5" :class="category.color" />
+          <div class="spot-detail-body">
+            <!-- Title row -->
+            <div class="flex items-start gap-4 mb-3">
+              <div
+                class="flex items-center justify-center size-11 rounded-full shrink-0"
+                :class="category.bgColor"
+              >
+                <UIcon name="i-lucide-flower-2" class="size-5" :class="category.color" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <h2 class="text-xl sm:text-2xl font-extrabold font-display leading-tight">
+                  Texas Bluebonnet
+                </h2>
+                <p
+                  v-if="selectedObs.place"
+                  class="text-sm text-muted mt-0.5 flex items-center gap-1.5"
+                >
+                  <UIcon name="i-lucide-map-pin" class="size-3.5 shrink-0" />
+                  {{ selectedObs.place }}
+                </p>
+              </div>
             </div>
-            <div class="min-w-0 flex-1">
-              <h2 class="text-xl sm:text-2xl font-extrabold font-display leading-tight mb-1">
-                Texas Bluebonnet
-              </h2>
-              <p v-if="selectedObs.place" class="text-sm text-muted">
-                {{ selectedObs.place }}
-              </p>
+
+            <!-- Meta row -->
+            <div class="flex flex-wrap items-center gap-2 mb-5">
+              <UBadge
+                v-if="selectedObs.observed_on"
+                :label="formatObsDate(selectedObs.observed_on)"
+                color="neutral"
+                variant="subtle"
+                size="sm"
+                icon="i-lucide-calendar"
+              />
+              <UBadge
+                :label="selectedObs.observer"
+                color="neutral"
+                variant="subtle"
+                size="sm"
+                icon="i-lucide-user"
+              />
+              <UBadge
+                label="Lupinus texensis"
+                color="success"
+                variant="subtle"
+                size="sm"
+                icon="i-lucide-leaf"
+              />
             </div>
-          </div>
 
-          <!-- Meta badges -->
-          <div class="flex flex-wrap items-center gap-2 mb-5">
-            <UBadge
-              v-if="selectedObs.observed_on"
-              :label="selectedObs.observed_on"
-              color="neutral"
-              variant="subtle"
+            <!-- iNaturalist link -->
+            <UButton
+              :to="selectedObs.url"
+              target="_blank"
+              rel="noopener"
+              variant="soft"
+              color="primary"
               size="sm"
-              icon="i-lucide-calendar"
-            />
-            <UBadge
-              :label="selectedObs.observer"
-              color="neutral"
-              variant="subtle"
-              size="sm"
-              icon="i-lucide-user"
-            />
-            <UBadge
-              label="Lupinus texensis"
-              color="success"
-              variant="subtle"
-              size="sm"
-              icon="i-lucide-leaf"
+              icon="i-lucide-external-link"
+              label="View on iNaturalist"
+              trailing
             />
           </div>
-
-          <!-- Link to iNaturalist -->
-          <a
-            :href="selectedObs.url"
-            target="_blank"
-            rel="noopener"
-            class="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
-          >
-            View full observation on iNaturalist
-            <UIcon name="i-lucide-external-link" class="size-4" />
-          </a>
         </div>
       </section>
 
@@ -388,14 +456,76 @@ useSchemaOrg([
 <!-- eslint-disable atx/no-style-block-layout -->
 <style scoped>
 .spot-detail-panel {
-  padding: 20px 24px;
   border-radius: 16px;
   border: 1px solid var(--ui-border);
   background: var(--ui-bg);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
 }
 
 :is(.dark) .spot-detail-panel {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+.spot-detail-body {
+  padding: 20px 24px 24px;
+}
+
+.spot-hero-wrapper {
+  position: relative;
+  width: 100%;
+  max-height: 380px;
+  overflow: hidden;
+}
+
+.spot-hero-img {
+  width: 100%;
+  max-height: 380px;
+  object-fit: cover;
+  display: block;
+}
+
+.spot-hero-gradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(to top, var(--ui-bg), transparent);
+  pointer-events: none;
+}
+
+/* Floating hint chip */
+.hint-chip {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  pointer-events: none;
+  z-index: 10;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+:is(.dark) .hint-chip {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

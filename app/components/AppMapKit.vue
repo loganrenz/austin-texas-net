@@ -67,6 +67,14 @@ const props = withDefaults(
     overlayStyleFn?: (properties: GeoJSONFeatureProperties) => OverlayStyle
     /** Lightweight circle overlays for rendering large point clouds. */
     circles?: Array<{ lat: number; lng: number; radius: number; color: string; opacity?: number }>
+    /** When true, circle radii scale dynamically with zoom level. */
+    dynamicCircleRadius?: boolean
+    /** Minimum circle radius in meters (only when dynamicCircleRadius is true). */
+    minCircleRadius?: number
+    /** Maximum circle radius in meters (only when dynamicCircleRadius is true). */
+    maxCircleRadius?: number
+    /** Scale factor for dynamic radius (fraction of visible latitude span). */
+    circleScaleFactor?: number
     /** When set, nearby annotations merge into cluster bubbles at low zoom. */
     clusteringIdentifier?: string
     annotationSize?: { width: number; height: number }
@@ -84,6 +92,10 @@ const props = withDefaults(
     geojson: null,
     overlayStyleFn: undefined,
     circles: () => [],
+    dynamicCircleRadius: false,
+    minCircleRadius: 200,
+    maxCircleRadius: 6000,
+    circleScaleFactor: 0.004,
     clusteringIdentifier: undefined,
     annotationSize: () => ({ width: 100, height: 56 }),
     zoomSpan: () => ({ lat: 0.002, lng: 0.0025 }),
@@ -116,7 +128,7 @@ let overviewRegion: any = null
 const overlayFeatureMap = new WeakMap<any, GeoJSONFeature>()
 
 // ── Texas mask ───────────────────────────────────────────────
-let texasMaskOverlay: any = null
+const texasMaskOverlays: any[] = []
 let _texasCoords: Array<[number, number]> | null = null
 
 async function fetchTexasCoords(): Promise<Array<[number, number]>> {
@@ -128,13 +140,20 @@ async function fetchTexasCoords(): Promise<Array<[number, number]>> {
   return _texasCoords!
 }
 
-function getTexasMaskStyle(): { fillColor: string; fillOpacity: number } {
+function getTexasMaskColor(): string {
   const isDark = document.documentElement.classList.contains('dark')
   /* eslint-disable atx/no-inline-hex -- MapKit overlay mask colours */
-  return isDark
-    ? { fillColor: '#111827', fillOpacity: 0.7 }
-    : { fillColor: '#ffffff', fillOpacity: 0.6 }
+  return isDark ? '#0a0a0a' : '#ffffff'
   /* eslint-enable atx/no-inline-hex */
+}
+
+// Scale a ring of MapKit Coordinates from a centroid by the given factor.
+function scaleRing(ring: any[], scale: number, cLat: number, cLng: number): any[] {
+  return ring.map((c: any) => {
+    const lat = cLat + (c.latitude - cLat) * scale
+    const lng = cLng + (c.longitude - cLng) * scale
+    return new mapkit.Coordinate(lat, lng)
+  })
 }
 
 async function addTexasMask() {
@@ -144,47 +163,70 @@ async function addTexasMask() {
   const coords = await fetchTexasCoords()
   if (!coords?.length) return
 
-  // World-bounding outer ring (CW) — covers the whole visible area
-  const worldRing = [
-    new mapkit.Coordinate(-85, -180),
-    new mapkit.Coordinate(-85, 180),
-    new mapkit.Coordinate(85, 180),
-    new mapkit.Coordinate(85, -180),
-    new mapkit.Coordinate(-85, -180),
+  // Outer rectangle ~20° around Texas
+  const outerRing = [
+    new mapkit.Coordinate(5, -180),
+    new mapkit.Coordinate(5, 179.99),
+    new mapkit.Coordinate(57, 179.99),
+    new mapkit.Coordinate(57, -180),
   ]
 
-  // Texas inner ring (CCW) — punches a hole in the overlay.
-  // GeoJSON is [lng, lat]; MapKit wants Coordinate(lat, lng).
-  // Reverse the ring so it winds opposite to the outer ring.
-  const texasRing = coords
-    .map(([lng, lat]: [number, number]) => new mapkit.Coordinate(lat, lng))
-    .reverse()
+  // Base Texas ring in original GeoJSON winding (CCW) → MapKit hole
+  const baseTexasRing = coords.map(
+    ([lng, lat]: [number, number]) => new mapkit.Coordinate(lat, lng),
+  )
 
-  const { fillColor, fillOpacity } = getTexasMaskStyle()
-  const style = new mapkit.Style({
-    fillColor,
-    fillOpacity,
-    strokeOpacity: 0,
-    lineWidth: 0,
-  })
+  // Approximate centroid of Texas
+  const cLat = 31.0
+  const cLng = -99.5
 
-  texasMaskOverlay = new mapkit.PolygonOverlay([worldRing, texasRing], { style })
-  texasMaskOverlay.enabled = false // not selectable / interactive
-  map.addOverlay(texasMaskOverlay)
-}
+  // Create 4 stacked overlays with progressively scaled Texas holes.
+  // Near the border only the outermost layer shows (light), further out
+  // they accumulate to near-opaque — simulating a gradient fade.
+  const layers = [
+    { scale: 1.25, opacity: 1.0 }, // outermost — lightest, covers most area
+    { scale: 1.2, opacity: 0.8 }, // outermost — lightest, covers most area
+    { scale: 1.15, opacity: 0.6 }, // outermost — lightest, covers most area
+    { scale: 1.08, opacity: 0.35 }, // outermost — lightest, covers most area
+    { scale: 1.05, opacity: 0.35 },
+    { scale: 1.025, opacity: 0.3 },
+    { scale: 1.0, opacity: 0.3 }, // innermost — right at the Texas border
+  ]
 
-function removeTexasMask() {
-  if (texasMaskOverlay && map) {
-    map.removeOverlay(texasMaskOverlay)
-    texasMaskOverlay = null
+  const fillColor = getTexasMaskColor()
+
+  for (const layer of layers) {
+    const scaledHole =
+      layer.scale === 1.0 ? baseTexasRing : scaleRing(baseTexasRing, layer.scale, cLat, cLng)
+
+    const style = new mapkit.Style({
+      fillColor,
+      fillOpacity: layer.opacity,
+      strokeOpacity: 0,
+      lineWidth: 0,
+    })
+
+    const overlay = new mapkit.PolygonOverlay([outerRing, scaledHole], { style })
+    overlay.enabled = false
+    map.addOverlay(overlay)
+    texasMaskOverlays.push(overlay)
   }
 }
 
+function removeTexasMask() {
+  if (!map) return
+  for (const overlay of texasMaskOverlays) {
+    map.removeOverlay(overlay)
+  }
+  texasMaskOverlays.length = 0
+}
+
 function updateTexasMaskStyle() {
-  if (!texasMaskOverlay) return
-  const { fillColor, fillOpacity } = getTexasMaskStyle()
-  texasMaskOverlay.style.fillColor = fillColor
-  texasMaskOverlay.style.fillOpacity = fillOpacity
+  if (!texasMaskOverlays.length) return
+  const fillColor = getTexasMaskColor()
+  for (const overlay of texasMaskOverlays) {
+    overlay.style.fillColor = fillColor
+  }
 }
 
 // ── Bounding region ──────────────────────────────────────────
@@ -217,6 +259,15 @@ function computeBoundingRegion(): any {
         hasPoints = true
       }
     }
+  }
+
+  // From circle overlays
+  for (const c of props.circles) {
+    if (c.lat < minLat) minLat = c.lat
+    if (c.lat > maxLat) maxLat = c.lat
+    if (c.lng < minLng) minLng = c.lng
+    if (c.lng > maxLng) maxLng = c.lng
+    hasPoints = true
   }
 
   if (hasPoints) {
@@ -398,9 +449,10 @@ function initMap() {
   addAnnotations()
   addOverlays()
   addCircles()
+  resizeCirclesToRegion() // Apply dynamic radius for the initial zoom level
   addTexasMask()
 
-  // Emit region changes for zoom-responsive behavior
+  // Emit region changes for zoom-responsive behavior + dynamic circle radius
   map.addEventListener('region-change-end', () => {
     const region = map.region
     if (region) {
@@ -410,6 +462,9 @@ function initMap() {
         centerLat: region.center.latitude,
         centerLng: region.center.longitude,
       })
+
+      // Dynamically resize circles based on visible span
+      resizeCirclesToRegion()
     }
   })
 }
@@ -538,6 +593,20 @@ function clearCircles() {
     map.removeOverlay(c)
   }
   circleOverlayRefs.length = 0
+}
+
+/** Resize all circle overlays proportionally to the current visible map region. */
+function resizeCirclesToRegion() {
+  if (!map || !props.dynamicCircleRadius || circleOverlayRefs.length === 0) return
+  const region = map.region
+  if (!region) return
+  const latDelta = region.span.latitudeDelta
+  // 1 degree latitude ≈ 111,320 meters
+  const rawRadius = latDelta * 111_320 * props.circleScaleFactor
+  const clampedRadius = Math.max(props.minCircleRadius, Math.min(props.maxCircleRadius, rawRadius))
+  for (const c of circleOverlayRefs) {
+    c.radius = clampedRadius
+  }
 }
 
 // ── Zoom behavior ────────────────────────────────────────────

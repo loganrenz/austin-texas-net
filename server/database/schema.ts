@@ -98,6 +98,10 @@ export const mapSpotsTable = sqliteTable('map_spots', {
   description: text('description'),
   priceRange: text('price_range').default('$'),
   rating: real('rating'),
+  neighborhoodRank: integer('neighborhood_rank'),
+  area: text('area'),
+  status: text('status').notNull().default('approved'), // approved | pending | archived
+  sourceRunId: integer('source_run_id'),
   featured: integer('featured', { mode: 'boolean' }).default(true),
   createdAt: text('created_at')
     .notNull()
@@ -120,6 +124,11 @@ export const neighborhoodsTable = sqliteTable('neighborhoods', {
   description: text('description'),
   population: integer('population'),
   featured: integer('featured', { mode: 'boolean' }).default(false),
+  // Shape & classification (added 0010)
+  tier: text('tier').default('neighborhood'), // 'region' | 'neighborhood' | 'micro' | 'district'
+  parentRegion: text('parent_region'), // e.g. 'Northwest Austin' for Northwest Hills
+  appleMapName: text('apple_maps_name'), // exact name from Apple Maps crawl
+  boundaryGeojson: text('boundary_geojson'), // GeoJSON Polygon geometry as JSON string
   createdAt: text('created_at')
     .notNull()
     .$defaultFn(() => new Date().toISOString()),
@@ -250,7 +259,26 @@ export const bluebonnetObservations = sqliteTable('bluebonnet_observations', {
   observer: text('observer').notNull(),
   place: text('place').notNull(),
   url: text('url').notNull(),
+  qualityGrade: text('quality_grade').default('needs_id'), // 'research' | 'needs_id'
   createdAt: text('created_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+})
+
+// ─── Site Hierarchy ──────────────────────────────────────────
+export const siteCategoriesTable = sqliteTable('site_categories', {
+  slug: text('slug').primaryKey(),
+  title: text('title').notNull(),
+  tagline: text('tagline').notNull(),
+  icon: text('icon').notNull(),
+  color: text('color').notNull(),
+  bgColor: text('bg_color').notNull(),
+  seoTitle: text('seo_title').notNull(),
+  seoDescription: text('seo_description').notNull(),
+  createdAt: text('created_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at')
     .notNull()
     .$defaultFn(() => new Date().toISOString()),
 })
@@ -263,12 +291,19 @@ export const contentPipelineTopics = sqliteTable('content_pipeline_topics', {
   topicKey: text('topic_key').notNull(),
   topicLabel: text('topic_label').notNull(),
   contentType: text('content_type').notNull(),
-  spotFile: text('spot_file').notNull(),
+  spotFile: text('spot_file'),
   maxSpots: integer('max_spots').notNull().default(10),
   searchQueries: text('search_queries').notNull().default('[]'), // JSON array of strings
   bodySystemPrompt: text('body_system_prompt'),
   faqSystemPrompt: text('faq_system_prompt'),
   enabled: integer('enabled', { mode: 'boolean' }).notNull().default(true),
+  // Additional fields for useSiteData compatibility
+  description: text('description'),
+  status: text('status').notNull().default('live'), // live | coming-soon
+  standaloneUrl: text('standalone_url'),
+  accentColor: text('accent_color'),
+  pinColor: text('pin_color'),
+  icon: text('icon'),
   createdAt: text('created_at')
     .notNull()
     .$defaultFn(() => new Date().toISOString()),
@@ -323,5 +358,8 @@ export type BluebonnetObservation = typeof bluebonnetObservations.$inferSelect
 export type NewBluebonnetObservation = typeof bluebonnetObservations.$inferInsert
 export type ContentPipelineTopic = typeof contentPipelineTopics.$inferSelect
 export type NewContentPipelineTopic = typeof contentPipelineTopics.$inferInsert
+
+export type SiteCategory = typeof siteCategoriesTable.$inferSelect
+export type NewSiteCategory = typeof siteCategoriesTable.$inferInsert
 export type ContentPipelineRun = typeof contentPipelineRuns.$inferSelect
 export type NewContentPipelineRun = typeof contentPipelineRuns.$inferInsert

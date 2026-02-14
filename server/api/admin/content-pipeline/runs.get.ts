@@ -12,7 +12,7 @@ const querySchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const { limit } = querySchema.parse(getQuery(event))
+  const { limit } = await getValidatedQuery(event, (data) => querySchema.parse(data))
 
   const db = useDatabase()
   const runs = await db

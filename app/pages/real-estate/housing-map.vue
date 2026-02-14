@@ -18,27 +18,38 @@ interface MapItem {
 }
 
 const ZIP_COORDS: Record<string, { lat: number; lng: number }> = {
-  '78701': { lat: 30.2700, lng: -97.7431 }, '78702': { lat: 30.2621, lng: -97.7208 },
-  '78703': { lat: 30.2937, lng: -97.7636 }, '78704': { lat: 30.2420, lng: -97.7638 },
-  '78705': { lat: 30.2906, lng: -97.7417 }, '78723': { lat: 30.3078, lng: -97.6905 },
-  '78731': { lat: 30.3474, lng: -97.7644 }, '78741': { lat: 30.2290, lng: -97.7199 },
-  '78745': { lat: 30.2060, lng: -97.7940 }, '78746': { lat: 30.3100, lng: -97.8050 },
-  '78749': { lat: 30.2300, lng: -97.8530 }, '78751': { lat: 30.3128, lng: -97.7234 },
-  '78752': { lat: 30.3300, lng: -97.7100 }, '78753': { lat: 30.3730, lng: -97.6770 },
-  '78757': { lat: 30.3530, lng: -97.7360 }, '78758': { lat: 30.3870, lng: -97.7130 },
-  '78759': { lat: 30.3990, lng: -97.7590 }, '78613': { lat: 30.5070, lng: -97.8210 },
-  '78660': { lat: 30.4390, lng: -97.6200 }, '78664': { lat: 30.5360, lng: -97.6620 },
+  '78701': { lat: 30.27, lng: -97.7431 },
+  '78702': { lat: 30.2621, lng: -97.7208 },
+  '78703': { lat: 30.2937, lng: -97.7636 },
+  '78704': { lat: 30.242, lng: -97.7638 },
+  '78705': { lat: 30.2906, lng: -97.7417 },
+  '78723': { lat: 30.3078, lng: -97.6905 },
+  '78731': { lat: 30.3474, lng: -97.7644 },
+  '78741': { lat: 30.229, lng: -97.7199 },
+  '78745': { lat: 30.206, lng: -97.794 },
+  '78746': { lat: 30.31, lng: -97.805 },
+  '78749': { lat: 30.23, lng: -97.853 },
+  '78751': { lat: 30.3128, lng: -97.7234 },
+  '78752': { lat: 30.33, lng: -97.71 },
+  '78753': { lat: 30.373, lng: -97.677 },
+  '78757': { lat: 30.353, lng: -97.736 },
+  '78758': { lat: 30.387, lng: -97.713 },
+  '78759': { lat: 30.399, lng: -97.759 },
+  '78613': { lat: 30.507, lng: -97.821 },
+  '78660': { lat: 30.439, lng: -97.62 },
+  '78664': { lat: 30.536, lng: -97.662 },
 }
 
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('real-estate')!
-const siblings = category.subApps.filter(a => a.slug !== 'housing-map' && a.status === 'live')
-const crossLinks = categories.filter(c => c.slug !== 'real-estate').slice(0, 4)
+const siblings = category.subApps.filter((a) => a.slug !== 'housing-map' && a.status === 'live')
+const crossLinks = categories.value.filter((c) => c.slug !== 'real-estate').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
 
 usePageSeo({
   title: 'Austin Housing Map — Home Prices & New Developments',
-  description: 'Interactive map of Austin housing: median home prices by zip code and new construction permits. See where Austin is growing.',
+  description:
+    'Interactive map of Austin housing: median home prices by zip code and new construction permits. See where Austin is growing.',
   ogImageComponent: 'OgImageSubApp',
   ogImageProps: {
     category: category.title,
@@ -46,13 +57,26 @@ usePageSeo({
   },
 })
 
-useSchemaOrg([defineWebPage({
-  name: 'Austin Housing Map',
-  description: 'Composite housing map showing home values and development permits across Austin.',
-})])
+useSchemaOrg([
+  defineWebPage({
+    name: 'Austin Housing Map',
+    description: 'Composite housing map showing home values and development permits across Austin.',
+  }),
+])
 
-const { data: priceData } = await useFetch<{ prices: Array<{ zipCode: string; medianValue: number; period: string }> }>('/api/real-estate/home-prices?latest=true')
-const { data: permitData } = await useFetch<{ permits: Array<{ id: string; lat: number; lng: number; name: string; displayValue: string; issueDate: string }> }>('/api/real-estate/developments?limit=100')
+const { data: priceData } = await useFetch<{
+  prices: Array<{ zipCode: string; medianValue: number; period: string }>
+}>('/api/real-estate/home-prices?latest=true')
+const { data: permitData } = await useFetch<{
+  permits: Array<{
+    id: string
+    lat: number
+    lng: number
+    name: string
+    displayValue: string
+    issueDate: string
+  }>
+}>('/api/real-estate/developments?limit=100')
 
 const activeLayer = ref<'all' | 'prices' | 'permits'>('all')
 
@@ -60,7 +84,7 @@ const items = computed<MapItem[]>(() => {
   const result: MapItem[] = []
 
   if (activeLayer.value === 'all' || activeLayer.value === 'prices') {
-    for (const p of (priceData.value?.prices || [])) {
+    for (const p of priceData.value?.prices || []) {
       const coords = ZIP_COORDS[p.zipCode]
       if (!coords) continue
       result.push({
@@ -76,7 +100,7 @@ const items = computed<MapItem[]>(() => {
   }
 
   if (activeLayer.value === 'all' || activeLayer.value === 'permits') {
-    for (const p of (permitData.value?.permits || [])) {
+    for (const p of permitData.value?.permits || []) {
       if (!p.lat || !p.lng) continue
       result.push({
         id: `permit-${p.id}`,
@@ -94,7 +118,7 @@ const items = computed<MapItem[]>(() => {
 })
 
 const selectedId = ref<string | null>(null)
-const selectedItem = computed(() => items.value.find(i => i.id === selectedId.value) ?? null)
+const selectedItem = computed(() => items.value.find((i) => i.id === selectedId.value) ?? null)
 
 function createPinElement(spot: MapItem, isSelected: boolean): { element: HTMLElement } {
   const isPricePin = spot.type === 'price'
@@ -140,7 +164,11 @@ function createPinElement(spot: MapItem, isSelected: boolean): { element: HTMLEl
     </ClientOnly>
 
     <UContainer class="py-8 md:py-12">
-      <UBreadcrumb v-if="breadcrumbs.length > 0 && !selectedItem" :items="breadcrumbs" class="mb-6" />
+      <UBreadcrumb
+        v-if="breadcrumbs.length > 0 && !selectedItem"
+        :items="breadcrumbs"
+        class="mb-6"
+      />
 
       <div v-if="!selectedItem" class="mb-8 animate-fade-up">
         <div class="flex items-center gap-3 mb-4">
@@ -152,48 +180,107 @@ function createPinElement(spot: MapItem, isSelected: boolean): { element: HTMLEl
           </h1>
         </div>
         <p class="text-base sm:text-lg text-muted max-w-2xl leading-relaxed">
-          Combined view of Austin home values and new construction. Blue pins show median prices by zip code,
-          green dots mark new development permits.
+          Combined view of Austin home values and new construction. Blue pins show median prices by
+          zip code, green dots mark new development permits.
         </p>
       </div>
 
       <!-- Layer Filter -->
       <div v-if="!selectedItem" class="mb-6 flex gap-2 flex-wrap animate-fade-up-delay-1">
-        <UButton :variant="activeLayer === 'all' ? 'solid' : 'ghost'" :color="activeLayer === 'all' ? 'primary' : 'neutral'" size="sm" icon="i-lucide-layers" @click="activeLayer = 'all'">All Layers</UButton>
-        <UButton :variant="activeLayer === 'prices' ? 'solid' : 'ghost'" :color="activeLayer === 'prices' ? 'primary' : 'neutral'" size="sm" icon="i-lucide-home" @click="activeLayer = 'prices'">Home Prices</UButton>
-        <UButton :variant="activeLayer === 'permits' ? 'solid' : 'ghost'" :color="activeLayer === 'permits' ? 'primary' : 'neutral'" size="sm" icon="i-lucide-construction" @click="activeLayer = 'permits'">Developments</UButton>
+        <UButton
+          :variant="activeLayer === 'all' ? 'solid' : 'ghost'"
+          :color="activeLayer === 'all' ? 'primary' : 'neutral'"
+          size="sm"
+          icon="i-lucide-layers"
+          @click="activeLayer = 'all'"
+          >All Layers</UButton
+        >
+        <UButton
+          :variant="activeLayer === 'prices' ? 'solid' : 'ghost'"
+          :color="activeLayer === 'prices' ? 'primary' : 'neutral'"
+          size="sm"
+          icon="i-lucide-home"
+          @click="activeLayer = 'prices'"
+          >Home Prices</UButton
+        >
+        <UButton
+          :variant="activeLayer === 'permits' ? 'solid' : 'ghost'"
+          :color="activeLayer === 'permits' ? 'primary' : 'neutral'"
+          size="sm"
+          icon="i-lucide-construction"
+          @click="activeLayer = 'permits'"
+          >Developments</UButton
+        >
       </div>
 
       <!-- Selected Item -->
       <section v-if="selectedItem" class="mb-10 animate-fade-up">
-        <UButton variant="link" color="neutral" size="xs" icon="i-lucide-arrow-left" class="text-xs font-bold uppercase tracking-widest mb-5" @click="selectedId = null">Back to Map</UButton>
-        <div class="rounded-2xl border border-default bg-default px-6 py-5 shadow-sm dark:shadow-md">
+        <UButton
+          variant="link"
+          color="neutral"
+          size="xs"
+          icon="i-lucide-arrow-left"
+          class="text-xs font-bold uppercase tracking-widest mb-5"
+          @click="selectedId = null"
+          >Back to Map</UButton
+        >
+        <div
+          class="rounded-2xl border border-default bg-default px-6 py-5 shadow-sm dark:shadow-md"
+        >
           <h2 class="text-lg font-extrabold font-display mb-2">{{ selectedItem.name }}</h2>
           <p class="text-sm text-muted mb-3">{{ selectedItem.detail }}</p>
           <div class="flex gap-3">
             <div class="rounded-xl border border-primary/15 bg-primary/5 px-4 py-2">
-              <span class="text-lg font-extrabold font-display">{{ selectedItem.displayValue }}</span>
+              <span class="text-lg font-extrabold font-display">{{
+                selectedItem.displayValue
+              }}</span>
             </div>
-            <UBadge :color="selectedItem.type === 'price' ? 'info' : 'success'" variant="subtle" size="sm" :label="selectedItem.type === 'price' ? 'Home Value' : 'Development'" />
+            <UBadge
+              :color="selectedItem.type === 'price' ? 'info' : 'success'"
+              variant="subtle"
+              size="sm"
+              :label="selectedItem.type === 'price' ? 'Home Value' : 'Development'"
+            />
           </div>
         </div>
       </section>
 
       <!-- More / Explore -->
       <section v-if="siblings.length && !selectedItem" class="mb-8 animate-fade-up-delay-2">
-        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-4">More in Real Estate</h2>
+        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-4">
+          More in Real Estate
+        </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <NuxtLink v-for="app in siblings" :key="app.slug" :to="`/real-estate/${app.slug}/`" class="group flex items-center justify-between rounded-xl border border-default bg-default p-4 transition-all duration-200 hover:border-primary/30 hover:shadow-sm">
-            <div><h3 class="text-sm font-semibold mb-1">{{ app.title }}</h3><p class="text-xs text-muted line-clamp-1">{{ app.description }}</p></div>
-            <UIcon name="i-lucide-chevron-right" class="size-4 text-dimmed group-hover:text-primary transition-colors" />
+          <NuxtLink
+            v-for="app in siblings"
+            :key="app.slug"
+            :to="`/real-estate/${app.slug}/`"
+            class="group flex items-center justify-between rounded-xl border border-default bg-default p-4 transition-all duration-200 hover:border-primary/30 hover:shadow-sm"
+          >
+            <div>
+              <h3 class="text-sm font-semibold mb-1">{{ app.title }}</h3>
+              <p class="text-xs text-muted line-clamp-1">{{ app.description }}</p>
+            </div>
+            <UIcon
+              name="i-lucide-chevron-right"
+              class="size-4 text-dimmed group-hover:text-primary transition-colors"
+            />
           </NuxtLink>
         </div>
       </section>
       <section v-if="!selectedItem" class="mb-6 animate-fade-up-delay-3">
         <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-4">Explore More</h2>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <NuxtLink v-for="c in crossLinks" :key="c.slug" :to="`/${c.slug}/`" class="flex items-center gap-2.5 rounded-xl border border-default bg-default px-4 py-3 transition-all duration-200 hover:border-primary/30">
-            <UIcon :name="c.icon" class="size-4" :class="c.color" /><span class="text-sm font-medium">{{ c.title }}</span>
+          <NuxtLink
+            v-for="c in crossLinks"
+            :key="c.slug"
+            :to="`/${c.slug}/`"
+            class="flex items-center gap-2.5 rounded-xl border border-default bg-default px-4 py-3 transition-all duration-200 hover:border-primary/30"
+          >
+            <UIcon :name="c.icon" class="size-4" :class="c.color" /><span
+              class="text-sm font-medium"
+              >{{ c.title }}</span
+            >
           </NuxtLink>
         </div>
       </section>

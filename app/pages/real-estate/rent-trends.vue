@@ -22,49 +22,49 @@ interface RentSpot {
 
 // Reuse zip code coordinates from home prices
 const ZIP_COORDS: Record<string, { lat: number; lng: number }> = {
-  '78701': { lat: 30.2700, lng: -97.7431 },
+  '78701': { lat: 30.27, lng: -97.7431 },
   '78702': { lat: 30.2621, lng: -97.7208 },
   '78703': { lat: 30.2937, lng: -97.7636 },
-  '78704': { lat: 30.2420, lng: -97.7638 },
+  '78704': { lat: 30.242, lng: -97.7638 },
   '78705': { lat: 30.2906, lng: -97.7417 },
-  '78721': { lat: 30.2703, lng: -97.6910 },
+  '78721': { lat: 30.2703, lng: -97.691 },
   '78722': { lat: 30.2822, lng: -97.7139 },
   '78723': { lat: 30.3078, lng: -97.6905 },
   '78724': { lat: 30.3199, lng: -97.6345 },
-  '78726': { lat: 30.4330, lng: -97.8303 },
+  '78726': { lat: 30.433, lng: -97.8303 },
   '78727': { lat: 30.4253, lng: -97.7197 },
   '78728': { lat: 30.4467, lng: -97.6937 },
   '78729': { lat: 30.4564, lng: -97.7676 },
-  '78730': { lat: 30.3650, lng: -97.8271 },
+  '78730': { lat: 30.365, lng: -97.8271 },
   '78731': { lat: 30.3474, lng: -97.7644 },
-  '78732': { lat: 30.3780, lng: -97.8888 },
-  '78733': { lat: 30.3200, lng: -97.8750 },
-  '78735': { lat: 30.2650, lng: -97.8460 },
-  '78741': { lat: 30.2290, lng: -97.7199 },
-  '78744': { lat: 30.1930, lng: -97.7350 },
-  '78745': { lat: 30.2060, lng: -97.7940 },
-  '78746': { lat: 30.3100, lng: -97.8050 },
-  '78748': { lat: 30.1770, lng: -97.8040 },
-  '78749': { lat: 30.2300, lng: -97.8530 },
-  '78750': { lat: 30.4060, lng: -97.7910 },
+  '78732': { lat: 30.378, lng: -97.8888 },
+  '78733': { lat: 30.32, lng: -97.875 },
+  '78735': { lat: 30.265, lng: -97.846 },
+  '78741': { lat: 30.229, lng: -97.7199 },
+  '78744': { lat: 30.193, lng: -97.735 },
+  '78745': { lat: 30.206, lng: -97.794 },
+  '78746': { lat: 30.31, lng: -97.805 },
+  '78748': { lat: 30.177, lng: -97.804 },
+  '78749': { lat: 30.23, lng: -97.853 },
+  '78750': { lat: 30.406, lng: -97.791 },
   '78751': { lat: 30.3128, lng: -97.7234 },
-  '78752': { lat: 30.3300, lng: -97.7100 },
-  '78753': { lat: 30.3730, lng: -97.6770 },
-  '78756': { lat: 30.3230, lng: -97.7390 },
-  '78757': { lat: 30.3530, lng: -97.7360 },
-  '78758': { lat: 30.3870, lng: -97.7130 },
-  '78759': { lat: 30.3990, lng: -97.7590 },
-  '78610': { lat: 30.0810, lng: -97.8400 },
-  '78613': { lat: 30.5070, lng: -97.8210 },
-  '78660': { lat: 30.4390, lng: -97.6200 },
-  '78664': { lat: 30.5360, lng: -97.6620 },
-  '78681': { lat: 30.5100, lng: -97.7370 },
+  '78752': { lat: 30.33, lng: -97.71 },
+  '78753': { lat: 30.373, lng: -97.677 },
+  '78756': { lat: 30.323, lng: -97.739 },
+  '78757': { lat: 30.353, lng: -97.736 },
+  '78758': { lat: 30.387, lng: -97.713 },
+  '78759': { lat: 30.399, lng: -97.759 },
+  '78610': { lat: 30.081, lng: -97.84 },
+  '78613': { lat: 30.507, lng: -97.821 },
+  '78660': { lat: 30.439, lng: -97.62 },
+  '78664': { lat: 30.536, lng: -97.662 },
+  '78681': { lat: 30.51, lng: -97.737 },
 }
 
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('real-estate')!
-const siblings = category.subApps.filter(a => a.slug !== 'rent-trends' && a.status === 'live')
-const crossLinks = categories.filter(c => c.slug !== 'real-estate').slice(0, 4)
+const siblings = category.subApps.filter((a) => a.slug !== 'rent-trends' && a.status === 'live')
+const crossLinks = categories.value.filter((c) => c.slug !== 'real-estate').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
 
 usePageSeo({
@@ -81,17 +81,20 @@ usePageSeo({
 useSchemaOrg([
   defineWebPage({
     name: 'Austin Rent Prices by Zip Code',
-    description: 'Interactive map of median rents across Austin-area zip codes from Zillow Observed Rent Index data.',
+    description:
+      'Interactive map of median rents across Austin-area zip codes from Zillow Observed Rent Index data.',
   }),
 ])
 
-const { data: apiData } = await useFetch<{ prices: Array<{ zipCode: string; period: string; medianRent: number; yoyChange: number | null }> }>('/api/real-estate/rent-trends?latest=true')
+const { data: apiData } = await useFetch<{
+  prices: Array<{ zipCode: string; period: string; medianRent: number; yoyChange: number | null }>
+}>('/api/real-estate/rent-trends?latest=true')
 
 const spots = computed<RentSpot[]>(() => {
   const prices = apiData.value?.prices || []
   return prices
-    .filter(p => ZIP_COORDS[p.zipCode])
-    .map(p => ({
+    .filter((p) => ZIP_COORDS[p.zipCode])
+    .map((p) => ({
       id: p.zipCode,
       name: `Zip ${p.zipCode}`,
       lat: ZIP_COORDS[p.zipCode]!.lat,
@@ -105,18 +108,23 @@ const spots = computed<RentSpot[]>(() => {
 
 const selectedId = ref<string | null>(null)
 const selectedSpot = computed<RentSpot | null>(
-  () => spots.value.find(s => s.id === selectedId.value) ?? null,
+  () => spots.value.find((s) => s.id === selectedId.value) ?? null,
 )
 
 const sortBy = ref<'rent-high' | 'rent-low' | 'yoy-high' | 'yoy-low'>('rent-high')
 const sortedSpots = computed(() => {
   const list = [...spots.value]
   switch (sortBy.value) {
-    case 'rent-high': return list.sort((a, b) => b.medianRent - a.medianRent)
-    case 'rent-low': return list.sort((a, b) => a.medianRent - b.medianRent)
-    case 'yoy-high': return list.sort((a, b) => (b.yoyChange ?? 0) - (a.yoyChange ?? 0))
-    case 'yoy-low': return list.sort((a, b) => (a.yoyChange ?? 0) - (b.yoyChange ?? 0))
-    default: return list
+    case 'rent-high':
+      return list.sort((a, b) => b.medianRent - a.medianRent)
+    case 'rent-low':
+      return list.sort((a, b) => a.medianRent - b.medianRent)
+    case 'yoy-high':
+      return list.sort((a, b) => (b.yoyChange ?? 0) - (a.yoyChange ?? 0))
+    case 'yoy-low':
+      return list.sort((a, b) => (a.yoyChange ?? 0) - (b.yoyChange ?? 0))
+    default:
+      return list
   }
 })
 
@@ -127,7 +135,8 @@ function createPinElement(
   const rent = spot.medianRent
 
   /* eslint-disable atx/no-inline-hex -- MapKit pin gradient */
-  const fillColor = rent >= 2500 ? '#7c3aed' : rent >= 1800 ? '#3b82f6' : rent >= 1200 ? '#22c55e' : '#f59e0b'
+  const fillColor =
+    rent >= 2500 ? '#7c3aed' : rent >= 1800 ? '#3b82f6' : rent >= 1200 ? '#22c55e' : '#f59e0b'
   /* eslint-enable atx/no-inline-hex */
 
   const el = document.createElement('div')
@@ -193,7 +202,8 @@ function yoyColor(change: number | null): string {
         </div>
         <p class="text-base sm:text-lg text-muted max-w-2xl leading-relaxed">
           Median monthly rents across Austin-area zip codes from the Zillow Observed Rent Index.
-          <strong class="text-default">Tap any pin</strong> to see rent data and year-over-year changes.
+          <strong class="text-default">Tap any pin</strong> to see rent data and year-over-year
+          changes.
         </p>
       </div>
 
@@ -210,9 +220,13 @@ function yoyColor(change: number | null): string {
           Back to All Zips
         </UButton>
 
-        <div class="rounded-2xl border border-default bg-default px-6 py-5 shadow-sm dark:shadow-md">
+        <div
+          class="rounded-2xl border border-default bg-default px-6 py-5 shadow-sm dark:shadow-md"
+        >
           <div class="flex items-start gap-4 mb-4">
-            <div class="flex items-center justify-center size-11 rounded-full bg-linear-to-br from-primary to-primary/70 shadow-lg">
+            <div
+              class="flex items-center justify-center size-11 rounded-full bg-linear-to-br from-primary to-primary/70 shadow-lg"
+            >
               <UIcon name="i-lucide-building-2" class="size-5 text-white" />
             </div>
             <div class="flex-1 min-w-0">
@@ -223,15 +237,30 @@ function yoyColor(change: number | null): string {
             </div>
           </div>
           <div class="grid grid-cols-2 gap-3 mb-5">
-            <div class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-2.5">
-              <span class="text-xl font-extrabold font-display">{{ selectedSpot.displayValue }}/mo</span>
-              <span class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center">Median Rent</span>
+            <div
+              class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-2.5"
+            >
+              <span class="text-xl font-extrabold font-display"
+                >{{ selectedSpot.displayValue }}/mo</span
+              >
+              <span
+                class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center"
+                >Median Rent</span
+              >
             </div>
-            <div class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-2.5">
-              <span class="text-xl font-extrabold font-display" :class="yoyColor(selectedSpot.yoyChange)">
+            <div
+              class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-2.5"
+            >
+              <span
+                class="text-xl font-extrabold font-display"
+                :class="yoyColor(selectedSpot.yoyChange)"
+              >
                 {{ formatYoy(selectedSpot.yoyChange) }}
               </span>
-              <span class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center">Year-over-Year</span>
+              <span
+                class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center"
+                >Year-over-Year</span
+              >
             </div>
           </div>
           <UBadge color="info" variant="subtle" size="sm" label="Zillow ZORI" class="mb-3" />
@@ -241,7 +270,9 @@ function yoyColor(change: number | null): string {
       <!-- Zip List -->
       <section v-if="!selectedSpot" class="mb-10 animate-fade-up-delay-1">
         <div class="flex items-center justify-between mb-5">
-          <h2 class="text-xs font-bold uppercase tracking-widest text-muted">Austin-Area Zip Codes</h2>
+          <h2 class="text-xs font-bold uppercase tracking-widest text-muted">
+            Austin-Area Zip Codes
+          </h2>
           <USelect
             v-model="sortBy"
             size="xs"
@@ -262,7 +293,9 @@ function yoyColor(change: number | null): string {
             class="group flex w-full items-center gap-3 rounded-[14px] border border-default bg-default px-4 py-3.5 transition-all duration-200 hover:-translate-y-px hover:border-primary/40 hover:shadow-sm"
             @click="selectedId = spot.id"
           >
-            <div class="flex items-center justify-center min-w-[80px] shrink-0 rounded-[10px] border border-primary/15 bg-primary/8 px-2.5 py-1.5 text-sm font-extrabold font-display">
+            <div
+              class="flex items-center justify-center min-w-[80px] shrink-0 rounded-[10px] border border-primary/15 bg-primary/8 px-2.5 py-1.5 text-sm font-extrabold font-display"
+            >
               {{ spot.displayValue }}
             </div>
             <div class="flex-1 min-w-0 text-left">
@@ -272,14 +305,19 @@ function yoyColor(change: number | null): string {
                 <span :class="yoyColor(spot.yoyChange)">{{ formatYoy(spot.yoyChange) }} YoY</span>
               </p>
             </div>
-            <UIcon name="i-lucide-chevron-right" class="size-4 text-muted group-hover:text-primary transition-colors shrink-0" />
+            <UIcon
+              name="i-lucide-chevron-right"
+              class="size-4 text-muted group-hover:text-primary transition-colors shrink-0"
+            />
           </UButton>
         </div>
       </section>
 
       <!-- More / Explore -->
       <section v-if="siblings.length && !selectedSpot" class="mb-8 animate-fade-up-delay-2">
-        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-4">More in Real Estate</h2>
+        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-4">
+          More in Real Estate
+        </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <NuxtLink
             v-for="app in siblings"
@@ -291,7 +329,10 @@ function yoyColor(change: number | null): string {
               <h3 class="text-sm font-semibold mb-1">{{ app.title }}</h3>
               <p class="text-xs text-muted line-clamp-1">{{ app.description }}</p>
             </div>
-            <UIcon name="i-lucide-chevron-right" class="size-4 text-dimmed group-hover:text-primary transition-colors" />
+            <UIcon
+              name="i-lucide-chevron-right"
+              class="size-4 text-dimmed group-hover:text-primary transition-colors"
+            />
           </NuxtLink>
         </div>
       </section>

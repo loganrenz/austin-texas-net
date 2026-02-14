@@ -29,15 +29,28 @@ interface NeighborhoodData {
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 
-const { data, error } = await useFetch<{ neighborhood: NeighborhoodData }>(
-  `/api/neighborhoods/${slug.value}`,
-)
+const { data, error } = await useFetch<{
+  neighborhood: NeighborhoodData
+  spots: Array<{
+    id: string
+    name: string
+    neighborhood?: string
+    neighborhoodRank?: number
+    priceRange?: string
+    knownFor?: string
+    description?: string
+    rating?: number
+    url?: string
+    [key: string]: unknown
+  }>
+}>(`/api/neighborhoods/${slug.value}`)
 
 if (error.value || !data.value?.neighborhood) {
   throw createError({ statusCode: 404, statusMessage: 'Neighborhood not found', fatal: true })
 }
 
 const neighborhood = computed(() => data.value!.neighborhood)
+const spots = computed(() => data.value!.spots || [])
 
 const displayName = computed(() => neighborhood.value.name)
 const cityLabel = computed(() => {
@@ -109,7 +122,9 @@ const siblings = computed(() =>
 
 // Cross-category links
 const { categories } = useSiteData()
-const crossLinks = computed(() => categories.filter((c) => c.slug !== 'neighborhoods').slice(0, 4))
+const crossLinks = computed(() =>
+  categories.value.filter((c) => c.slug !== 'neighborhoods').slice(0, 4),
+)
 </script>
 
 <template>
@@ -211,8 +226,62 @@ const crossLinks = computed(() => categories.filter((c) => c.slug !== 'neighborh
         </div>
       </section>
 
-      <!-- Coming soon placeholder -->
-      <section class="rounded-2xl border border-default bg-elevated p-6 sm:p-8 mb-8">
+      <!-- Top Spots in Neighborhood -->
+      <section v-if="spots.length > 0" class="mb-8">
+        <h2 class="text-sm font-bold uppercase tracking-widest text-muted mb-4 text-center">
+          Best in {{ displayName }}
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div
+            v-for="spot in spots"
+            :key="spot.id"
+            class="group bg-elevated border border-default rounded-2xl p-5 transition-all hover:border-accented hover:shadow-sm"
+          >
+            <div class="flex items-start justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <span
+                  v-if="spot.neighborhoodRank"
+                  class="size-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[0.65rem] font-bold"
+                >
+                  {{ spot.neighborhoodRank }}
+                </span>
+                <h3 class="font-bold text-[0.95rem]">{{ spot.name }}</h3>
+              </div>
+              <UBadge v-if="spot.priceRange" color="neutral" variant="soft" size="xs">
+                {{ spot.priceRange }}
+              </UBadge>
+            </div>
+            <p
+              v-if="spot.knownFor"
+              class="text-[0.7rem] font-semibold text-primary uppercase tracking-wide mb-2"
+            >
+              {{ spot.knownFor }}
+            </p>
+            <p class="text-[0.8rem] text-muted leading-relaxed line-clamp-3 mb-4">
+              {{ spot.description }}
+            </p>
+            <div class="flex items-center justify-between mt-auto">
+              <div class="flex items-center gap-1">
+                <UIcon name="i-lucide-star" class="size-3 text-warning" />
+                <span class="text-[0.7rem] font-bold">{{ spot.rating || '—' }}</span>
+              </div>
+              <UButton
+                v-if="spot.url"
+                :to="spot.url"
+                target="_blank"
+                variant="link"
+                color="primary"
+                size="xs"
+                icon="i-lucide-external-link"
+                label="Website"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Coming soon placeholder (if no spots yet) -->
+      <section v-else class="rounded-2xl border border-default bg-elevated p-6 sm:p-8 mb-8">
         <h2 class="text-sm font-bold uppercase tracking-widest text-muted mb-4">What's Coming</h2>
         <div class="text-sm text-muted leading-relaxed space-y-3">
           <p>

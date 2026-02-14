@@ -16,6 +16,7 @@ interface INatObservation {
   id: number
   geojson: { type: string; coordinates: [number, number] } | null
   observed_on: string | null
+  quality_grade: string | null
   place_guess: string | null
   uri: string | null
   user: { login: string; name: string | null } | null
@@ -110,6 +111,7 @@ export default defineEventHandler(async (event) => {
             observer: obs.user?.name || obs.user?.login || 'Anonymous',
             place: obs.place_guess || '',
             url: obs.uri || `https://www.inaturalist.org/observations/${obs.id}`,
+            qualityGrade: obs.quality_grade || 'needs_id',
             createdAt: new Date().toISOString(),
           })
         }
@@ -138,6 +140,7 @@ export default defineEventHandler(async (event) => {
                   photoUrl: row.photoUrl,
                   place: row.place,
                   observer: row.observer,
+                  qualityGrade: row.qualityGrade,
                 })
                 .where(eq(tables.bluebonnetObservations.inatId, row.inatId))
                 .run()

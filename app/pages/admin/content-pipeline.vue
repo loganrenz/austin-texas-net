@@ -24,7 +24,9 @@ const { isAdmin } = useAuth()
 
 // ─── Category options from useSiteData ──────────────────────
 const { categories } = useSiteData()
-const categoryOptions = categories.map((c) => ({ label: c.title, value: c.slug }))
+const categoryOptions = computed(() =>
+  categories.value.map((c) => ({ label: c.title, value: c.slug })),
+)
 
 const DEFAULT_BODY_PROMPT = `You are a content writer for Austin-Texas.net, an illustrated city guide to Austin, TX.
 Write engaging, opinionated prose about Austin's local scene. Be specific — name real places,
@@ -55,7 +57,7 @@ const showEditModal = ref(false)
 
 function onCategoryChange(slug: string) {
   if (!editingTopic.value) return
-  const cat = categories.find((c) => c.slug === slug)
+  const cat = categories.value.find((c) => c.slug === slug)
   editingTopic.value.categorySlug = slug
   editingTopic.value.categoryLabel = cat?.title ?? slug
 }
@@ -69,6 +71,9 @@ function openNewTopic() {
     contentType: 'spots',
     spotFile: '',
     maxSpots: 10,
+    description: '',
+    status: 'live',
+    standaloneUrl: '',
     searchQueries: [
       'best ___ austin texas 2025',
       'top rated ___ austin tx',
@@ -335,84 +340,146 @@ const categorizedTopics = computed(() => {
         <div
           v-for="topic in catTopics"
           :key="String(topic.id)"
-          class="group relative rounded-2xl border border-default bg-elevated p-5 transition-all duration-200 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
+          class="group relative rounded-2xl border border-default bg-elevated transition-all duration-200 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 active:scale-[0.98]"
+          :class="topic.enabled ? 'opacity-100' : 'opacity-60'"
         >
-          <div class="flex items-start justify-between mb-3">
-            <div>
-              <h3 class="font-semibold">{{ topic.topicLabel }}</h3>
-              <p class="text-xs text-dimmed mt-0.5">
-                {{ topic.contentType }} → {{ topic.spotFile }}
-              </p>
-            </div>
-            <UBadge
-              :color="topic.enabled ? 'success' : 'neutral'"
-              variant="subtle"
-              size="xs"
-              :label="topic.enabled ? 'Active' : 'Disabled'"
-            />
-          </div>
+          <!-- Accent Strip -->
+          <div
+            class="absolute inset-y-0 left-0 w-1 rounded-l-2xl"
+            :class="topic.accentColor ? `bg-${topic.accentColor}-500` : 'bg-muted'"
+          />
 
-          <!-- Search queries -->
-          <div class="mb-3">
-            <p class="text-xs font-medium text-dimmed mb-1.5">Search Queries</p>
-            <div class="flex flex-wrap gap-1">
-              <UBadge
-                v-for="(q, qi) in (topic.searchQueries as string[]).slice(0, 3)"
-                :key="qi"
-                color="primary"
-                variant="subtle"
+          <div class="p-5">
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex items-start gap-3">
+                <div
+                  class="size-10 rounded-xl flex items-center justify-center shrink-0 border border-default"
+                  :class="
+                    topic.accentColor
+                      ? `bg-${topic.accentColor}-500/10 text-${topic.accentColor}-600 dark:text-${topic.accentColor}-400`
+                      : 'bg-muted/10 text-muted'
+                  "
+                >
+                  <UIcon :name="(topic.icon as string) || 'i-lucide-folder'" class="size-5" />
+                </div>
+                <div>
+                  <h3 class="font-bold leading-tight">{{ topic.topicLabel }}</h3>
+                  <p class="text-[10px] font-mono text-dimmed uppercase tracking-wider mt-0.5">
+                    /{{ topic.categorySlug }}/{{ topic.topicKey }}
+                  </p>
+                </div>
+              </div>
+              <div class="flex flex-col items-end gap-1">
+                <UBadge
+                  :color="topic.enabled ? 'success' : 'neutral'"
+                  variant="subtle"
+                  size="xs"
+                  class="px-1.5"
+                >
+                  {{ topic.enabled ? 'Active' : 'Disabled' }}
+                </UBadge>
+                <div class="flex items-center gap-1">
+                  <UBadge
+                    v-if="topic.status === 'coming-soon'"
+                    color="warning"
+                    variant="subtle"
+                    size="xs"
+                    class="px-1"
+                    >Soon</UBadge
+                  >
+                  <UBadge
+                    color="neutral"
+                    variant="outline"
+                    size="xs"
+                    class="px-1 font-mono uppercase text-[9px]"
+                  >
+                    {{ topic.contentType }}
+                  </UBadge>
+                </div>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <p v-if="topic.description" class="text-xs text-muted line-clamp-2 mb-4 h-8">
+              {{ topic.description }}
+            </p>
+            <div v-else class="mb-4 h-8 flex items-center">
+              <span class="text-[10px] italic text-dimmed">No description provided</span>
+            </div>
+
+            <!-- Meta info -->
+            <div class="grid grid-cols-2 gap-2 mb-5">
+              <div
+                class="flex items-center gap-2 bg-default rounded-lg p-1.5 border border-default"
+              >
+                <UIcon name="i-lucide-file-code" class="size-3.5 text-dimmed" />
+                <span class="text-[10px] truncate text-muted font-mono">{{
+                  topic.spotFile || 'None'
+                }}</span>
+              </div>
+              <div
+                class="flex items-center gap-2 bg-default rounded-lg p-1.5 border border-default"
+              >
+                <UIcon name="i-lucide-map-pin" class="size-3.5 text-dimmed" />
+                <span class="text-[10px] text-muted font-bold">{{ topic.maxSpots }} spots</span>
+              </div>
+            </div>
+
+            <!-- Search queries preview -->
+            <div class="mb-5">
+              <div class="flex flex-wrap gap-1">
+                <span
+                  v-for="(q, qi) in (topic.searchQueries as string[]).slice(0, 2)"
+                  :key="qi"
+                  class="inline-flex items-center px-1.5 py-0.5 rounded bg-primary/5 border border-primary/10 text-[9px] text-primary-600 dark:text-primary-400 font-medium truncate max-w-[120px]"
+                >
+                  {{ q }}
+                </span>
+                <span
+                  v-if="(topic.searchQueries as string[]).length > 2"
+                  class="text-[9px] text-dimmed ml-1 self-center"
+                >
+                  +{{ (topic.searchQueries as string[]).length - 2 }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-2 mt-auto pt-4 border-t border-default/50">
+              <UTooltip text="Preview / Run Pipeline">
+                <UButton
+                  size="xs"
+                  color="primary"
+                  variant="soft"
+                  icon="i-lucide-play"
+                  :loading="runningTopicId === Number(topic.id)"
+                  :disabled="runningTopicId !== null && runningTopicId !== Number(topic.id)"
+                  @click="runTopic(Number(topic.id))"
+                >
+                  Run
+                </UButton>
+              </UTooltip>
+              <UButton
                 size="xs"
-                :label="q"
-                class="max-w-[200px] truncate"
-              />
-              <UBadge
-                v-if="(topic.searchQueries as string[]).length > 3"
                 color="neutral"
-                variant="subtle"
-                size="xs"
-                :label="`+${(topic.searchQueries as string[]).length - 3} more`"
-              />
+                variant="outline"
+                icon="i-lucide-pencil"
+                class="flex-1"
+                @click="openEditTopic(topic)"
+              >
+                Edit
+              </UButton>
+              <div class="ml-auto flex items-center gap-1">
+                <UButton
+                  size="xs"
+                  color="error"
+                  variant="ghost"
+                  icon="i-lucide-trash-2"
+                  :loading="deleting"
+                  @click="deleteTopic(Number(topic.id))"
+                />
+              </div>
             </div>
-          </div>
-
-          <!-- Spots config -->
-          <div class="flex items-center gap-4 text-xs text-dimmed mb-4">
-            <span class="flex items-center gap-1">
-              <UIcon name="i-lucide-map-pin" class="size-3.5" />
-              {{ topic.maxSpots }} spots
-            </span>
-          </div>
-
-          <!-- Actions -->
-          <div class="flex items-center gap-2">
-            <UButton
-              size="xs"
-              color="primary"
-              variant="soft"
-              icon="i-lucide-play"
-              :loading="runningTopicId === Number(topic.id)"
-              :disabled="runningTopicId !== null && runningTopicId !== Number(topic.id)"
-              @click="runTopic(Number(topic.id))"
-            >
-              Run
-            </UButton>
-            <UButton
-              size="xs"
-              color="neutral"
-              variant="outline"
-              icon="i-lucide-pencil"
-              @click="openEditTopic(topic)"
-            >
-              Edit
-            </UButton>
-            <UButton
-              size="xs"
-              color="error"
-              variant="ghost"
-              icon="i-lucide-trash-2"
-              :loading="deleting"
-              @click="deleteTopic(Number(topic.id))"
-            />
           </div>
         </div>
       </div>
@@ -461,111 +528,280 @@ const categorizedTopics = computed(() => {
             {{ editingTopic?.id ? 'Edit Topic' : 'New Topic' }}
           </h3>
 
-          <div v-if="editingTopic" class="flex flex-col gap-5">
-            <!-- Row 1: Category (USelectMenu) + Topic Key -->
-            <div class="grid grid-cols-2 gap-4">
-              <UFormField label="Category">
-                <USelect
-                  :model-value="editingTopic.categorySlug as string"
-                  :items="categoryOptions"
-                  @update:model-value="onCategoryChange"
-                />
-              </UFormField>
-              <UFormField label="Topic Key" description="URL slug, e.g. bbq">
-                <UInput v-model="editingTopic.topicKey as string" placeholder="bbq" />
-              </UFormField>
-            </div>
+          <div v-if="editingTopic" class="flex flex-col gap-8">
+            <!-- Section 1: Topic Identity -->
+            <section>
+              <h4
+                class="text-sm font-bold uppercase tracking-widest text-muted mb-4 flex items-center gap-2"
+              >
+                <UIcon name="i-lucide-fingerprint" class="size-4" />
+                Topic Identity
+              </h4>
+              <div class="grid grid-cols-1 gap-5">
+                <div class="grid grid-cols-2 gap-4">
+                  <UFormField label="Category" required>
+                    <USelect
+                      :model-value="editingTopic.categorySlug as string"
+                      :items="categoryOptions"
+                      class="w-full"
+                      @update:model-value="onCategoryChange"
+                    />
+                  </UFormField>
+                  <UFormField label="Topic Key" description="Slug (e.g. 'bbq')" required>
+                    <UInput
+                      v-model="editingTopic.topicKey as string"
+                      placeholder="bbq"
+                      class="w-full"
+                    />
+                  </UFormField>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <UFormField label="Topic Label" description="Display name" required>
+                    <UInput
+                      v-model="editingTopic.topicLabel as string"
+                      placeholder="BBQ Joints"
+                      class="w-full"
+                    />
+                  </UFormField>
+                  <UFormField label="Content Type" required>
+                    <USelect
+                      v-model="editingTopic.contentType as string"
+                      :items="['spots', 'guide', 'data-page', 'utility']"
+                      class="w-full"
+                      @update:model-value="
+                        (val: string) => {
+                          if (val === 'utility') {
+                            editingTopic!.spotFile = null
+                          }
+                        }
+                      "
+                    />
+                  </UFormField>
+                </div>
+                <UFormField label="Description" description="Short teaser for the category hub">
+                  <UTextarea
+                    v-model="editingTopic.description as string"
+                    placeholder="Find the best breakfast tacos in Austin..."
+                    :rows="2"
+                    class="w-full"
+                  />
+                </UFormField>
+              </div>
+            </section>
 
-            <!-- Row 2: Topic Label + Content Type -->
-            <div class="grid grid-cols-2 gap-4">
-              <UFormField label="Topic Label" description="Display name">
-                <UInput v-model="editingTopic.topicLabel as string" placeholder="BBQ Joints" />
-              </UFormField>
-              <UFormField label="Content Type">
-                <USelect
-                  v-model="editingTopic.contentType as string"
-                  :items="['spots', 'guide', 'data-page']"
-                />
-              </UFormField>
-            </div>
+            <USeparator />
 
-            <!-- Row 3: Spot File + Max Spots -->
-            <div class="grid grid-cols-2 gap-4">
-              <UFormField label="Spot File" description="Static fallback, e.g. bbqSpots.ts">
-                <UInput v-model="editingTopic.spotFile as string" placeholder="bbqSpots.ts" />
-              </UFormField>
-              <UFormField label="Max Spots">
-                <UInput
-                  v-model.number="editingTopic.maxSpots as number"
-                  type="number"
-                  :min="1"
-                  :max="50"
-                />
-              </UFormField>
-            </div>
+            <!-- Section 2: Appearance & Metadata -->
+            <section>
+              <h4
+                class="text-sm font-bold uppercase tracking-widest text-muted mb-4 flex items-center gap-2"
+              >
+                <UIcon name="i-lucide-palette" class="size-4" />
+                Appearance & Metadata
+              </h4>
+              <div class="grid grid-cols-1 gap-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <!-- Icon with Preview -->
+                  <UFormField label="Icon" description="Iconify name (e.g. i-lucide-beef)">
+                    <div class="flex gap-3 items-center">
+                      <UInput
+                        v-model="editingTopic.icon as string"
+                        placeholder="i-lucide-beef"
+                        class="flex-1"
+                      />
+                      <div
+                        class="size-10 rounded-xl bg-elevated border border-default flex items-center justify-center shrink-0"
+                      >
+                        <UIcon
+                          :name="(editingTopic.icon as string) || 'i-lucide-help-circle'"
+                          class="size-5"
+                        />
+                      </div>
+                    </div>
+                  </UFormField>
 
-            <!-- Search Queries -->
-            <UFormField label="Search Queries">
-              <div class="flex flex-col gap-2">
-                <div
-                  v-for="(_, qi) in editingTopic.searchQueries as string[]"
-                  :key="qi"
-                  class="flex gap-2"
+                  <!-- Accent Color with Preview -->
+                  <UFormField label="Accent Color" description="Tailwind color (e.g. amber, red)">
+                    <div class="flex gap-3 items-center">
+                      <UInput
+                        v-model="editingTopic.accentColor as string"
+                        placeholder="amber"
+                        class="flex-1"
+                      />
+                      <div
+                        class="size-10 rounded-xl border border-default shrink-0"
+                        :class="
+                          editingTopic.accentColor
+                            ? `bg-${editingTopic.accentColor}-500`
+                            : 'bg-muted'
+                        "
+                      />
+                    </div>
+                  </UFormField>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <!-- Pin Color with Preview -->
+                  <UFormField label="Pin Color" description="Hex for map pins (e.g. #dc2626)">
+                    <div class="flex gap-3 items-center">
+                      <UInput
+                        v-model="editingTopic.pinColor as string"
+                        placeholder="#dc2626"
+                        class="flex-1"
+                      />
+                      <div
+                        class="size-10 rounded-xl border border-default shrink-0"
+                        :style="
+                          editingTopic.pinColor
+                            ? { backgroundColor: String(editingTopic.pinColor) }
+                            : {}
+                        "
+                        :class="!editingTopic.pinColor ? 'bg-muted' : ''"
+                      />
+                    </div>
+                  </UFormField>
+
+                  <!-- Status -->
+                  <UFormField label="Status" description="Site visibility">
+                    <USelect
+                      v-model="editingTopic.status as string"
+                      :items="['live', 'coming-soon']"
+                      class="w-full"
+                    />
+                  </UFormField>
+                </div>
+
+                <!-- Standalone URL -->
+                <UFormField
+                  label="Standalone URL"
+                  description="Link to external port (e.g. legacy app)"
                 >
                   <UInput
-                    v-model="(editingTopic.searchQueries as string[])[qi]"
-                    class="flex-1"
-                    placeholder="best bbq austin texas 2026"
+                    v-model="editingTopic.standaloneUrl as string"
+                    placeholder="https://tacos.austin-texas.net"
+                    icon="i-lucide-external-link"
+                    class="w-full"
                   />
-                  <UButton
-                    color="error"
-                    variant="ghost"
-                    size="xs"
-                    icon="i-lucide-x"
-                    @click="removeSearchQuery(qi)"
-                  />
-                </div>
-                <UButton
-                  color="neutral"
-                  variant="outline"
-                  size="xs"
-                  icon="i-lucide-plus"
-                  @click="addSearchQuery"
-                >
-                  Add Query
-                </UButton>
+                </UFormField>
               </div>
-            </UFormField>
+            </section>
 
-            <!-- Prompts -->
-            <UFormField label="Body System Prompt">
-              <UTextarea
-                v-model="editingTopic.bodySystemPrompt as string"
-                :rows="6"
-                class="w-full font-mono text-xs"
-                placeholder="You are a content writer for Austin-Texas.net..."
-              />
-            </UFormField>
+            <template v-if="editingTopic.contentType !== 'utility'">
+              <USeparator />
 
-            <UFormField label="FAQ System Prompt">
-              <UTextarea
-                v-model="editingTopic.faqSystemPrompt as string"
-                :rows="4"
-                class="w-full font-mono text-xs"
-                placeholder="You are a local Austin expert..."
-              />
-            </UFormField>
+              <!-- Section 3: Content Delivery / AI Pipeline -->
+              <section>
+                <div class="flex items-center justify-between mb-4">
+                  <h4
+                    class="text-sm font-bold uppercase tracking-widest text-muted flex items-center gap-2"
+                  >
+                    <UIcon name="i-lucide-zap" class="size-4 text-primary" />
+                    AI Pipeline & Config
+                  </h4>
+                  <UBadge color="primary" variant="subtle" size="xs">AI Enabled</UBadge>
+                </div>
 
-            <!-- Enabled toggle -->
-            <div class="flex items-center gap-3">
-              <USwitch v-model="editingTopic.enabled as boolean" />
-              <span class="text-sm">{{ editingTopic.enabled ? 'Enabled' : 'Disabled' }}</span>
-            </div>
+                <div class="grid grid-cols-1 gap-5">
+                  <div class="grid grid-cols-2 gap-4">
+                    <UFormField label="Spot File" description="Static fallback name">
+                      <UInput
+                        v-model="editingTopic.spotFile as string"
+                        placeholder="bbqSpots.ts"
+                        class="w-full"
+                      />
+                    </UFormField>
+                    <UFormField label="Max Spots" description="Points to generate">
+                      <UInput
+                        v-model.number="editingTopic.maxSpots as number"
+                        type="number"
+                        :min="1"
+                        :max="50"
+                        class="w-full"
+                      />
+                    </UFormField>
+                  </div>
+
+                  <!-- Search Queries -->
+                  <UFormField label="Search Queries" description="Used by AI to research the topic">
+                    <div class="flex flex-col gap-2">
+                      <div
+                        v-for="(_, qi) in editingTopic.searchQueries as string[]"
+                        :key="qi"
+                        class="flex gap-2"
+                      >
+                        <UInput
+                          v-model="(editingTopic.searchQueries as string[])[qi]"
+                          class="flex-1"
+                          placeholder="best bbq austin texas 2026"
+                        />
+                        <UButton
+                          color="error"
+                          variant="ghost"
+                          size="xs"
+                          icon="i-lucide-x"
+                          @click="removeSearchQuery(qi)"
+                        />
+                      </div>
+                      <UButton
+                        color="neutral"
+                        variant="outline"
+                        size="xs"
+                        icon="i-lucide-plus"
+                        class="w-fit"
+                        @click="addSearchQuery"
+                      >
+                        Add Query
+                      </UButton>
+                    </div>
+                  </UFormField>
+
+                  <!-- Prompts -->
+                  <div class="grid grid-cols-1 gap-4">
+                    <UFormField label="Body System Prompt">
+                      <UTextarea
+                        v-model="editingTopic.bodySystemPrompt as string"
+                        :rows="6"
+                        class="w-full font-mono text-xs"
+                        placeholder="You are a content writer for Austin-Texas.net..."
+                      />
+                    </UFormField>
+
+                    <UFormField label="FAQ System Prompt">
+                      <UTextarea
+                        v-model="editingTopic.faqSystemPrompt as string"
+                        :rows="4"
+                        class="w-full font-mono text-xs"
+                        placeholder="You are a local Austin expert..."
+                      />
+                    </UFormField>
+                  </div>
+                </div>
+              </section>
+            </template>
+
+            <USeparator />
+
+            <!-- Section 4: Settings & Visibility -->
+            <section class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <USwitch v-model="editingTopic.enabled as boolean" />
+                <div>
+                  <p class="text-sm font-medium">
+                    {{ editingTopic.enabled ? 'Active Topic' : 'Topic Disabled' }}
+                  </p>
+                  <p class="text-xs text-dimmed">
+                    Controls if this route exists in the final build
+                  </p>
+                </div>
+              </div>
+            </section>
 
             <!-- Actions -->
-            <div class="flex items-center gap-3 pt-4 border-t border-default">
-              <UButton color="primary" :loading="saving" @click="saveTopic"> Save </UButton>
-              <UButton color="neutral" variant="outline" @click="showEditModal = false">
+            <div class="flex items-center gap-3 pt-6 border-t border-default">
+              <UButton color="primary" size="lg" :loading="saving" @click="saveTopic">
+                {{ editingTopic.id ? 'Update Topic' : 'Create Topic' }}
+              </UButton>
+              <UButton color="neutral" variant="outline" size="lg" @click="showEditModal = false">
                 Cancel
               </UButton>
             </div>

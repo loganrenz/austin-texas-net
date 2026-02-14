@@ -23,6 +23,7 @@ interface BluebonnetPoint {
   observer: string
   place: string
   url: string
+  quality_grade: string
 }
 
 export default defineCachedEventHandler(
@@ -60,6 +61,7 @@ export default defineCachedEventHandler(
       observer: obs.observer,
       place: obs.place,
       url: obs.url,
+      quality_grade: obs.qualityGrade || 'needs_id',
     }))
 
     // Compute year range (could also be done via SQL aggregation, but this is cached and fast enough)

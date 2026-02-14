@@ -168,6 +168,10 @@ export default defineEventHandler(async (event) => {
     })
     .returning()
 
+  if (!run) {
+    throw createError({ statusCode: 500, statusMessage: 'Failed to create run record' })
+  }
+
   try {
     // Parse search queries
     const queries: string[] = JSON.parse(topic.searchQueries || '[]')

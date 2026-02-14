@@ -14,7 +14,7 @@ import { getCategoryHexColor } from '~/utils/categoryHexColors'
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('real-estate')!
 const siblings = category.subApps.filter((a) => a.slug !== 'market-trends' && a.status === 'live')
-const crossLinks = categories.filter((c) => c.slug !== 'real-estate').slice(0, 4)
+const crossLinks = categories.value.filter((c) => c.slug !== 'real-estate').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
 
 usePageSeo({

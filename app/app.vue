@@ -13,6 +13,10 @@ useSeoMeta({
   twitterCard: 'summary_large_image',
 })
 
+// Fetch site-wide hierarchy once at the root
+const { fetchSiteData } = useSiteData()
+await useAsyncData('site-data', () => fetchSiteData())
+
 const canonicalUrl = computed(() => `${siteUrl}${route.path}`)
 
 useHead({

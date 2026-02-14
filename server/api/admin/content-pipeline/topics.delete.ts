@@ -12,7 +12,7 @@ const bodySchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const { id } = bodySchema.parse(await readBody(event))
+  const { id } = await readValidatedBody(event, (data) => bodySchema.parse(data))
 
   const db = useDatabase()
   await db.delete(contentPipelineTopics).where(eq(contentPipelineTopics.id, id))

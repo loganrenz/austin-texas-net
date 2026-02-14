@@ -27,8 +27,10 @@ interface PermitSpot {
 
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('real-estate')!
-const siblings = category.subApps.filter(a => a.slug !== 'new-developments' && a.status === 'live')
-const crossLinks = categories.filter(c => c.slug !== 'real-estate').slice(0, 4)
+const siblings = category.subApps.filter(
+  (a) => a.slug !== 'new-developments' && a.status === 'live',
+)
+const crossLinks = categories.value.filter((c) => c.slug !== 'real-estate').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
 
 usePageSeo({
@@ -45,7 +47,8 @@ usePageSeo({
 useSchemaOrg([
   defineWebPage({
     name: 'New Developments in Austin',
-    description: 'Interactive map of new construction building permits in Austin from City of Austin open data.',
+    description:
+      'Interactive map of new construction building permits in Austin from City of Austin open data.',
   }),
 ])
 
@@ -55,7 +58,7 @@ const spots = computed<PermitSpot[]>(() => apiData.value?.permits || [])
 
 const selectedId = ref<string | null>(null)
 const selectedSpot = computed<PermitSpot | null>(
-  () => spots.value.find(s => s.id === selectedId.value) ?? null,
+  () => spots.value.find((s) => s.id === selectedId.value) ?? null,
 )
 
 function createPinElement(
@@ -63,7 +66,8 @@ function createPinElement(
   isSelected: boolean,
 ): { element: HTMLElement; cleanup?: () => void } {
   /* eslint-disable atx/no-inline-hex -- MapKit pin gradient */
-  const fillColor = (spot.units ?? 0) >= 50 ? '#7c3aed' : (spot.units ?? 0) >= 10 ? '#3b82f6' : '#22c55e'
+  const fillColor =
+    (spot.units ?? 0) >= 50 ? '#7c3aed' : (spot.units ?? 0) >= 10 ? '#3b82f6' : '#22c55e'
   /* eslint-enable atx/no-inline-hex */
 
   const el = document.createElement('div')
@@ -142,31 +146,55 @@ function formatValuation(val: number | null): string {
           Back to All Permits
         </UButton>
 
-        <div class="rounded-2xl border border-default bg-default px-6 py-5 shadow-sm dark:shadow-md">
+        <div
+          class="rounded-2xl border border-default bg-default px-6 py-5 shadow-sm dark:shadow-md"
+        >
           <div class="flex items-start gap-4 mb-4">
-            <div class="flex items-center justify-center size-11 rounded-full bg-linear-to-br from-primary to-primary/70 shadow-lg">
+            <div
+              class="flex items-center justify-center size-11 rounded-full bg-linear-to-br from-primary to-primary/70 shadow-lg"
+            >
               <UIcon name="i-lucide-building" class="size-5 text-white" />
             </div>
             <div class="flex-1 min-w-0">
               <h2 class="text-lg sm:text-xl font-extrabold font-display leading-tight mb-1">
                 {{ selectedSpot.name }}
               </h2>
-              <p class="text-sm text-muted">Permit #{{ selectedSpot.id }} · {{ selectedSpot.issueDate }}</p>
+              <p class="text-sm text-muted">
+                Permit #{{ selectedSpot.id }} · {{ selectedSpot.issueDate }}
+              </p>
             </div>
           </div>
 
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
-            <div v-if="selectedSpot.units" class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-2.5">
+            <div
+              v-if="selectedSpot.units"
+              class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-2.5"
+            >
               <span class="text-xl font-extrabold font-display">{{ selectedSpot.units }}</span>
-              <span class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center">Units</span>
+              <span
+                class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center"
+                >Units</span
+              >
             </div>
-            <div class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-2.5">
-              <span class="text-xl font-extrabold font-display">{{ formatValuation(selectedSpot.valuation) }}</span>
-              <span class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center">Valuation</span>
+            <div
+              class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-2.5"
+            >
+              <span class="text-xl font-extrabold font-display">{{
+                formatValuation(selectedSpot.valuation)
+              }}</span>
+              <span
+                class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center"
+                >Valuation</span
+              >
             </div>
-            <div class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-2.5">
+            <div
+              class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-2.5"
+            >
               <span class="text-sm font-extrabold font-display">{{ selectedSpot.workClass }}</span>
-              <span class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center">Type</span>
+              <span
+                class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center"
+                >Type</span
+              >
             </div>
           </div>
 
@@ -175,7 +203,13 @@ function formatValuation(val: number | null): string {
             {{ selectedSpot.address }}
           </div>
 
-          <UBadge color="info" variant="subtle" size="sm" label="City of Austin Open Data" class="mb-3" />
+          <UBadge
+            color="info"
+            variant="subtle"
+            size="sm"
+            label="City of Austin Open Data"
+            class="mb-3"
+          />
         </div>
       </section>
 
@@ -193,7 +227,9 @@ function formatValuation(val: number | null): string {
             class="group flex w-full items-center gap-3 rounded-[14px] border border-default bg-default px-4 py-3.5 transition-all duration-200 hover:-translate-y-px hover:border-primary/40 hover:shadow-sm"
             @click="selectedId = spot.id"
           >
-            <div class="flex items-center justify-center size-9 shrink-0 rounded-full bg-primary/10">
+            <div
+              class="flex items-center justify-center size-9 shrink-0 rounded-full bg-primary/10"
+            >
               <UIcon name="i-lucide-building" class="size-4 text-primary" />
             </div>
             <div class="flex-1 min-w-0 text-left">
@@ -204,14 +240,19 @@ function formatValuation(val: number | null): string {
                 <span v-if="spot.valuation"> · {{ formatValuation(spot.valuation) }}</span>
               </p>
             </div>
-            <UIcon name="i-lucide-chevron-right" class="size-4 text-muted group-hover:text-primary transition-colors shrink-0" />
+            <UIcon
+              name="i-lucide-chevron-right"
+              class="size-4 text-muted group-hover:text-primary transition-colors shrink-0"
+            />
           </UButton>
         </div>
       </section>
 
       <!-- More / Explore -->
       <section v-if="siblings.length && !selectedSpot" class="mb-8 animate-fade-up-delay-2">
-        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-4">More in Real Estate</h2>
+        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-4">
+          More in Real Estate
+        </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <NuxtLink
             v-for="app in siblings"
@@ -223,7 +264,10 @@ function formatValuation(val: number | null): string {
               <h3 class="text-sm font-semibold mb-1">{{ app.title }}</h3>
               <p class="text-xs text-muted line-clamp-1">{{ app.description }}</p>
             </div>
-            <UIcon name="i-lucide-chevron-right" class="size-4 text-dimmed group-hover:text-primary transition-colors" />
+            <UIcon
+              name="i-lucide-chevron-right"
+              class="size-4 text-dimmed group-hover:text-primary transition-colors"
+            />
           </NuxtLink>
         </div>
       </section>

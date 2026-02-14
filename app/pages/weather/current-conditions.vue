@@ -15,7 +15,7 @@ import { getCategoryHexColor } from '~/utils/categoryHexColors'
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('weather')!
 const siblings = category.subApps.filter((a) => a.slug !== 'current-conditions')
-const crossLinks = categories.filter((c) => c.slug !== 'weather').slice(0, 4)
+const crossLinks = categories.value.filter((c) => c.slug !== 'weather').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
 
 usePageSeo({

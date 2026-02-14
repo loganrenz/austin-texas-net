@@ -22,12 +22,14 @@ export default defineEventHandler(async (event) => {
   const db = useDatabase()
 
   try {
-    const spots = await db.select()
+    const spots = await db
+      .select()
       .from(mapSpotsTable)
       .where(
         and(
           eq(mapSpotsTable.contentType, category),
           eq(mapSpotsTable.featured, true),
+          eq(mapSpotsTable.status, 'approved'),
         ),
       )
       .orderBy(
@@ -38,8 +40,7 @@ export default defineEventHandler(async (event) => {
       .all()
 
     return { spots }
-  }
-  catch {
+  } catch {
     // Table might not exist yet during dev — return empty
     return { spots: [] }
   }

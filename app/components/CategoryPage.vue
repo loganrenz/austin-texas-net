@@ -17,7 +17,7 @@ const faqItems = computed(() => props.content?.faqItems ?? [])
 
 const { categories } = useSiteData()
 const crossLinks = computed(() =>
-  categories.filter((c) => c.slug !== props.category.slug).slice(0, 4),
+  categories.value.filter((c) => c.slug !== props.category.slug).slice(0, 4),
 )
 
 // FAQPage JSON-LD for Google rich results
@@ -25,12 +25,12 @@ if (props.content?.faqItems?.length) {
   useSchemaOrg([
     {
       '@type': 'FAQPage' as const,
-      'mainEntity': props.content.faqItems.map(item => ({
+      mainEntity: props.content.faqItems.map((item) => ({
         '@type': 'Question' as const,
-        'name': item.question,
-        'acceptedAnswer': {
+        name: item.question,
+        acceptedAnswer: {
           '@type': 'Answer' as const,
-          'text': item.answer,
+          text: item.answer,
         },
       })),
     },
@@ -88,23 +88,26 @@ function trackAppClick(appTitle: string, destination: string) {
       <section class="pt-8 pb-6">
         <UBreadcrumb v-if="breadcrumbs.length > 0" :items="breadcrumbs" class="mb-6" />
         <div class="text-center">
-        <div
-          class="size-16 rounded-[18px] inline-flex items-center justify-center bg-current mb-4 *:text-white"
-          :class="category.color"
-        >
-          <UIcon :name="category.icon" class="size-8" />
-        </div>
-        <h1 class="text-[clamp(1.5rem,4vw,2rem)] font-extrabold tracking-[-0.02em] mb-2">
-          {{ category.title }} in Austin
-        </h1>
-        <p class="text-[0.95rem] text-muted max-w-[480px] mx-auto leading-[1.6]">
-          {{ category.tagline }}
-        </p>
+          <div
+            class="size-16 rounded-[18px] inline-flex items-center justify-center bg-current mb-4 *:text-white"
+            :class="category.color"
+          >
+            <UIcon :name="category.icon" class="size-8" />
+          </div>
+          <h1 class="text-[clamp(1.5rem,4vw,2rem)] font-extrabold tracking-[-0.02em] mb-2">
+            {{ category.title }} in Austin
+          </h1>
+          <p class="text-[0.95rem] text-muted max-w-[480px] mx-auto leading-[1.6]">
+            {{ category.tagline }}
+          </p>
         </div>
       </section>
 
       <!-- Overview (SEO content) rendered from Nuxt Content markdown -->
-      <section v-if="content" class="bg-elevated border border-default rounded-2xl px-4 py-5 sm:px-6 sm:py-7 mb-6">
+      <section
+        v-if="content"
+        class="bg-elevated border border-default rounded-2xl px-4 py-5 sm:px-6 sm:py-7 mb-6"
+      >
         <div class="prose-content text-[0.88rem] leading-[1.8] text-muted">
           <ContentRenderer :value="content" />
         </div>

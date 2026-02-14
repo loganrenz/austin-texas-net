@@ -205,7 +205,9 @@ const { data: content } = await useAsyncData('category-content-neighborhoods', (
 
 // Cross-link categories
 const { categories } = useSiteData()
-const crossLinks = computed(() => categories.filter((c) => c.slug !== 'neighborhoods').slice(0, 4))
+const crossLinks = computed(() =>
+  categories.value.filter((c) => c.slug !== 'neighborhoods').slice(0, 4),
+)
 </script>
 
 <template>

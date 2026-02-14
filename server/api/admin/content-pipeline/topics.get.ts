@@ -13,6 +13,9 @@ export default defineEventHandler(async () => {
     topics: topics.map((t) => ({
       ...t,
       searchQueries: JSON.parse(t.searchQueries || '[]') as string[],
+      description: t.description || '',
+      status: t.status,
+      standaloneUrl: t.standaloneUrl || '',
     })),
   }
 })

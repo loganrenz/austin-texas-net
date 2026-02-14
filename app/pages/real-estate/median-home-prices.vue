@@ -26,75 +26,77 @@ interface HomePriceSpot {
  * These are approximate centroids of each zip code area.
  */
 const ZIP_COORDS: Record<string, { lat: number; lng: number }> = {
-  '78701': { lat: 30.2700, lng: -97.7431 },
+  '78701': { lat: 30.27, lng: -97.7431 },
   '78702': { lat: 30.2621, lng: -97.7208 },
   '78703': { lat: 30.2937, lng: -97.7636 },
-  '78704': { lat: 30.2420, lng: -97.7638 },
+  '78704': { lat: 30.242, lng: -97.7638 },
   '78705': { lat: 30.2906, lng: -97.7417 },
   '78712': { lat: 30.2849, lng: -97.7341 },
   '78717': { lat: 30.4844, lng: -97.7559 },
-  '78719': { lat: 30.1560, lng: -97.6879 },
-  '78721': { lat: 30.2703, lng: -97.6910 },
+  '78719': { lat: 30.156, lng: -97.6879 },
+  '78721': { lat: 30.2703, lng: -97.691 },
   '78722': { lat: 30.2822, lng: -97.7139 },
   '78723': { lat: 30.3078, lng: -97.6905 },
   '78724': { lat: 30.3199, lng: -97.6345 },
   '78725': { lat: 30.2638, lng: -97.6326 },
-  '78726': { lat: 30.4330, lng: -97.8303 },
+  '78726': { lat: 30.433, lng: -97.8303 },
   '78727': { lat: 30.4253, lng: -97.7197 },
   '78728': { lat: 30.4467, lng: -97.6937 },
   '78729': { lat: 30.4564, lng: -97.7676 },
-  '78730': { lat: 30.3650, lng: -97.8271 },
+  '78730': { lat: 30.365, lng: -97.8271 },
   '78731': { lat: 30.3474, lng: -97.7644 },
-  '78732': { lat: 30.3780, lng: -97.8888 },
-  '78733': { lat: 30.3200, lng: -97.8750 },
-  '78734': { lat: 30.3790, lng: -97.9420 },
-  '78735': { lat: 30.2650, lng: -97.8460 },
-  '78736': { lat: 30.2260, lng: -97.8870 },
-  '78737': { lat: 30.1790, lng: -97.8780 },
-  '78738': { lat: 30.3150, lng: -97.9330 },
-  '78739': { lat: 30.1760, lng: -97.8310 },
-  '78741': { lat: 30.2290, lng: -97.7199 },
-  '78742': { lat: 30.2380, lng: -97.6730 },
-  '78744': { lat: 30.1930, lng: -97.7350 },
-  '78745': { lat: 30.2060, lng: -97.7940 },
-  '78746': { lat: 30.3100, lng: -97.8050 },
-  '78747': { lat: 30.1520, lng: -97.7560 },
-  '78748': { lat: 30.1770, lng: -97.8040 },
-  '78749': { lat: 30.2300, lng: -97.8530 },
-  '78750': { lat: 30.4060, lng: -97.7910 },
+  '78732': { lat: 30.378, lng: -97.8888 },
+  '78733': { lat: 30.32, lng: -97.875 },
+  '78734': { lat: 30.379, lng: -97.942 },
+  '78735': { lat: 30.265, lng: -97.846 },
+  '78736': { lat: 30.226, lng: -97.887 },
+  '78737': { lat: 30.179, lng: -97.878 },
+  '78738': { lat: 30.315, lng: -97.933 },
+  '78739': { lat: 30.176, lng: -97.831 },
+  '78741': { lat: 30.229, lng: -97.7199 },
+  '78742': { lat: 30.238, lng: -97.673 },
+  '78744': { lat: 30.193, lng: -97.735 },
+  '78745': { lat: 30.206, lng: -97.794 },
+  '78746': { lat: 30.31, lng: -97.805 },
+  '78747': { lat: 30.152, lng: -97.756 },
+  '78748': { lat: 30.177, lng: -97.804 },
+  '78749': { lat: 30.23, lng: -97.853 },
+  '78750': { lat: 30.406, lng: -97.791 },
   '78751': { lat: 30.3128, lng: -97.7234 },
-  '78752': { lat: 30.3300, lng: -97.7100 },
-  '78753': { lat: 30.3730, lng: -97.6770 },
-  '78754': { lat: 30.3720, lng: -97.6410 },
-  '78756': { lat: 30.3230, lng: -97.7390 },
-  '78757': { lat: 30.3530, lng: -97.7360 },
-  '78758': { lat: 30.3870, lng: -97.7130 },
-  '78759': { lat: 30.3990, lng: -97.7590 },
-  '78610': { lat: 30.0810, lng: -97.8400 },
-  '78613': { lat: 30.5070, lng: -97.8210 },
-  '78615': { lat: 30.5600, lng: -97.5500 },
-  '78617': { lat: 30.1300, lng: -97.6300 },
-  '78620': { lat: 30.1900, lng: -98.0870 },
-  '78626': { lat: 30.6330, lng: -97.6770 },
-  '78628': { lat: 30.6700, lng: -97.7330 },
-  '78633': { lat: 30.7100, lng: -97.7600 },
-  '78634': { lat: 30.5570, lng: -97.5470 },
-  '78640': { lat: 30.0000, lng: -97.8700 },
-  '78641': { lat: 30.5750, lng: -97.8530 },
-  '78642': { lat: 30.6570, lng: -97.9070 },
-  '78653': { lat: 30.3320, lng: -97.5470 },
-  '78660': { lat: 30.4390, lng: -97.6200 },
-  '78664': { lat: 30.5360, lng: -97.6620 },
-  '78665': { lat: 30.5770, lng: -97.7320 },
-  '78666': { lat: 29.8830, lng: -97.9410 },
-  '78669': { lat: 30.3180, lng: -97.9420 },
-  '78681': { lat: 30.5100, lng: -97.7370 },
+  '78752': { lat: 30.33, lng: -97.71 },
+  '78753': { lat: 30.373, lng: -97.677 },
+  '78754': { lat: 30.372, lng: -97.641 },
+  '78756': { lat: 30.323, lng: -97.739 },
+  '78757': { lat: 30.353, lng: -97.736 },
+  '78758': { lat: 30.387, lng: -97.713 },
+  '78759': { lat: 30.399, lng: -97.759 },
+  '78610': { lat: 30.081, lng: -97.84 },
+  '78613': { lat: 30.507, lng: -97.821 },
+  '78615': { lat: 30.56, lng: -97.55 },
+  '78617': { lat: 30.13, lng: -97.63 },
+  '78620': { lat: 30.19, lng: -98.087 },
+  '78626': { lat: 30.633, lng: -97.677 },
+  '78628': { lat: 30.67, lng: -97.733 },
+  '78633': { lat: 30.71, lng: -97.76 },
+  '78634': { lat: 30.557, lng: -97.547 },
+  '78640': { lat: 30.0, lng: -97.87 },
+  '78641': { lat: 30.575, lng: -97.853 },
+  '78642': { lat: 30.657, lng: -97.907 },
+  '78653': { lat: 30.332, lng: -97.547 },
+  '78660': { lat: 30.439, lng: -97.62 },
+  '78664': { lat: 30.536, lng: -97.662 },
+  '78665': { lat: 30.577, lng: -97.732 },
+  '78666': { lat: 29.883, lng: -97.941 },
+  '78669': { lat: 30.318, lng: -97.942 },
+  '78681': { lat: 30.51, lng: -97.737 },
 }
 
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('real-estate')!
-const siblings = category.subApps.filter(a => a.slug !== 'median-home-prices' && a.status === 'live')
-const crossLinks = categories.filter(c => c.slug !== 'real-estate').slice(0, 4)
+const siblings = category.subApps.filter(
+  (a) => a.slug !== 'median-home-prices' && a.status === 'live',
+)
+const crossLinks = categories.value.filter((c) => c.slug !== 'real-estate').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
 
 usePageSeo({
@@ -111,18 +113,21 @@ usePageSeo({
 useSchemaOrg([
   defineWebPage({
     name: 'Austin Median Home Prices by Zip Code',
-    description: 'Interactive map of median home values across Austin-area zip codes from Zillow Home Value Index data.',
+    description:
+      'Interactive map of median home values across Austin-area zip codes from Zillow Home Value Index data.',
   }),
 ])
 
 // Fetch data from API
-const { data: apiData } = await useFetch<{ prices: Array<{ zipCode: string; period: string; medianValue: number; yoyChange: number | null }> }>('/api/real-estate/home-prices?latest=true')
+const { data: apiData } = await useFetch<{
+  prices: Array<{ zipCode: string; period: string; medianValue: number; yoyChange: number | null }>
+}>('/api/real-estate/home-prices?latest=true')
 
 const spots = computed<HomePriceSpot[]>(() => {
   const prices = apiData.value?.prices || []
   return prices
-    .filter(p => ZIP_COORDS[p.zipCode])
-    .map(p => ({
+    .filter((p) => ZIP_COORDS[p.zipCode])
+    .map((p) => ({
       id: p.zipCode,
       name: `Zip ${p.zipCode}`,
       lat: ZIP_COORDS[p.zipCode]!.lat,
@@ -137,7 +142,7 @@ const spots = computed<HomePriceSpot[]>(() => {
 // Selection state
 const selectedId = ref<string | null>(null)
 const selectedSpot = computed<HomePriceSpot | null>(
-  () => spots.value.find(s => s.id === selectedId.value) ?? null,
+  () => spots.value.find((s) => s.id === selectedId.value) ?? null,
 )
 
 // Sort state
@@ -145,11 +150,16 @@ const sortBy = ref<'price-high' | 'price-low' | 'yoy-high' | 'yoy-low'>('price-h
 const sortedSpots = computed(() => {
   const list = [...spots.value]
   switch (sortBy.value) {
-    case 'price-high': return list.sort((a, b) => b.medianValue - a.medianValue)
-    case 'price-low': return list.sort((a, b) => a.medianValue - b.medianValue)
-    case 'yoy-high': return list.sort((a, b) => (b.yoyChange ?? 0) - (a.yoyChange ?? 0))
-    case 'yoy-low': return list.sort((a, b) => (a.yoyChange ?? 0) - (b.yoyChange ?? 0))
-    default: return list
+    case 'price-high':
+      return list.sort((a, b) => b.medianValue - a.medianValue)
+    case 'price-low':
+      return list.sort((a, b) => a.medianValue - b.medianValue)
+    case 'yoy-high':
+      return list.sort((a, b) => (b.yoyChange ?? 0) - (a.yoyChange ?? 0))
+    case 'yoy-low':
+      return list.sort((a, b) => (a.yoyChange ?? 0) - (b.yoyChange ?? 0))
+    default:
+      return list
   }
 })
 
@@ -161,7 +171,14 @@ function createPinElement(
   const value = spot.medianValue
 
   /* eslint-disable atx/no-inline-hex -- MapKit pin gradient */
-  const fillColor = value >= 800000 ? '#7c3aed' : value >= 500000 ? '#3b82f6' : value >= 300000 ? '#22c55e' : '#f59e0b'
+  const fillColor =
+    value >= 800000
+      ? '#7c3aed'
+      : value >= 500000
+        ? '#3b82f6'
+        : value >= 300000
+          ? '#22c55e'
+          : '#f59e0b'
   /* eslint-enable atx/no-inline-hex */
 
   const el = document.createElement('div')
@@ -240,7 +257,8 @@ function priceTierLabel(value: number): string {
         </div>
         <p class="text-base sm:text-lg text-muted max-w-2xl leading-relaxed">
           Median home values across Austin-area zip codes from the Zillow Home Value Index.
-          <strong class="text-default">Tap any pin</strong> to see current value and year-over-year change.
+          <strong class="text-default">Tap any pin</strong> to see current value and year-over-year
+          change.
         </p>
       </div>
 
@@ -257,30 +275,51 @@ function priceTierLabel(value: number): string {
           Back to All Zips
         </UButton>
 
-        <div class="rounded-2xl border border-default bg-default px-6 py-5 shadow-sm dark:shadow-md">
+        <div
+          class="rounded-2xl border border-default bg-default px-6 py-5 shadow-sm dark:shadow-md"
+        >
           <div class="flex items-start gap-4 mb-4">
-            <div class="flex items-center justify-center size-11 rounded-full bg-linear-to-br from-primary to-primary/70 shadow-lg">
+            <div
+              class="flex items-center justify-center size-11 rounded-full bg-linear-to-br from-primary to-primary/70 shadow-lg"
+            >
               <UIcon name="i-lucide-home" class="size-5 text-white" />
             </div>
             <div class="flex-1 min-w-0">
               <h2 class="text-xl sm:text-2xl font-extrabold font-display leading-tight mb-1">
                 Zip Code {{ selectedSpot.id }}
               </h2>
-              <p class="text-sm text-muted">As of {{ selectedSpot.period }} · {{ priceTierLabel(selectedSpot.medianValue) }}</p>
+              <p class="text-sm text-muted">
+                As of {{ selectedSpot.period }} · {{ priceTierLabel(selectedSpot.medianValue) }}
+              </p>
             </div>
           </div>
 
           <!-- Stats grid -->
           <div class="grid grid-cols-2 gap-3 mb-5">
-            <div class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-2.5">
-              <span class="text-xl font-extrabold font-display">{{ formatPrice(selectedSpot.medianValue) }}</span>
-              <span class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center">Median Home Value</span>
+            <div
+              class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-2.5"
+            >
+              <span class="text-xl font-extrabold font-display">{{
+                formatPrice(selectedSpot.medianValue)
+              }}</span>
+              <span
+                class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center"
+                >Median Home Value</span
+              >
             </div>
-            <div class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-2.5">
-              <span class="text-xl font-extrabold font-display" :class="yoyColor(selectedSpot.yoyChange)">
+            <div
+              class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-2.5"
+            >
+              <span
+                class="text-xl font-extrabold font-display"
+                :class="yoyColor(selectedSpot.yoyChange)"
+              >
                 {{ formatYoy(selectedSpot.yoyChange) }}
               </span>
-              <span class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center">Year-over-Year</span>
+              <span
+                class="text-[0.65rem] font-semibold uppercase tracking-wider text-muted text-center"
+                >Year-over-Year</span
+              >
             </div>
           </div>
 

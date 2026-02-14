@@ -26,7 +26,7 @@ interface LakeSpot {
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('live-data')!
 const siblings = category.subApps.filter((a) => a.slug !== 'lake-levels' && a.status === 'live')
-const crossLinks = categories.filter((c) => c.slug !== 'live-data').slice(0, 4)
+const crossLinks = categories.value.filter((c) => c.slug !== 'live-data').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
 
 usePageSeo({

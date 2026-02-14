@@ -2,13 +2,15 @@
  * GET /api/neighborhoods/geojson
  *
  * Returns all neighborhoods as a GeoJSON FeatureCollection with
- * polygon boundaries. Polygon data is sourced from a static file
- * (City of Austin, OpenStreetMap, blackmad/neighborhoods).
- * D1 metadata (population, description, etc.) is merged in when available.
+ * polygon boundaries. Shape data priority:
+ *   1. DB-stored boundary_geojson (from Apple Maps crawl hull generation)
+ *   2. Static GeoJSON file (City of Austin, OpenStreetMap, blackmad/neighborhoods)
+ *   3. Point fallback (DB lat/lng only)
  *
  * Query params (optional):
  *   city   — filter by city name, e.g. "Austin"
  *   region — filter by region, e.g. "Central"
+ *   tier   — filter by tier, e.g. "neighborhood" (excludes regions)
  */
 import { eq, and, asc } from 'drizzle-orm'
 import { z } from 'zod'
@@ -17,6 +19,7 @@ import { neighborhoodsTable } from '~~/server/database/schema'
 const querySchema = z.object({
   city: z.string().optional(),
   region: z.string().optional(),
+  tier: z.string().optional(),
 })
 
 interface GeoJSONGeometry {
@@ -50,6 +53,8 @@ interface NeighborhoodProperties {
   slug: string
   region: string | null
   city: string | null
+  tier: string | null
+  parentRegion: string | null
   population: number | null
   zipCode: string | null
   description: string | null
@@ -96,7 +101,7 @@ async function loadStaticGeoJSON(): Promise<StaticFeatureCollection> {
 
 export default defineEventHandler(async (event): Promise<GeoJSONFeatureCollection> => {
   const query = getQuery(event)
-  const { city, region } = querySchema.parse(query)
+  const { city, region, tier } = querySchema.parse(query)
 
   // Load static polygon data (edge-compatible, reads from public/)
   const staticData = await loadStaticGeoJSON()
@@ -119,6 +124,9 @@ export default defineEventHandler(async (event): Promise<GeoJSONFeatureCollectio
     if (region) {
       conditions.push(eq(neighborhoodsTable.region, region))
     }
+    if (tier) {
+      conditions.push(eq(neighborhoodsTable.tier, tier))
+    }
 
     const rows = await db
       .select()
@@ -135,7 +143,7 @@ export default defineEventHandler(async (event): Promise<GeoJSONFeatureCollectio
   // Determine which features to return
   let slugsToInclude: Set<string>
 
-  if (city || region) {
+  if (city || region || tier) {
     // When filtering, only include neighborhoods that match the filter in D1
     slugsToInclude = new Set(dbBySlug.keys())
   } else {
@@ -149,47 +157,52 @@ export default defineEventHandler(async (event): Promise<GeoJSONFeatureCollectio
     const staticFeat = staticBySlug.get(slug)
     const dbRow = dbBySlug.get(slug)
 
-    if (staticFeat) {
-      features.push({
-        type: 'Feature',
-        geometry: staticFeat.geometry,
-        properties: {
-          name: dbRow?.name ?? staticFeat.properties.name,
-          slug,
-          region: dbRow?.region ?? staticFeat.properties.region,
-          city: dbRow?.city ?? staticFeat.properties.city,
-          population: dbRow?.population ?? null,
-          zipCode: dbRow?.zipCode ?? null,
-          description: dbRow?.description ?? null,
-          featured: dbRow?.featured ?? null,
-          centerLat: dbRow?.lat ?? staticFeat.properties.centerLat,
-          centerLng: dbRow?.lng ?? staticFeat.properties.centerLng,
-          source: staticFeat.properties.source,
-        },
-      })
-    } else if (dbRow && Number.isFinite(dbRow.lat) && Number.isFinite(dbRow.lng)) {
-      // Neighborhood exists in D1 but not in static file — Point fallback
-      features.push({
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [dbRow.lng, dbRow.lat],
-        },
-        properties: {
-          name: dbRow.name,
-          slug,
-          region: dbRow.region,
-          city: dbRow.city,
-          population: dbRow.population,
-          zipCode: dbRow.zipCode,
-          description: dbRow.description,
-          featured: dbRow.featured,
-          centerLat: dbRow.lat,
-          centerLng: dbRow.lng,
-          source: 'database',
-        },
-      })
+    // Determine geometry: DB boundary_geojson > static polygon > point fallback
+    let geometry: GeoJSONGeometry | null = null
+    let source = 'unknown'
+
+    if (dbRow?.boundaryGeojson) {
+      // Prefer DB-stored shape from Apple Maps crawl
+      try {
+        geometry = JSON.parse(dbRow.boundaryGeojson) as GeoJSONGeometry
+        source = 'apple-maps-crawl'
+      } catch {
+        // Fallback if JSON is invalid
+        geometry = null
+      }
     }
+
+    if (!geometry && staticFeat) {
+      geometry = staticFeat.geometry
+      source = staticFeat.properties.source
+    }
+
+    if (!geometry && dbRow && Number.isFinite(dbRow.lat) && Number.isFinite(dbRow.lng)) {
+      geometry = { type: 'Point', coordinates: [dbRow.lng, dbRow.lat] }
+      source = 'database'
+    }
+
+    if (!geometry) continue
+
+    features.push({
+      type: 'Feature',
+      geometry,
+      properties: {
+        name: dbRow?.name ?? staticFeat?.properties.name ?? slug,
+        slug,
+        region: dbRow?.region ?? staticFeat?.properties.region ?? null,
+        city: dbRow?.city ?? staticFeat?.properties.city ?? null,
+        tier: dbRow?.tier ?? 'neighborhood',
+        parentRegion: dbRow?.parentRegion ?? null,
+        population: dbRow?.population ?? null,
+        zipCode: dbRow?.zipCode ?? null,
+        description: dbRow?.description ?? null,
+        featured: dbRow?.featured ?? null,
+        centerLat: dbRow?.lat ?? staticFeat?.properties.centerLat ?? null,
+        centerLng: dbRow?.lng ?? staticFeat?.properties.centerLng ?? null,
+        source,
+      },
+    })
   }
 
   return { type: 'FeatureCollection', features }

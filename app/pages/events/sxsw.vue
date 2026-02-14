@@ -15,7 +15,7 @@ import { getCategoryHexColor } from '~/utils/categoryHexColors'
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('events')!
 const siblings = category.subApps.filter((a) => a.slug !== 'sxsw')
-const crossLinks = categories.filter((c) => c.slug !== 'events').slice(0, 4)
+const crossLinks = categories.value.filter((c) => c.slug !== 'events').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
 
 usePageSeo({

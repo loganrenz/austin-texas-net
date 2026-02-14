@@ -14,12 +14,18 @@ const bodySchema = z.object({
   topicKey: z.string().min(1),
   topicLabel: z.string().min(1),
   contentType: z.string().min(1),
-  spotFile: z.string().min(1),
+  spotFile: z.string().optional().nullable(),
   maxSpots: z.number().int().min(1).max(50).optional().default(10),
   searchQueries: z.array(z.string()).optional().default([]),
   bodySystemPrompt: z.string().optional(),
   faqSystemPrompt: z.string().optional(),
   enabled: z.boolean().optional().default(true),
+  description: z.string().optional().default(''),
+  status: z.enum(['live', 'coming-soon']).optional().default('live'),
+  standaloneUrl: z.string().optional().default(''),
+  accentColor: z.string().optional().nullable().default(''),
+  pinColor: z.string().optional().nullable().default(''),
+  icon: z.string().optional().nullable().default(''),
 })
 
 export default defineEventHandler(async (event) => {
@@ -51,6 +57,12 @@ export default defineEventHandler(async (event) => {
     bodySystemPrompt: body.bodySystemPrompt ?? null,
     faqSystemPrompt: body.faqSystemPrompt ?? null,
     enabled: body.enabled,
+    description: body.description,
+    status: body.status,
+    standaloneUrl: body.standaloneUrl || null,
+    accentColor: body.accentColor || null,
+    pinColor: body.pinColor || null,
+    icon: body.icon || null,
     updatedAt: new Date().toISOString(),
   }
 

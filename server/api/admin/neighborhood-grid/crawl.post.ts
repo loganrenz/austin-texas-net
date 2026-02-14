@@ -25,24 +25,30 @@ import { neighborhoodGrid } from '~~/server/database/schema'
 import { getAppleMapsAccessToken } from '~~/server/utils/appleMapToken'
 import { getAuthUser } from '~~/server/utils/auth'
 import {
-  GRID_ROWS, GRID_COLS, GRID_BOUNDS, STEP_LAT, STEP_LNG,
+  GRID_ROWS,
+  GRID_COLS,
+  GRID_BOUNDS,
+  STEP_LAT,
+  STEP_LNG,
   gridToLatLng,
 } from '~~/server/utils/neighborhoodGrid'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-const bodySchema = z.object({
-  batchSize: z.number().min(1).max(2000).optional().default(500),
-  delayMs: z.number().min(0).max(500).optional().default(50),
-  startLat: z.number().optional(),
-  startLng: z.number().optional(),
-  reset: z.boolean().optional().default(false),
-  // Focus crawl params
-  focusLat: z.number().optional(),
-  focusLng: z.number().optional(),
-  focusRadiusKm: z.number().min(0.1).max(10).optional().default(2),
-  focusStepMeters: z.number().min(25).max(500).optional().default(100),
-}).optional()
+const bodySchema = z
+  .object({
+    batchSize: z.number().min(1).max(2000).optional().default(500),
+    delayMs: z.number().min(0).max(500).optional().default(50),
+    startLat: z.number().optional(),
+    startLng: z.number().optional(),
+    reset: z.boolean().optional().default(false),
+    // Focus crawl params
+    focusLat: z.number().optional(),
+    focusLng: z.number().optional(),
+    focusRadiusKm: z.number().min(0.1).max(10).optional().default(2),
+    focusStepMeters: z.number().min(25).max(500).optional().default(100),
+  })
+  .optional()
 
 type CrawlPoint = { row: number; col: number; lat: number; lng: number }
 
@@ -76,12 +82,7 @@ export default defineEventHandler(async (event) => {
         parsed.focusStepMeters ?? 100,
         batchSize,
       )
-    : await generateGridBatch(
-        db,
-        parsed.startLat,
-        parsed.startLng,
-        batchSize,
-      )
+    : await generateGridBatch(db, parsed.startLat, parsed.startLng, batchSize)
 
   if (batch.length === 0) {
     return {
@@ -119,13 +120,17 @@ export default defineEventHandler(async (event) => {
 
       if (!response.ok) {
         const errBody = await response.text()
-        errors.push({ row: point.row, col: point.col, error: `HTTP ${response.status}: ${errBody}` })
+        errors.push({
+          row: point.row,
+          col: point.col,
+          error: `HTTP ${response.status}: ${errBody}`,
+        })
         failed++
         continue
       }
 
-      const data: any = await response.json()
-      const results: any[] = data?.results || []
+      const data = (await response.json()) as { results: any[] }
+      const results = data?.results || []
       const place = results[0]
 
       const dependentLocalities: string[] = place?.structuredAddress?.dependentLocalities || []
@@ -140,33 +145,36 @@ export default defineEventHandler(async (event) => {
       }
 
       // Upsert into D1
-      await db.insert(neighborhoodGrid).values({
-        lat: point.lat,
-        lng: point.lng,
-        neighborhood: primaryNeighborhood,
-        allLocalities: dependentLocalities.length ? JSON.stringify(dependentLocalities) : null,
-        locality,
-        subLocality,
-        postCode,
-        crawledAt: now,
-        gridRow: point.row,
-        gridCol: point.col,
-      }).onConflictDoUpdate({
-        target: [neighborhoodGrid.gridRow, neighborhoodGrid.gridCol],
-        set: {
+      await db
+        .insert(neighborhoodGrid)
+        .values({
+          lat: point.lat,
+          lng: point.lng,
           neighborhood: primaryNeighborhood,
           allLocalities: dependentLocalities.length ? JSON.stringify(dependentLocalities) : null,
           locality,
           subLocality,
           postCode,
           crawledAt: now,
-        },
-      })
+          gridRow: point.row,
+          gridCol: point.col,
+        })
+        .onConflictDoUpdate({
+          target: [neighborhoodGrid.gridRow, neighborhoodGrid.gridCol],
+          set: {
+            neighborhood: primaryNeighborhood,
+            allLocalities: dependentLocalities.length ? JSON.stringify(dependentLocalities) : null,
+            locality,
+            subLocality,
+            postCode,
+            crawledAt: now,
+          },
+        })
 
       crawled++
 
       if (delayMs > 0) {
-        await new Promise(resolve => setTimeout(resolve, delayMs))
+        await new Promise((resolve) => setTimeout(resolve, delayMs))
       }
     } catch (err: any) {
       errors.push({ row: point.row, col: point.col, error: err.message || String(err) })
@@ -200,8 +208,14 @@ async function generateGridBatch(
   let startCol = 0
 
   if (startLat != null && startLng != null) {
-    startRow = Math.max(0, Math.min(GRID_ROWS - 1, Math.round((GRID_BOUNDS.north - startLat) / STEP_LAT)))
-    startCol = Math.max(0, Math.min(GRID_COLS - 1, Math.round((startLng - GRID_BOUNDS.west) / STEP_LNG)))
+    startRow = Math.max(
+      0,
+      Math.min(GRID_ROWS - 1, Math.round((GRID_BOUNDS.north - startLat) / STEP_LAT)),
+    )
+    startCol = Math.max(
+      0,
+      Math.min(GRID_COLS - 1, Math.round((startLng - GRID_BOUNDS.west) / STEP_LNG)),
+    )
   } else {
     // Auto-resume: find highest crawled (row, col) in the standard grid range
     const lastCrawled = await db
@@ -261,9 +275,9 @@ async function generateFocusBatch(
 ): Promise<CrawlPoint[]> {
   // Convert step size and radius to degrees
   const stepLat = stepMeters / 111_111
-  const stepLng = stepMeters / (111_111 * Math.cos(centerLat * Math.PI / 180))
+  const stepLng = stepMeters / (111_111 * Math.cos((centerLat * Math.PI) / 180))
   const radiusLat = radiusKm / 111.111
-  const radiusLng = radiusKm / (111.111 * Math.cos(centerLat * Math.PI / 180))
+  const radiusLng = radiusKm / (111.111 * Math.cos((centerLat * Math.PI) / 180))
 
   const minLat = centerLat - radiusLat
   const maxLat = centerLat + radiusLat
@@ -300,12 +314,12 @@ async function generateFocusBatch(
       gridCol: neighborhoodGrid.gridCol,
     })
     .from(neighborhoodGrid)
-    .where(sql`grid_row > 10000 AND lat BETWEEN ${minLat} AND ${maxLat} AND lng BETWEEN ${minLng} AND ${maxLng}`)
+    .where(
+      sql`grid_row > 10000 AND lat BETWEEN ${minLat} AND ${maxLat} AND lng BETWEEN ${minLng} AND ${maxLng}`,
+    )
     .all()
 
   const existingSet = new Set(existing.map((e: any) => `${e.gridRow},${e.gridCol}`))
 
-  return allPoints
-    .filter(p => !existingSet.has(`${p.row},${p.col}`))
-    .slice(0, batchSize)
+  return allPoints.filter((p) => !existingSet.has(`${p.row},${p.col}`)).slice(0, batchSize)
 }

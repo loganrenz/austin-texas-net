@@ -13,7 +13,7 @@ import { getCategoryHexColor } from '~/utils/categoryHexColors'
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('health')!
 const siblings = category.subApps.filter((a) => a.slug !== 'cedar-pollen')
-const crossLinks = categories.filter((c) => c.slug !== 'health').slice(0, 4)
+const crossLinks = categories.value.filter((c) => c.slug !== 'health').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
 
 usePageSeo({
@@ -139,16 +139,15 @@ const healthTips = computed(() => {
   <div>
     <UContainer class="py-8 md:py-12">
       <!-- Breadcrumbs -->
-      <UBreadcrumb
-        v-if="breadcrumbs.length > 0"
-        :items="breadcrumbs"
-        class="mb-6"
-      />
+      <UBreadcrumb v-if="breadcrumbs.length > 0" :items="breadcrumbs" class="mb-6" />
 
       <!-- Header -->
       <div class="mb-8 animate-fade-up">
         <div class="flex items-center gap-3 mb-4">
-          <div class="flex items-center justify-center size-12 rounded-2xl" :class="category.bgColor">
+          <div
+            class="flex items-center justify-center size-12 rounded-2xl"
+            :class="category.bgColor"
+          >
             <UIcon :name="category.icon" class="size-6" :class="category.color" />
           </div>
           <div>
@@ -158,7 +157,10 @@ const healthTips = computed(() => {
           </div>
         </div>
         <p class="text-base sm:text-lg text-muted max-w-2xl leading-relaxed">
-          {{ current?.description || 'Live cedar pollen counts for Austin, TX. Track mountain cedar levels, view forecasts, and get health tips.' }}
+          {{
+            current?.description ||
+            'Live cedar pollen counts for Austin, TX. Track mountain cedar levels, view forecasts, and get health tips.'
+          }}
         </p>
       </div>
 
@@ -167,12 +169,7 @@ const healthTips = computed(() => {
         <!-- Compact current-level banner -->
         <div class="cedar-banner mb-4">
           <div class="cedar-banner-ring">
-            <PollenSeverityRing
-              v-if="current"
-              :count="current.count"
-              :size="80"
-              label="Cedar"
-            />
+            <PollenSeverityRing v-if="current" :count="current.count" :size="80" label="Cedar" />
             <div v-else class="flex items-center justify-center size-20">
               <UIcon name="i-lucide-loader" class="size-6 text-muted animate-spin" />
             </div>
@@ -189,8 +186,10 @@ const healthTips = computed(() => {
               />
             </div>
             <p v-if="current" class="text-xs text-dimmed mt-1">
-              Updated {{ current.date }}
-              · {{ current.source === 'kxan-live' ? 'KXAN / Georgetown Allergy Center' : current.source }}
+              Updated {{ current.date }} ·
+              {{
+                current.source === 'kxan-live' ? 'KXAN / Georgetown Allergy Center' : current.source
+              }}
             </p>
           </div>
         </div>

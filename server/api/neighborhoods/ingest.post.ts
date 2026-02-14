@@ -17,9 +17,11 @@ import { NEIGHBORHOOD_SEED, type NeighborhoodSeedEntry } from '~~/server/utils/n
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-const bodySchema = z.object({
-  names: z.array(z.string().min(1)).optional(),
-}).optional()
+const bodySchema = z
+  .object({
+    names: z.array(z.string().min(1)).optional(),
+  })
+  .optional()
 
 // Austin metro bounding box: Leander (north) to Buda (south)
 // Format: northLat,eastLng,southLat,westLng
@@ -50,13 +52,10 @@ export default defineEventHandler(async (event) => {
   if (parsed?.names?.length) {
     // Use provided names, look them up in seed for region/city, fallback to defaults
     entries = parsed.names.map((name) => {
-      const match = NEIGHBORHOOD_SEED.find(
-        s => s.name.toLowerCase() === name.toLowerCase(),
-      )
-      return match || { name, region: 'Unknown', city: 'Austin' }
+      const match = NEIGHBORHOOD_SEED.find((s) => s.name.toLowerCase() === name.toLowerCase())
+      return match || { name, region: 'Unknown', city: 'Austin', tier: 'neighborhood' as const }
     })
-  }
-  else {
+  } else {
     entries = NEIGHBORHOOD_SEED
   }
 
@@ -65,7 +64,7 @@ export default defineEventHandler(async (event) => {
   let inserted = 0
   let updated = 0
   let failed = 0
-  const errors: Array<{ name: string, error: string }> = []
+  const errors: Array<{ name: string; error: string }> = []
 
   for (const entry of entries) {
     try {
@@ -111,27 +110,34 @@ export default defineEventHandler(async (event) => {
       }
 
       // Check if neighborhood already exists by slug
-      const existing = await db.select()
+      const existing = await db
+        .select()
         .from(neighborhoodsTable)
         .where(eq(neighborhoodsTable.slug, slug))
         .get()
 
       if (existing) {
-        await db.update(neighborhoodsTable)
+        await db
+          .update(neighborhoodsTable)
           .set({
             lat: neighborhoodData.lat,
             lng: neighborhoodData.lng,
             city: neighborhoodData.city,
             zipCode: neighborhoodData.zipCode,
             region: neighborhoodData.region,
+            tier: entry.tier ?? 'neighborhood',
+            parentRegion: ('parentRegion' in entry ? entry.parentRegion : undefined) ?? null,
+            appleMapName: ('appleMapName' in entry ? entry.appleMapName : undefined) ?? null,
             updatedAt: now,
           })
           .where(eq(neighborhoodsTable.slug, slug))
         updated++
-      }
-      else {
+      } else {
         await db.insert(neighborhoodsTable).values({
           ...neighborhoodData,
+          tier: entry.tier ?? 'neighborhood',
+          parentRegion: ('parentRegion' in entry ? entry.parentRegion : undefined) ?? null,
+          appleMapName: ('appleMapName' in entry ? entry.appleMapName : undefined) ?? null,
           featured: false,
           createdAt: now,
         })
@@ -139,9 +145,8 @@ export default defineEventHandler(async (event) => {
       }
 
       // Small delay to avoid rate limiting (25k/day quota shared with MapKit JS)
-      await new Promise(resolve => setTimeout(resolve, 100))
-    }
-    catch (err: any) {
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    } catch (err: any) {
       errors.push({ name: entry.name, error: err.message || String(err) })
       failed++
     }

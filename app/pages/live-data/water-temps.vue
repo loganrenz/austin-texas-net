@@ -25,7 +25,7 @@ interface WaterSpot {
 const { getCategoryBySlug, categories } = useSiteData()
 const category = getCategoryBySlug('live-data')!
 const siblings = category.subApps.filter((a) => a.slug !== 'water-temps' && a.status === 'live')
-const crossLinks = categories.filter((c) => c.slug !== 'live-data').slice(0, 4)
+const crossLinks = categories.value.filter((c) => c.slug !== 'live-data').slice(0, 4)
 const { items: breadcrumbs } = useBreadcrumbs()
 
 usePageSeo({
