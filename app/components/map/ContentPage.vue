@@ -1,4 +1,4 @@
-<!-- eslint-disable vue/no-v-html -->
+<!-- eslint-disable vue/no-v-html, atx/no-fetch-in-component -- CMS HTML; neighborhood filter fetch -->
 <script setup lang="ts">
 /**
  * MapContentPage — Full page wrapper for the Map Content Type pattern.
@@ -133,10 +133,12 @@ watch(selectedRegion, () => clearSelection())
           </div>
         </div>
 
+        <!-- eslint-disable vue/no-v-html -- CMS author-controlled text -->
         <p
           class="text-base sm:text-lg text-muted max-w-2xl leading-relaxed mb-5"
           v-html="config.introText"
         />
+        <!-- eslint-enable vue/no-v-html -->
 
         <!-- Area filter -->
         <div

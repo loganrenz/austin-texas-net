@@ -21,12 +21,12 @@ export default defineEventHandler(async (event) => {
   const db = useDatabase()
 
   try {
+    // eslint-disable-next-line atx/prefer-drizzle-operators -- raw SQL query, no Drizzle schema
     const result = await db.run(sql`
       SELECT value, unit, parameter_code, timestamp
       FROM water_readings
       WHERE site_id = ${siteId}
         AND timestamp >= datetime('now', ${`-${days} days`})
-      // eslint-disable-next-line atx/prefer-drizzle-operators
       ORDER BY timestamp ASC
     `)
 

@@ -1,3 +1,4 @@
+<!-- eslint-disable atx/no-fetch-in-component -- SSR page data fetching -->
 <script setup lang="ts">
 import type { MapPageConfig, MapSpot } from '~/types/mapSpot'
 import { foodTruckSpots as staticSpots } from '~/data/foodTruckSpots'

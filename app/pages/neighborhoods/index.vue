@@ -1,4 +1,4 @@
-<!-- eslint-disable atx/no-inline-hex -- GeoJSON overlay colors are MapKit JS API data -->
+<!-- eslint-disable atx/no-inline-hex, atx/no-fetch-in-component -- GeoJSON colors; SSR page data fetching -->
 <script setup lang="ts">
 import type {
   GeoJSONFeature,
@@ -299,13 +299,13 @@ const crossLinks = computed(() => categories.filter((c) => c.slug !== 'neighborh
               <span class="font-semibold text-default">{{ filteredCount }}</span>
               of {{ totalCount }} neighborhoods
             </p>
-            <button
-              class="text-xs font-medium text-primary hover:underline"
-              type="button"
+            <UButton
+              variant="link"
+              color="primary"
+              size="xs"
+              label="Clear filters"
               @click="clearFilters"
-            >
-              Clear filters
-            </button>
+            />
           </div>
         </div>
       </section>

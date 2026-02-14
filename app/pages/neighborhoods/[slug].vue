@@ -1,3 +1,4 @@
+<!-- eslint-disable atx/no-fetch-in-component -- SSR page data fetching -->
 <script setup lang="ts">
 import type {
   GeoJSONFeatureCollection,
@@ -76,6 +77,7 @@ const neighborhoodGeojson = computed<GeoJSONFeatureCollection | null>(() => {
 })
 
 function overlayStyleFn(_properties: GeoJSONFeatureProperties): OverlayStyle {
+  /* eslint-disable atx/no-inline-hex -- MapKit overlay style */
   return {
     strokeColor: '#0d9488',
     strokeOpacity: 0.9,
@@ -83,6 +85,7 @@ function overlayStyleFn(_properties: GeoJSONFeatureProperties): OverlayStyle {
     fillOpacity: 0.15,
     lineWidth: 2.5,
   }
+  /* eslint-enable atx/no-inline-hex */
 }
 
 // Fetch sibling neighborhoods in the same region

@@ -84,7 +84,7 @@ const { getIconPaths } = useMapIcons()
           <UIcon name="i-lucide-star" class="size-3.5 text-amber-400" />
           <span>{{ spot.rating }}</span>
         </div>
-        <!-- eslint-disable-next-line atx/no-raw-tailwind-colors -->
+        <!-- eslint-disable atx/no-raw-tailwind-colors -- amber hover accent -->
         <UIcon
           name="i-lucide-map-pin"
           class="size-4 text-muted group-hover:text-amber-500 transition-colors shrink-0"

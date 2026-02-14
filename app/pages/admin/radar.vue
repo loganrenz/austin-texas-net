@@ -1,3 +1,4 @@
+<!-- eslint-disable atx/no-fetch-in-component -- SSR page data fetching -->
 <script setup lang="ts">
 definePageMeta({ title: 'Radar', middleware: 'auth' })
 

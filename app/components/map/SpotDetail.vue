@@ -124,12 +124,12 @@ const stars = computed(() => {
           <path v-for="(d, i) in iconPaths" :key="i" :d="d" />
         </svg>
         <div>
-          <!-- eslint-disable-next-line atx/no-raw-tailwind-colors -->
+          <!-- eslint-disable atx/no-raw-tailwind-colors -- amber accent colors -->
           <span
             class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400"
             >Known For</span
           >
-          <!-- eslint-disable-next-line atx/no-raw-tailwind-colors -->
+
           <p class="text-sm font-semibold text-amber-800 dark:text-amber-300 mt-0.5">
             {{ spot.knownFor }}
           </p>
