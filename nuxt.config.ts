@@ -42,6 +42,9 @@ export default defineNuxtConfig({
       __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
       __APP_VERSION__: JSON.stringify(pkg.version),
     },
+    css: {
+      devSourcemap: true,
+  }
   },
 
   runtimeConfig: {
@@ -99,7 +102,7 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    preset: 'cloudflare_module',
+    preset: 'cloudflare_pages',
     experimental: {
       wasm: true,
     },
