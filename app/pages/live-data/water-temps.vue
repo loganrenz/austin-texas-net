@@ -139,10 +139,8 @@ function formatTimestamp(ts: string): string {
       <!-- Header (hidden when selected) -->
       <div v-if="!selectedSpot" class="mb-8 animate-fade-up">
         <div class="flex items-center gap-3 mb-4">
-          <div
-            class="flex items-center justify-center size-12 rounded-2xl bg-cyan-100 dark:bg-cyan-900/30"
-          >
-            <UIcon name="i-lucide-thermometer" class="size-6 text-cyan-600 dark:text-cyan-400" />
+          <div class="flex items-center justify-center size-12 rounded-2xl bg-primary/10">
+            <UIcon name="i-lucide-thermometer" class="size-6 text-primary" />
           </div>
           <div>
             <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight font-display">
@@ -159,13 +157,16 @@ function formatTimestamp(ts: string): string {
 
       <!-- Selected Station Detail -->
       <section v-if="selectedSpot" class="mb-10 animate-fade-up">
-        <button
-          class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-muted mb-5 hover:text-default transition-colors"
+        <UButton
+          variant="link"
+          color="neutral"
+          size="xs"
+          icon="i-lucide-arrow-left"
+          class="text-xs font-bold uppercase tracking-widest mb-5"
           @click="selectedId = null"
         >
-          <UIcon name="i-lucide-arrow-left" class="size-3.5" />
           Back to All Stations
-        </button>
+        </UButton>
 
         <div
           class="rounded-2xl border border-default bg-default px-6 py-5 shadow-sm dark:shadow-md"
@@ -173,7 +174,7 @@ function formatTimestamp(ts: string): string {
           <!-- Station Info -->
           <div class="flex items-start gap-4 mb-4">
             <div
-              class="flex items-center justify-center size-11 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-700 shadow-lg"
+              class="flex items-center justify-center size-11 rounded-full bg-gradient-to-br from-primary to-primary/70 shadow-lg"
             >
               <UIcon name="i-lucide-thermometer" class="size-5 text-white" />
             </div>
@@ -188,9 +189,9 @@ function formatTimestamp(ts: string): string {
           <!-- Current Reading -->
           <div class="flex flex-wrap items-center gap-3 mb-5">
             <div
-              class="flex flex-col items-center rounded-xl border border-cyan-500/20 bg-cyan-500/[0.08] px-4 py-2.5 dark:border-cyan-500/15 dark:bg-cyan-500/[0.06]"
+              class="flex flex-col items-center rounded-xl border border-primary/20 bg-primary/8 px-4 py-2.5"
             >
-              <span class="text-2xl font-extrabold font-display text-cyan-700 dark:text-cyan-300">{{
+              <span class="text-2xl font-extrabold font-display text-primary">{{
                 selectedSpot.displayValue
               }}</span>
               <span class="text-[0.7rem] font-semibold uppercase tracking-wider text-muted"
@@ -199,9 +200,9 @@ function formatTimestamp(ts: string): string {
             </div>
             <div
               v-if="selectedSpot.parameterCode === '00010'"
-              class="flex flex-col items-center rounded-xl border border-cyan-500/20 bg-cyan-500/[0.08] px-4 py-2.5 dark:border-cyan-500/15 dark:bg-cyan-500/[0.06]"
+              class="flex flex-col items-center rounded-xl border border-primary/20 bg-primary/8 px-4 py-2.5"
             >
-              <span class="text-2xl font-extrabold font-display text-cyan-700 dark:text-cyan-300"
+              <span class="text-2xl font-extrabold font-display text-primary"
                 >{{ selectedSpot.value.toFixed(1) }}°C</span
               >
               <span class="text-[0.7rem] font-semibold uppercase tracking-wider text-muted"
@@ -236,14 +237,16 @@ function formatTimestamp(ts: string): string {
           Monitoring Stations
         </h2>
         <div class="space-y-3">
-          <button
+          <UButton
             v-for="spot in spots"
             :key="spot.id"
-            class="group flex w-full items-center gap-3 rounded-[14px] border border-default bg-default px-4 py-3.5 transition-all duration-200 hover:-translate-y-px hover:border-cyan-500/40 hover:shadow-[0_2px_12px_rgba(6,182,212,0.08)] dark:hover:border-cyan-500/30 dark:hover:shadow-[0_2px_12px_rgba(6,182,212,0.12)]"
+            variant="ghost"
+            color="neutral"
+            class="group flex w-full items-center gap-3 rounded-[14px] border border-default bg-default px-4 py-3.5 transition-all duration-200 hover:-translate-y-px hover:border-primary/40 hover:shadow-sm"
             @click="selectedId = spot.id"
           >
             <div
-              class="flex items-center justify-center size-9 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-700 shadow-sm shrink-0"
+              class="flex items-center justify-center size-9 rounded-full bg-gradient-to-br from-primary to-primary/70 shadow-sm shrink-0"
             >
               <UIcon name="i-lucide-thermometer" class="size-4 text-white" />
             </div>
@@ -254,15 +257,15 @@ function formatTimestamp(ts: string): string {
               </p>
             </div>
             <div
-              class="flex items-center rounded-full bg-gradient-to-br from-cyan-500 to-cyan-700 px-2.5 py-1 text-[13px] font-extrabold font-display text-white shadow-[0_1px_4px_rgba(6,182,212,0.3)]"
+              class="flex items-center rounded-full bg-gradient-to-br from-primary to-primary/70 px-2.5 py-1 text-[13px] font-extrabold font-display text-white shadow-sm"
             >
               {{ spot.displayValue }}
             </div>
             <UIcon
               name="i-lucide-chevron-right"
-              class="size-4 text-muted group-hover:text-cyan-500 transition-colors shrink-0"
+              class="size-4 text-muted group-hover:text-primary transition-colors shrink-0"
             />
-          </button>
+          </UButton>
         </div>
       </section>
 

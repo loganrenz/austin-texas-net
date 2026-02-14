@@ -39,8 +39,7 @@ export default defineEventHandler(async (event) => {
   let readings
   try {
     readings = await fetchLakeLevels()
-  }
-  catch (err: unknown) {
+  } catch (err: unknown) {
     throw createError({
       statusCode: 502,
       message: `WaterDataForTexas fetch failed: ${(err as Error).message}`,
@@ -59,7 +58,7 @@ export default defineEventHandler(async (event) => {
         LIMIT 1
       `)
 
-      if (existing.rows && existing.rows.length > 0) {
+      if (existing.results && existing.results.length > 0) {
         // Update existing
         await db.run(sql`
           UPDATE lake_readings SET
@@ -70,8 +69,7 @@ export default defineEventHandler(async (event) => {
           WHERE lake_key = ${reading.lakeKey} AND timestamp = ${reading.timestamp}
         `)
         skipped++
-      }
-      else {
+      } else {
         await db.run(sql`
           INSERT INTO lake_readings (lake_key, lake_name, lat, lng, elevation, percent_full, conservation_capacity, conservation_storage, timestamp, created_at)
           VALUES (
@@ -89,8 +87,7 @@ export default defineEventHandler(async (event) => {
         `)
         inserted++
       }
-    }
-    catch {
+    } catch {
       skipped++
     }
   }

@@ -24,9 +24,7 @@ const { getIconPaths } = useMapIcons()
 
 <template>
   <section class="mb-10 animate-fade-up-delay-1">
-    <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-5">
-      The Rankings
-    </h2>
+    <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-5">The Rankings</h2>
     <div class="space-y-3">
       <button
         v-for="spot in spots"
@@ -38,7 +36,13 @@ const { getIconPaths } = useMapIcons()
           <div
             class="map-list-icon"
             :class="{ 'is-top-3': spot.rank <= 3 }"
-            :style="pinColor ? { background: `linear-gradient(145deg, ${pinColor}, color-mix(in srgb, ${pinColor} 55%, #000))` } : undefined"
+            :style="
+              pinColor
+                ? {
+                    background: `linear-gradient(145deg, ${pinColor}, color-mix(in srgb, ${pinColor} 55%, #000))`,
+                  }
+                : undefined
+            "
           >
             <svg
               class="map-list-svg"
@@ -84,6 +88,7 @@ const { getIconPaths } = useMapIcons()
   </section>
 </template>
 
+<!-- eslint-disable atx/no-style-block-layout -->
 <style scoped>
 .map-list-item {
   display: flex;

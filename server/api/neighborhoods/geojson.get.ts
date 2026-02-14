@@ -77,8 +77,16 @@ async function loadStaticGeoJSON(): Promise<StaticFeatureCollection> {
   if (staticGeoJSON) return staticGeoJSON
 
   try {
-    const data = await $fetch<StaticFeatureCollection>('/data/austin-neighborhoods.geojson')
-    staticGeoJSON = data
+    const storage = useStorage('assets:data')
+    // Nitro unstorage normalises dots to colons in keys
+    const raw = await storage.getItem<string>('austin-neighborhoods:geojson')
+    if (raw && typeof raw === 'string') {
+      staticGeoJSON = JSON.parse(raw) as StaticFeatureCollection
+    } else if (raw && typeof raw === 'object') {
+      staticGeoJSON = raw as unknown as StaticFeatureCollection
+    } else {
+      staticGeoJSON = { type: 'FeatureCollection', features: [] }
+    }
   } catch {
     staticGeoJSON = { type: 'FeatureCollection', features: [] }
   }

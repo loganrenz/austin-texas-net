@@ -51,8 +51,7 @@ function base64url(input: ArrayBuffer | string): string {
   let str: string
   if (typeof input === 'string') {
     str = btoa(input)
-  }
-  else {
+  } else {
     const bytes = new Uint8Array(input)
     let binary = ''
     for (const b of bytes) binary += String.fromCharCode(b)
@@ -107,12 +106,14 @@ function derToRaw(der: Uint8Array): Uint8Array {
   if (der[0] !== 0x30) return der // Not DER, return as-is
 
   let offset = 2
-  // Skip length byte(s)
-  if (der[1] & 0x80) offset += (der[1] & 0x7f)
+  const lenByte = der[1]
+  if (lenByte === undefined) return der
+  if (lenByte & 0x80) offset += lenByte & 0x7f
 
   // Parse r
   if (der[offset] !== 0x02) return der
   const rLen = der[offset + 1]
+  if (rLen === undefined) return der
   offset += 2
   let r = der.slice(offset, offset + rLen)
   offset += rLen
@@ -120,6 +121,7 @@ function derToRaw(der: Uint8Array): Uint8Array {
   // Parse s
   if (der[offset] !== 0x02) return der
   const sLen = der[offset + 1]
+  if (sLen === undefined) return der
   offset += 2
   let s = der.slice(offset, offset + sLen)
 
@@ -139,7 +141,7 @@ function derToRaw(der: Uint8Array): Uint8Array {
 async function exchangeForAccessToken(authToken: string): Promise<CachedToken> {
   const response = await fetch('https://maps-api.apple.com/v1/token', {
     headers: {
-      'Authorization': `Bearer ${authToken}`,
+      Authorization: `Bearer ${authToken}`,
     },
   })
 
@@ -148,7 +150,7 @@ async function exchangeForAccessToken(authToken: string): Promise<CachedToken> {
     throw new Error(`Apple Maps token exchange failed (${response.status}): ${body}`)
   }
 
-  const data = await response.json() as any
+  const data = (await response.json()) as any
   const accessToken = data.accessToken as string
   const expiresInSeconds = (data.expiresInSeconds as number) || 1800
 
@@ -183,8 +185,8 @@ export async function getAppleMapsAccessToken(event?: any): Promise<string> {
 
   if (!privateKeyPem || !teamId || !keyId) {
     throw new Error(
-      'Apple Maps config missing. Need either MAPKIT_SERVER_API_KEY (pre-signed JWT) '
-      + 'or APPLE_SECRET_KEY + APPLE_TEAM_ID + APPLE_KEY_ID for PEM signing.',
+      'Apple Maps config missing. Need either MAPKIT_SERVER_API_KEY (pre-signed JWT) ' +
+        'or APPLE_SECRET_KEY + APPLE_TEAM_ID + APPLE_KEY_ID for PEM signing.',
     )
   }
 
@@ -198,12 +200,15 @@ export async function getAppleMapsAccessToken(event?: any): Promise<string> {
 /**
  * Search Apple Maps Server API.
  */
-export async function searchAppleMaps(query: string, options?: {
-  lat?: number
-  lng?: number
-  categories?: string[]
-  limit?: number
-}): Promise<any> {
+export async function searchAppleMaps(
+  query: string,
+  options?: {
+    lat?: number
+    lng?: number
+    categories?: string[]
+    limit?: number
+  },
+): Promise<any> {
   const accessToken = await getAppleMapsAccessToken()
 
   const params = new URLSearchParams({
@@ -227,7 +232,7 @@ export async function searchAppleMaps(query: string, options?: {
 
   const response = await fetch(url, {
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
   })
 
@@ -243,10 +248,13 @@ export async function searchAppleMaps(query: string, options?: {
  * Geocode an address string using Apple Maps Server API.
  * Uses /v1/geocode with an optional search region hint.
  */
-export async function geocodeAppleMaps(address: string, options?: {
-  searchRegion?: string // "northLat,eastLng,southLat,westLng"
-  limitToCountries?: string
-}): Promise<any> {
+export async function geocodeAppleMaps(
+  address: string,
+  options?: {
+    searchRegion?: string // "northLat,eastLng,southLat,westLng"
+    limitToCountries?: string
+  },
+): Promise<any> {
   const accessToken = await getAppleMapsAccessToken()
 
   const params = new URLSearchParams({ q: address })
@@ -263,7 +271,7 @@ export async function geocodeAppleMaps(address: string, options?: {
 
   const response = await fetch(url, {
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
   })
 
@@ -279,9 +287,12 @@ export async function geocodeAppleMaps(address: string, options?: {
  * Search Apple Maps for neighborhood/sub-locality addresses.
  * Uses resultTypeFilter=Address for area-level results.
  */
-export async function searchAppleMapsNeighborhood(name: string, options?: {
-  searchRegion?: string
-}): Promise<any> {
+export async function searchAppleMapsNeighborhood(
+  name: string,
+  options?: {
+    searchRegion?: string
+  },
+): Promise<any> {
   const accessToken = await getAppleMapsAccessToken()
 
   const params = new URLSearchParams({
@@ -299,7 +310,7 @@ export async function searchAppleMapsNeighborhood(name: string, options?: {
 
   const response = await fetch(url, {
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
   })
 

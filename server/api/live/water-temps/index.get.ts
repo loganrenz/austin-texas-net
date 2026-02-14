@@ -24,8 +24,19 @@ export default defineEventHandler(async () => {
       ORDER BY wr.site_name
     `)
 
-    if (result.rows && result.rows.length > 0) {
-      const spots = (result.rows as any[]).map(r => ({
+    interface WaterRow {
+      site_id: string
+      site_name: string
+      lat: number
+      lng: number
+      value: number
+      unit: string
+      parameter_code: string
+      timestamp: string
+    }
+    const rows = (result.results ?? []) as WaterRow[]
+    if (rows.length > 0) {
+      const spots = rows.map((r) => ({
         id: r.site_id,
         name: r.site_name,
         lat: r.lat,
@@ -39,15 +50,14 @@ export default defineEventHandler(async () => {
 
       return { spots, source: 'db' }
     }
-  }
-  catch {
+  } catch {
     // Table may not exist yet
   }
 
   // Fallback: fetch directly from USGS
   try {
     const readings = await fetchUsgsReadings()
-    const spots = readings.map(r => ({
+    const spots = readings.map((r) => ({
       id: r.siteId,
       name: r.siteName,
       lat: r.lat,
@@ -60,8 +70,7 @@ export default defineEventHandler(async () => {
     }))
 
     return { spots, source: 'live' }
-  }
-  catch {
+  } catch {
     return { spots: [], source: 'error' }
   }
 })
@@ -69,7 +78,7 @@ export default defineEventHandler(async () => {
 function formatWaterValue(value: number, unit: string, paramCode: string): string {
   if (paramCode === '00010') {
     // Convert °C to °F
-    const f = Math.round(value * 9 / 5 + 32)
+    const f = Math.round((value * 9) / 5 + 32)
     return `${f}°F`
   }
   if (paramCode === '00065') {

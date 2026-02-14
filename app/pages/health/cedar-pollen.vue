@@ -27,7 +27,7 @@ useSchemaOrg([
 ])
 
 // ─── Data fetching ─────────────────────────────────────
-const { data: currentData, status: currentStatus } = await useFetch('/api/pollen/current')
+const { data: currentData } = await useFetch('/api/pollen/current')
 
 const historyDays = ref(30)
 const {
@@ -47,7 +47,9 @@ async function onPeriodChange(days: number) {
 // ─── Computed ──────────────────────────────────────────
 const current = computed(() => currentData.value?.current ?? null)
 const trend = computed(() => currentData.value?.trend ?? 'stable')
-const season = computed(() => currentData.value?.season ?? { peakCount: 0, avgCount: 0, highDays: 0 })
+const season = computed(
+  () => currentData.value?.season ?? { peakCount: 0, avgCount: 0, highDays: 0 },
+)
 const allergens = computed(() => currentData.value?.allergens ?? null)
 const forecast = computed(() => currentData.value?.forecast ?? [])
 
@@ -109,7 +111,10 @@ const healthTips = computed(() => {
     return [
       { icon: 'i-lucide-house', text: 'Limit outdoor activities, especially in the morning.' },
       ...base,
-      { icon: 'i-lucide-air-vent', text: 'Run HEPA air purifiers indoors and keep windows sealed.' },
+      {
+        icon: 'i-lucide-air-vent',
+        text: 'Run HEPA air purifiers indoors and keep windows sealed.',
+      },
     ]
   }
   return base
@@ -121,10 +126,7 @@ const healthTips = computed(() => {
     <UContainer class="py-8 md:py-12">
       <!-- Header -->
       <div class="flex items-center gap-3 mb-8 animate-fade-up">
-        <div
-          class="flex items-center justify-center size-12 rounded-2xl"
-          :class="category.bgColor"
-        >
+        <div class="flex items-center justify-center size-12 rounded-2xl" :class="category.bgColor">
           <UIcon :name="category.icon" class="size-6" :class="category.color" />
         </div>
         <div>
@@ -163,9 +165,7 @@ const healthTips = computed(() => {
               :icon="trendIcon"
               :label="trendLabel"
             />
-            <span v-if="current" class="text-xs text-dimmed">
-              Updated {{ current.date }}
-            </span>
+            <span v-if="current" class="text-xs text-dimmed"> Updated {{ current.date }} </span>
           </div>
 
           <p class="text-base sm:text-lg text-muted leading-relaxed max-w-lg">
@@ -174,7 +174,10 @@ const healthTips = computed(() => {
 
           <!-- Source label -->
           <p v-if="current" class="text-xs text-dimmed mt-3">
-            Source: {{ current.source === 'kxan-live' ? 'KXAN / Georgetown Allergy Center' : current.source }}
+            Source:
+            {{
+              current.source === 'kxan-live' ? 'KXAN / Georgetown Allergy Center' : current.source
+            }}
           </p>
         </div>
       </section>
@@ -193,15 +196,19 @@ const healthTips = computed(() => {
           suffix="gr/m³"
           :color="severityFromCount(season.avgCount).color"
         />
-        <PollenStatCard
-          label="High Days"
-          :value="season.highDays"
-          suffix="days"
-        />
+        <PollenStatCard label="High Days" :value="season.highDays" suffix="days" />
         <PollenStatCard
           v-if="allergens"
           label="Cedar Dominance"
-          :value="allergens.cedar > 0 ? Math.round((allergens.cedar / (allergens.cedar + (allergens.elm || 0) + (allergens.mold || 0))) * 100) : 0"
+          :value="
+            allergens.cedar > 0
+              ? Math.round(
+                  (allergens.cedar /
+                    (allergens.cedar + (allergens.elm || 0) + (allergens.mold || 0))) *
+                    100,
+                )
+              : 0
+          "
           suffix="%"
           color="#EF4444"
         />
@@ -216,7 +223,9 @@ const healthTips = computed(() => {
           <PollenForecastCard
             v-for="day in forecast"
             :key="day.date"
-            :day-name="new Date(day.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' })"
+            :day-name="
+              new Date(day.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' })
+            "
             :date="day.date"
             :level="day.cedar?.category || 'None'"
             :count="day.cedar?.approxCount ?? 0"
@@ -230,9 +239,7 @@ const healthTips = computed(() => {
 
       <!-- ══════ Historical Chart ══════ -->
       <section class="mb-10 animate-fade-up-delay-3">
-        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-5">
-          Pollen Trend
-        </h2>
+        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-5">Pollen Trend</h2>
         <PollenChart
           :data="chartData"
           :loading="historyStatus === 'pending'"
@@ -264,9 +271,7 @@ const healthTips = computed(() => {
 
       <!-- ══════ Health Tips ══════ -->
       <section class="cedar-tips mb-10">
-        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-5">
-          Health Tips
-        </h2>
+        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-5">Health Tips</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div
             v-for="(tip, i) in healthTips"
@@ -305,9 +310,9 @@ const healthTips = computed(() => {
               peak events.
             </p>
             <p>
-              This tracker aggregates data from local monitoring stations across the Austin
-              metro area — the same data used by allergists and weather services. Updated daily,
-              so you can check before heading outdoors.
+              This tracker aggregates data from local monitoring stations across the Austin metro
+              area — the same data used by allergists and weather services. Updated daily, so you
+              can check before heading outdoors.
             </p>
           </div>
 
@@ -335,9 +340,7 @@ const healthTips = computed(() => {
 
       <!-- ══════ More in Health ══════ -->
       <section v-if="siblings.length" class="mb-8">
-        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-4">
-          More in Health
-        </h2>
+        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-4">More in Health</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <NuxtLink
             v-for="app in siblings"

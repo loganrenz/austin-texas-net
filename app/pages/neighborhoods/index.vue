@@ -33,10 +33,9 @@ const { items: breadcrumbs } = useBreadcrumbs()
 const { data } = await useFetch('/api/neighborhoods')
 
 // ── GeoJSON boundary data ────────────────────────────────────
-const { data: geojson } = await useFetch<GeoJSONFeatureCollection>(
-  '/data/austin-neighborhoods.geojson',
-  { key: 'neighborhoods-geojson' },
-)
+const { data: geojson } = await useFetch<GeoJSONFeatureCollection>('/api/neighborhoods/geojson', {
+  key: 'neighborhoods-geojson',
+})
 
 const REGION_COLORS: Record<string, { stroke: string; fill: string }> = {
   'Far North': { stroke: '#1d4ed8', fill: '#3b82f6' },

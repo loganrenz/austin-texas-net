@@ -17,11 +17,7 @@ interface Env {
 }
 
 export default {
-  async scheduled(
-    _controller: ScheduledController,
-    env: Env,
-    ctx: ExecutionContext,
-  ) {
+  async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext) {
     const baseUrl = env.INGEST_URL || 'https://austin-texas.net'
     const apiKey = env.INGEST_API_KEY
 
@@ -39,33 +35,35 @@ export default {
     const waterPromise = fetch(`${baseUrl}/api/live/water-temps/ingest`, {
       method: 'POST',
       headers,
-    }).then(async (res) => {
-      const body = await res.text()
-      if (!res.ok) {
-        console.error(`Water temps ingest failed (${res.status}): ${body}`)
-      }
-      else {
-        console.log(`Water temps ingest success: ${body}`)
-      }
-    }).catch((err) => {
-      console.error(`Water temps ingest error: ${err.message}`)
     })
+      .then(async (res) => {
+        const body = await res.text()
+        if (!res.ok) {
+          console.error(`Water temps ingest failed (${res.status}): ${body}`)
+        } else {
+          console.warn(`Water temps ingest success: ${body}`)
+        }
+      })
+      .catch((err) => {
+        console.error(`Water temps ingest error: ${err.message}`)
+      })
 
     // Ingest lake levels from WaterDataForTexas
     const lakePromise = fetch(`${baseUrl}/api/live/lake-levels/ingest`, {
       method: 'POST',
       headers,
-    }).then(async (res) => {
-      const body = await res.text()
-      if (!res.ok) {
-        console.error(`Lake levels ingest failed (${res.status}): ${body}`)
-      }
-      else {
-        console.log(`Lake levels ingest success: ${body}`)
-      }
-    }).catch((err) => {
-      console.error(`Lake levels ingest error: ${err.message}`)
     })
+      .then(async (res) => {
+        const body = await res.text()
+        if (!res.ok) {
+          console.error(`Lake levels ingest failed (${res.status}): ${body}`)
+        } else {
+          console.warn(`Lake levels ingest success: ${body}`)
+        }
+      })
+      .catch((err) => {
+        console.error(`Lake levels ingest error: ${err.message}`)
+      })
 
     // Run both in parallel
     ctx.waitUntil(Promise.allSettled([waterPromise, lakePromise]))

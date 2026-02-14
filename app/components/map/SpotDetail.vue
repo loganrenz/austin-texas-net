@@ -44,7 +44,13 @@ const stars = computed(() => {
         <div v-if="spot.rank" class="spot-detail-pin">
           <div
             class="spot-detail-icon"
-            :style="config.pinColor ? { background: `linear-gradient(145deg, ${config.pinColor}, color-mix(in srgb, ${config.pinColor} 55%, #000))` } : undefined"
+            :style="
+              config.pinColor
+                ? {
+                    background: `linear-gradient(145deg, ${config.pinColor}, color-mix(in srgb, ${config.pinColor} 55%, #000))`,
+                  }
+                : undefined
+            "
           >
             <svg
               class="spot-detail-svg"
@@ -70,8 +76,20 @@ const stars = computed(() => {
 
       <!-- Meta badges -->
       <div class="flex flex-wrap items-center gap-2 mb-5">
-        <UBadge v-if="spot.neighborhood" :label="spot.neighborhood" color="neutral" variant="subtle" size="sm" />
-        <UBadge v-if="spot.priceRange" :label="spot.priceRange" color="success" variant="subtle" size="sm" />
+        <UBadge
+          v-if="spot.neighborhood"
+          :label="spot.neighborhood"
+          color="neutral"
+          variant="subtle"
+          size="sm"
+        />
+        <UBadge
+          v-if="spot.priceRange"
+          :label="spot.priceRange"
+          color="success"
+          variant="subtle"
+          size="sm"
+        />
         <div v-if="spot.rating" class="flex items-center gap-1 ml-auto">
           <template v-for="i in stars.full" :key="`df${i}`">
             <UIcon name="i-lucide-star" class="size-4 text-amber-400 fill-amber-400" />
@@ -100,8 +118,13 @@ const stars = computed(() => {
           <path v-for="(d, i) in iconPaths" :key="i" :d="d" />
         </svg>
         <div>
-          <span class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Known For</span>
-          <p class="text-sm font-semibold text-amber-800 dark:text-amber-300 mt-0.5">{{ spot.knownFor }}</p>
+          <span
+            class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400"
+            >Known For</span
+          >
+          <p class="text-sm font-semibold text-amber-800 dark:text-amber-300 mt-0.5">
+            {{ spot.knownFor }}
+          </p>
         </div>
       </div>
 
@@ -113,6 +136,7 @@ const stars = computed(() => {
   </section>
 </template>
 
+<!-- eslint-disable atx/no-style-block-layout -->
 <style scoped>
 .spot-detail-panel {
   padding: 20px 24px;

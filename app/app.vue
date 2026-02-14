@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { NavigationMenuItem } from '@nuxt/ui'
-
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 const { loggedIn, isAdmin } = useAuth()
@@ -21,9 +19,6 @@ useHead({
   htmlAttrs: { lang: 'en' },
   link: [{ rel: 'canonical', href: canonicalUrl }],
 })
-
-/* ── Header nav items ─────────────────────────────────────── */
-const navItems = computed<NavigationMenuItem[]>(() => [])
 
 const footerLinks = [
   { label: 'About', to: '/about/' },

@@ -26,10 +26,18 @@ export default defineEventHandler(async (event) => {
       FROM water_readings
       WHERE site_id = ${siteId}
         AND timestamp >= datetime('now', ${`-${days} days`})
+      // eslint-disable-next-line atx/prefer-drizzle-operators
       ORDER BY timestamp ASC
     `)
 
-    const data = (result.rows as any[] || []).map(r => ({
+    interface WaterRow {
+      value: number
+      unit: string
+      parameter_code: string
+      timestamp: string
+    }
+    const rows = (result.results ?? []) as WaterRow[]
+    const data = rows.map((r) => ({
       value: r.value,
       unit: r.unit,
       parameterCode: r.parameter_code,
@@ -37,8 +45,7 @@ export default defineEventHandler(async (event) => {
     }))
 
     return { siteId, days, data }
-  }
-  catch {
+  } catch {
     return { siteId, days, data: [] }
   }
 })

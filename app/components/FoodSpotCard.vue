@@ -1,9 +1,20 @@
 <script setup lang="ts">
-import type { FoodSpot } from '~~/server/api/spots.get'
+interface FoodSpot {
+  name: string
+  address: string
+  neighborhood?: string
+  region?: string
+  lat: number
+  lng: number
+}
 
 defineProps<{
   spot: FoodSpot
   isSelected?: boolean
+}>()
+
+defineEmits<{
+  directions: [spot: FoodSpot]
 }>()
 </script>
 
@@ -15,7 +26,9 @@ defineProps<{
     <div class="flex flex-1 flex-col p-5">
       <div class="mb-3">
         <h3 class="font-display text-lg font-bold leading-tight">{{ spot.name }}</h3>
-        <p v-if="spot.neighborhood" class="mt-0.5 text-sm text-primary font-medium">{{ spot.neighborhood }}</p>
+        <p v-if="spot.neighborhood" class="mt-0.5 text-sm text-primary font-medium">
+          {{ spot.neighborhood }}
+        </p>
       </div>
 
       <div class="mt-auto space-y-2">
@@ -23,7 +36,10 @@ defineProps<{
           <UIcon name="i-lucide-map-pin" class="size-3.5 shrink-0" />
           <span class="truncate">{{ spot.address }}</span>
         </div>
-        <div v-if="spot.region && spot.region !== 'Unknown'" class="flex items-center gap-2 text-xs text-dimmed">
+        <div
+          v-if="spot.region && spot.region !== 'Unknown'"
+          class="flex items-center gap-2 text-xs text-dimmed"
+        >
           <UIcon name="i-lucide-compass" class="size-3.5 shrink-0" />
           <span>{{ spot.region }} Austin</span>
         </div>

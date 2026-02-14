@@ -16,7 +16,7 @@ const crossLinks = categories.filter((c) => c.slug !== 'food').slice(0, 4)
 const config: MapPageConfig = {
   title: 'Top 10 Breakfast Tacos',
   description:
-    'Find the best breakfast tacos in Austin, TX. Interactive map of the top 10 spots — from Veracruz migas to Juan in a Million\'s Don Juan taco.',
+    "Find the best breakfast tacos in Austin, TX. Interactive map of the top 10 spots — from Veracruz migas to Juan in a Million's Don Juan taco.",
   introText:
     'The definitive Austin breakfast taco guide. From legendary East Austin trucks to iconic Tex-Mex joints — <strong class="text-default">tap any pin on the map</strong> to see the details.',
   parentCategory: 'food',
@@ -42,21 +42,21 @@ useSchemaOrg([
 ])
 
 // Fetch from API, fall back to static data
-const { data: apiData } = await useFetch<{ spots: any[] }>(config.apiEndpoint!)
+const { data: apiData } = await useFetch<{ spots: MapSpot[] }>(config.apiEndpoint!)
 const spots = computed<MapSpot[]>(() => {
   const apiSpots = apiData.value?.spots
   if (apiSpots && apiSpots.length > 0) {
     // Map DB columns to MapSpot interface
-    return (apiSpots as any[]).map((s, i) => ({
+    return apiSpots.map((s, i) => ({
       id: s.id,
       rank: s.rank ?? i + 1,
       name: s.name,
       slug: s.id,
       neighborhood: s.neighborhood || '',
-      knownFor: s.knownFor || s.known_for || s.category || '',
+      knownFor: s.knownFor || s.category || '',
       category: s.category || 'Restaurant',
       description: s.description || '',
-      priceRange: s.priceRange || s.price_range || '$',
+      priceRange: s.priceRange || '$',
       rating: s.rating ?? 0,
       lat: s.lat,
       lng: s.lng,
@@ -72,9 +72,7 @@ const spots = computed<MapSpot[]>(() => {
     <template #related>
       <!-- More in Food -->
       <section v-if="siblings.length" class="mb-8 animate-fade-up-delay-2">
-        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-4">
-          More in Food
-        </h2>
+        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-4">More in Food</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <NuxtLink
             v-for="app in siblings"
@@ -104,9 +102,7 @@ const spots = computed<MapSpot[]>(() => {
 
       <!-- Explore More -->
       <section class="mb-6 animate-fade-up-delay-3">
-        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-4">
-          Explore More
-        </h2>
+        <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-4">Explore More</h2>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <NuxtLink
             v-for="c in crossLinks"

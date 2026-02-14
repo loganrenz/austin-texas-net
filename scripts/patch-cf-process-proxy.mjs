@@ -58,9 +58,9 @@ for await (const p of walk(ROOT)) {
 }
 
 if (totalReplacements === 0) {
-  console.log(`[patch-cf-process-proxy] No matches under ${ROOT}; nothing to patch.`)
+  console.warn(`[patch-cf-process-proxy] No matches under ${ROOT}; nothing to patch.`)
 } else {
-  console.log(
+  console.warn(
     `[patch-cf-process-proxy] Patched ${patchedFiles.length} file(s), ${totalReplacements} replacement(s).`
   )
 }

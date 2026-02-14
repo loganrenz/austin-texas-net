@@ -23,8 +23,20 @@ export default defineEventHandler(async () => {
       ORDER BY lr.lake_name
     `)
 
-    if (result.rows && result.rows.length > 0) {
-      const spots = (result.rows as any[]).map(r => ({
+    interface LakeRow {
+      lake_key: string
+      lake_name: string
+      lat: number
+      lng: number
+      elevation: number
+      percent_full: number | null
+      conservation_capacity: number | null
+      conservation_storage: number | null
+      timestamp: string
+    }
+    const rows = (result.results ?? []) as LakeRow[]
+    if (rows.length > 0) {
+      const spots = rows.map((r) => ({
         id: r.lake_key,
         name: r.lake_name,
         lat: r.lat,
@@ -33,21 +45,23 @@ export default defineEventHandler(async () => {
         percentFull: r.percent_full,
         conservationCapacity: r.conservation_capacity,
         conservationStorage: r.conservation_storage,
-        displayValue: r.percent_full != null ? `${Math.round(r.percent_full)}%` : `${r.elevation.toFixed(1)} ft`,
+        displayValue:
+          r.percent_full != null
+            ? `${Math.round(r.percent_full)}%`
+            : `${r.elevation.toFixed(1)} ft`,
         timestamp: r.timestamp,
       }))
 
       return { spots, source: 'db' }
     }
-  }
-  catch {
+  } catch {
     // Table may not exist yet
   }
 
   // Fallback: fetch directly from WaterDataForTexas
   try {
     const readings = await fetchLakeLevels()
-    const spots = readings.map(r => ({
+    const spots = readings.map((r) => ({
       id: r.lakeKey,
       name: r.lakeName,
       lat: r.lat,
@@ -56,13 +70,13 @@ export default defineEventHandler(async () => {
       percentFull: r.percentFull,
       conservationCapacity: r.conservationCapacity,
       conservationStorage: r.conservationStorage,
-      displayValue: r.percentFull != null ? `${Math.round(r.percentFull)}%` : `${r.elevation.toFixed(1)} ft`,
+      displayValue:
+        r.percentFull != null ? `${Math.round(r.percentFull)}%` : `${r.elevation.toFixed(1)} ft`,
       timestamp: r.timestamp,
     }))
 
     return { spots, source: 'live' }
-  }
-  catch {
+  } catch {
     return { spots: [], source: 'error' }
   }
 })

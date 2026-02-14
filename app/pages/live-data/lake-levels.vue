@@ -176,20 +176,23 @@ function percentFullBg(pct: number | null): string {
 
       <!-- Selected Lake Detail -->
       <section v-if="selectedSpot" class="mb-10 animate-fade-up">
-        <button
-          class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-muted mb-5 hover:text-default transition-colors"
+        <UButton
+          variant="link"
+          color="neutral"
+          size="xs"
+          icon="i-lucide-arrow-left"
+          class="text-xs font-bold uppercase tracking-widest mb-5"
           @click="selectedId = null"
         >
-          <UIcon name="i-lucide-arrow-left" class="size-3.5" />
           Back to All Lakes
-        </button>
+        </UButton>
 
         <div
           class="rounded-2xl border border-default bg-default px-6 py-5 shadow-sm dark:shadow-md"
         >
           <div class="flex items-start gap-4 mb-4">
             <div
-              class="flex items-center justify-center size-11 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg"
+              class="flex items-center justify-center size-11 rounded-full bg-linear-to-br from-primary to-primary/70 shadow-lg"
             >
               <UIcon name="i-lucide-waves" class="size-5 text-white" />
             </div>
@@ -204,7 +207,7 @@ function percentFullBg(pct: number | null): string {
           <!-- Stats grid -->
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
             <div
-              class="flex flex-col items-center rounded-xl border border-blue-500/15 bg-blue-500/5 px-3 py-2.5 dark:border-blue-500/12 dark:bg-blue-500/[0.06]"
+              class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-2.5"
             >
               <span
                 class="text-xl font-extrabold font-display"
@@ -222,7 +225,7 @@ function percentFullBg(pct: number | null): string {
               >
             </div>
             <div
-              class="flex flex-col items-center rounded-xl border border-blue-500/15 bg-blue-500/5 px-3 py-2.5 dark:border-blue-500/12 dark:bg-blue-500/[0.06]"
+              class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-2.5"
             >
               <span class="text-xl font-extrabold font-display">{{
                 selectedSpot.elevation.toFixed(1)
@@ -233,7 +236,7 @@ function percentFullBg(pct: number | null): string {
               >
             </div>
             <div
-              class="flex flex-col items-center rounded-xl border border-blue-500/15 bg-blue-500/5 px-3 py-2.5 dark:border-blue-500/12 dark:bg-blue-500/[0.06]"
+              class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-2.5"
             >
               <span class="text-xl font-extrabold font-display">{{
                 formatNumber(selectedSpot.conservationCapacity)
@@ -244,7 +247,7 @@ function percentFullBg(pct: number | null): string {
               >
             </div>
             <div
-              class="flex flex-col items-center rounded-xl border border-blue-500/15 bg-blue-500/5 px-3 py-2.5 dark:border-blue-500/12 dark:bg-blue-500/[0.06]"
+              class="flex flex-col items-center rounded-xl border border-primary/15 bg-primary/5 px-3 py-2.5"
             >
               <span class="text-xl font-extrabold font-display">{{
                 formatNumber(selectedSpot.conservationStorage)
@@ -279,14 +282,16 @@ function percentFullBg(pct: number | null): string {
           Austin-Area Reservoirs
         </h2>
         <div class="space-y-3">
-          <button
+          <UButton
             v-for="spot in spots"
             :key="spot.id"
-            class="group flex w-full items-center gap-3 rounded-[14px] border border-default bg-default px-4 py-3.5 transition-all duration-200 hover:-translate-y-px hover:border-blue-500/40 hover:shadow-[0_2px_12px_rgba(59,130,246,0.08)] dark:hover:border-blue-500/30 dark:hover:shadow-[0_2px_12px_rgba(59,130,246,0.12)]"
+            variant="ghost"
+            color="neutral"
+            class="group flex w-full items-center gap-3 rounded-[14px] border border-default bg-default px-4 py-3.5 transition-all duration-200 hover:-translate-y-px hover:border-primary/40 hover:shadow-sm"
             @click="selectedId = spot.id"
           >
             <div
-              class="flex items-center justify-center min-w-[50px] shrink-0 rounded-[10px] border border-blue-500/15 bg-blue-500/[0.08] px-2.5 py-1.5 text-sm font-extrabold font-display"
+              class="flex items-center justify-center min-w-[50px] shrink-0 rounded-[10px] border border-primary/15 bg-primary/8 px-2.5 py-1.5 text-sm font-extrabold font-display"
               :class="percentFullColor(spot.percentFull)"
             >
               {{ spot.displayValue }}
@@ -307,9 +312,9 @@ function percentFullBg(pct: number | null): string {
             </div>
             <UIcon
               name="i-lucide-chevron-right"
-              class="size-4 text-muted group-hover:text-blue-500 transition-colors shrink-0"
+              class="size-4 text-muted group-hover:text-primary transition-colors shrink-0"
             />
-          </button>
+          </UButton>
         </div>
       </section>
 

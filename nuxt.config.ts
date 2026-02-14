@@ -26,22 +26,22 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   future: {
-    compatibilityVersion: 4
+    compatibilityVersion: 4,
   },
 
   ui: {
-    colorMode: true
+    colorMode: true,
   },
 
   colorMode: {
-    preference: 'light'
+    preference: 'light',
   },
 
   vite: {
     define: {
       __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
-      __APP_VERSION__: JSON.stringify(pkg.version)
-    }
+      __APP_VERSION__: JSON.stringify(pkg.version),
+    },
   },
 
   runtimeConfig: {
@@ -58,17 +58,17 @@ export default defineNuxtConfig({
       mapkitToken: process.env.MAPKIT_TOKEN || '',
       gaMeasurementId: process.env.GA_MEASUREMENT_ID || '',
       posthogPublicKey: process.env.POSTHOG_PUBLIC_KEY || '',
-      appName: process.env.APP_NAME || 'Austin Texas'
-    }
+      appName: process.env.APP_NAME || 'Austin Texas',
+    },
   },
 
   site: {
     url: 'https://austin-texas.net',
-    name: 'Austin Texas'
+    name: 'Austin Texas',
   },
 
   sitemap: {
-    sources: ['/api/sitemap-urls']
+    sources: ['/api/sitemap-urls'],
   },
 
   robots: {
@@ -88,7 +88,8 @@ export default defineNuxtConfig({
       name: 'Austin Texas',
       url: 'https://austin-texas.net',
       logo: '/favicon.png',
-      description: 'Your guide to Austin, Texas — pollen counts, local food, live music, neighborhoods, and more.',
+      description:
+        'Your guide to Austin, Texas — pollen counts, local food, live music, neighborhoods, and more.',
     },
   },
 
@@ -96,12 +97,18 @@ export default defineNuxtConfig({
     preset: 'cloudflare-pages',
     esbuild: {
       options: {
-        target: 'esnext'
-      }
+        target: 'esnext',
+      },
     },
     externals: {
-      inline: ['drizzle-orm']
-    }
+      inline: ['drizzle-orm'],
+    },
+    serverAssets: [
+      {
+        baseName: 'data',
+        dir: './public/data',
+      },
+    ],
   },
 
   app: {
@@ -110,8 +117,16 @@ export default defineNuxtConfig({
       htmlAttrs: { lang: 'en' },
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
-        { name: 'description', content: 'Your guide to Austin, Texas — live pollen counts, local food, live music, neighborhoods, and more.' },
-        { name: 'keywords', content: 'austin texas, austin guide, austin pollen, cedar fever, austin food, austin music, austin neighborhoods' },
+        {
+          name: 'description',
+          content:
+            'Your guide to Austin, Texas — live pollen counts, local food, live music, neighborhoods, and more.',
+        },
+        {
+          name: 'keywords',
+          content:
+            'austin texas, austin guide, austin pollen, cedar fever, austin food, austin music, austin neighborhoods',
+        },
         { name: 'theme-color', content: '#0a1004' },
         { name: 'geo.region', content: 'US-TX' },
         { name: 'geo.placename', content: 'Austin' },
@@ -119,10 +134,8 @@ export default defineNuxtConfig({
         { name: 'ICBM', content: '30.2672, -97.7431' },
         { name: 'build-time', content: new Date().toISOString() },
       ],
-      link: [
-        { rel: 'icon', type: 'image/png', href: '/favicon.png' },
-      ]
+      link: [{ rel: 'icon', type: 'image/png', href: '/favicon.png' }],
     },
-    pageTransition: { name: 'page', mode: 'out-in' }
-  }
+    pageTransition: { name: 'page', mode: 'out-in' },
+  },
 })

@@ -17,11 +17,7 @@ interface Env {
 }
 
 export default {
-  async scheduled(
-    _controller: ScheduledController,
-    env: Env,
-    ctx: ExecutionContext,
-  ) {
+  async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext) {
     const baseUrl = env.INGEST_URL || 'https://austin-texas.net'
     const apiKey = env.INGEST_API_KEY
 
@@ -39,31 +35,35 @@ export default {
     const cedarPromise = fetch(`${baseUrl}/api/pollen/ingest-cedar`, {
       method: 'POST',
       headers,
-    }).then(async (res) => {
-      const body = await res.text()
-      if (!res.ok) {
-        console.error(`AustinCedar ingest failed (${res.status}): ${body}`)
-      } else {
-        console.log(`AustinCedar ingest success: ${body}`)
-      }
-    }).catch((err) => {
-      console.error(`AustinCedar ingest error: ${err.message}`)
     })
+      .then(async (res) => {
+        const body = await res.text()
+        if (!res.ok) {
+          console.error(`AustinCedar ingest failed (${res.status}): ${body}`)
+        } else {
+          console.warn(`AustinCedar ingest success: ${body}`)
+        }
+      })
+      .catch((err) => {
+        console.error(`AustinCedar ingest error: ${err.message}`)
+      })
 
     // Ingest from KXAN (existing endpoint)
     const kxanPromise = fetch(`${baseUrl}/api/pollen/ingest`, {
       method: 'POST',
       headers,
-    }).then(async (res) => {
-      const body = await res.text()
-      if (!res.ok) {
-        console.error(`KXAN ingest failed (${res.status}): ${body}`)
-      } else {
-        console.log(`KXAN ingest success: ${body}`)
-      }
-    }).catch((err) => {
-      console.error(`KXAN ingest error: ${err.message}`)
     })
+      .then(async (res) => {
+        const body = await res.text()
+        if (!res.ok) {
+          console.error(`KXAN ingest failed (${res.status}): ${body}`)
+        } else {
+          console.warn(`KXAN ingest success: ${body}`)
+        }
+      })
+      .catch((err) => {
+        console.error(`KXAN ingest error: ${err.message}`)
+      })
 
     // Run both in parallel, don't let one failure block the other
     ctx.waitUntil(Promise.allSettled([cedarPromise, kxanPromise]))

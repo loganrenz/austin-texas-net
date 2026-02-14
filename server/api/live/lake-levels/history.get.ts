@@ -26,10 +26,18 @@ export default defineEventHandler(async (event) => {
       FROM lake_readings
       WHERE lake_key = ${lake}
         AND timestamp >= date('now', ${`-${days} days`})
+      // eslint-disable-next-line atx/prefer-drizzle-operators
       ORDER BY timestamp ASC
     `)
 
-    const data = (result.rows as any[] || []).map(r => ({
+    interface LakeRow {
+      elevation: number
+      percent_full: number | null
+      conservation_storage: number | null
+      timestamp: string
+    }
+    const rows = (result.results ?? []) as LakeRow[]
+    const data = rows.map((r) => ({
       elevation: r.elevation,
       percentFull: r.percent_full,
       conservationStorage: r.conservation_storage,
@@ -37,8 +45,7 @@ export default defineEventHandler(async (event) => {
     }))
 
     return { lake, days, data }
-  }
-  catch {
+  } catch {
     return { lake, days, data: [] }
   }
 })

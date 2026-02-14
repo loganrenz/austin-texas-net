@@ -10,15 +10,15 @@
 const RECENT_CONDITIONS_URL = 'https://waterdatafortexas.org/reservoirs/recent-conditions.json'
 
 export interface LakeLevelReading {
-  lakeKey: string        // "Travis", "Austin", etc.
-  lakeName: string       // "Lake Travis"
+  lakeKey: string // "Travis", "Austin", etc.
+  lakeName: string // "Lake Travis"
   lat: number
   lng: number
-  elevation: number      // ft above sea level
+  elevation: number // ft above sea level
   percentFull: number | null
   conservationCapacity: number | null
   conservationStorage: number | null
-  timestamp: string      // YYYY-MM-DD
+  timestamp: string // YYYY-MM-DD
 }
 
 /**
@@ -29,13 +29,11 @@ export const AUSTIN_LAKES = [
   'Austin',
   'Buchanan',
   'Georgetown',
-  'LyndonBJohnson',   // LBJ
+  'LyndonBJohnson', // LBJ
   'Inks',
   'MarbleFalls',
-  'Canyon',           // Canyon Lake — popular day trip
+  'Canyon', // Canyon Lake — popular day trip
 ] as const
-
-type AustinLakeKey = typeof AUSTIN_LAKES[number]
 
 interface TwdbReservoir {
   full_name: string
@@ -60,7 +58,7 @@ export async function fetchLakeLevels(): Promise<LakeLevelReading[]> {
     throw new Error(`WaterDataForTexas API returned ${res.status}: ${res.statusText}`)
   }
 
-  const data = await res.json() as Record<string, TwdbReservoir>
+  const data = (await res.json()) as Record<string, TwdbReservoir>
   const readings: LakeLevelReading[] = []
 
   for (const key of AUSTIN_LAKES) {
@@ -70,7 +68,7 @@ export async function fetchLakeLevels(): Promise<LakeLevelReading[]> {
     readings.push({
       lakeKey: key,
       lakeName: lake.full_name,
-      lat: lake.gauge_location.coordinates[1],   // GeoJSON is [lng, lat]
+      lat: lake.gauge_location.coordinates[1], // GeoJSON is [lng, lat]
       lng: lake.gauge_location.coordinates[0],
       elevation: lake.elevation,
       percentFull: lake.percent_full,
