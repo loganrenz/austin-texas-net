@@ -396,6 +396,25 @@ const editingTopic = ref<Partial<AdminTopic> | null>(null)
 const savingTopic = ref(false)
 const generatingDescription = ref(false)
 
+const isNewTopic = computed(() => !editingTopic.value?.id)
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+function onTopicLabelInput(val: string) {
+  if (!editingTopic.value) return
+  editingTopic.value.topicLabel = val
+  // Auto-generate key only for new topics
+  if (isNewTopic.value) {
+    editingTopic.value.topicKey = slugify(val)
+  }
+}
+
 function openEditTopic(topic?: AdminTopic) {
   editingTopic.value = topic
     ? { ...topic }
@@ -758,9 +777,7 @@ const spotColumns = [
         </template>
         <template #topics-cell="{ row }">
           <UBadge variant="soft" color="neutral" size="sm">
-            {{
-              allTopics.filter((t) => t.categorySlug === (row.original as any).slug).length
-            }}
+            {{ allTopics.filter((t) => t.categorySlug === (row.original as any).slug).length }}
             Topics
           </UBadge>
         </template>
@@ -1124,11 +1141,50 @@ const spotColumns = [
     <UModal v-model:open="showTopicModal">
       <template #content>
         <div v-if="editingTopic" class="p-8 flex flex-col gap-8 max-w-2xl w-full">
-          <h3 class="text-2xl font-bold">Edit Topic: {{ editingTopic.topicLabel }}</h3>
+          <h3 class="text-2xl font-bold">
+            {{ isNewTopic ? 'New Topic' : `Edit Topic: ${editingTopic.topicLabel}` }}
+          </h3>
           <div class="grid grid-cols-2 gap-6">
-            <UFormField label="Label" class="col-span-2 sm:col-span-1"
-              ><UInput v-model="editingTopic.topicLabel" size="lg" class="w-full"
-            /></UFormField>
+            <UFormField label="Label" required class="col-span-2 sm:col-span-1">
+              <UInput
+                :model-value="editingTopic.topicLabel"
+                size="lg"
+                class="w-full"
+                placeholder="BBQ Joints"
+                @update:model-value="onTopicLabelInput"
+              />
+            </UFormField>
+            <UFormField label="Key (slug)" required class="col-span-2 sm:col-span-1">
+              <UInput
+                v-model="editingTopic.topicKey!"
+                size="lg"
+                class="w-full font-mono"
+                placeholder="bbq"
+              />
+            </UFormField>
+            <UFormField label="Content Type" class="col-span-2 sm:col-span-1">
+              <USelect
+                v-model="editingTopic.contentType!"
+                :items="['spots', 'guide', 'data-page', 'utility']"
+                size="lg"
+                class="w-full"
+              />
+            </UFormField>
+            <UFormField label="Icon" class="col-span-2 sm:col-span-1">
+              <div class="flex gap-3 items-center">
+                <UInput
+                  v-model="editingTopic.icon!"
+                  size="lg"
+                  class="flex-1"
+                  placeholder="i-lucide-folder"
+                />
+                <div
+                  class="size-10 rounded-xl bg-elevated border border-default flex items-center justify-center shrink-0"
+                >
+                  <UIcon :name="editingTopic.icon || 'i-lucide-help-circle'" class="size-5" />
+                </div>
+              </div>
+            </UFormField>
             <UFormField label="Description" class="col-span-2">
               <template #label>
                 <div class="flex items-center justify-between w-full">
