@@ -59,6 +59,28 @@ const { data, status } = await useFetch<{
 const observations = computed(() => data.value?.observations ?? [])
 const totalCount = computed(() => data.value?.total ?? 0)
 
+// ── Center map on Texas once items arrive ───────────────────
+// ── Center map on Texas once map is ready ───────────────────
+const mapRef = ref<{
+  setRegion: (center: { lat: number; lng: number }, span?: { lat: number; lng: number }) => void
+}>()
+
+// Data is already available from SSR; the map mounts later via ClientOnly.
+// Watch for mapRef becoming available, then recenter on Texas.
+watch(
+  mapRef,
+  (map) => {
+    if (map && observations.value.length > 0) {
+      nextTick(() => {
+        setTimeout(() => {
+          map.setRegion({ lat: 31.0, lng: -100.4 }, { lat: 12, lng: 12 })
+        }, 100)
+      })
+    }
+  },
+  { once: true },
+)
+
 // ── Map items (pin annotations) ────────────────────────────
 interface BluebonnetItem {
   id: string
@@ -509,6 +531,7 @@ useSchemaOrg([
       <div class="bb-map">
         <ClientOnly>
           <AppMapKit
+            ref="mapRef"
             v-model:selected-id="selectedId"
             :items="mapItems"
             :create-pin-element="createBluebonnetPin"
@@ -723,7 +746,7 @@ useSchemaOrg([
 /* ── Floating hint chip ─────────────────────────────────────── */
 .hint-chip {
   position: absolute;
-  bottom: 12px;
+  top: 12px;
   right: 12px;
   display: flex;
   align-items: center;
@@ -738,6 +761,13 @@ useSchemaOrg([
   z-index: 10;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
+}
+
+@media (min-width: 1024px) {
+  .hint-chip {
+    top: auto;
+    bottom: 12px;
+  }
 }
 
 :is(.dark) .hint-chip {
