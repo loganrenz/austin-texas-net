@@ -515,7 +515,7 @@ useSchemaOrg([
             :create-cluster-element="createBluebonnetCluster"
             clustering-identifier="bluebonnets"
             :annotation-size="{ width: 28, height: 28 }"
-            :fallback-center="{ lat: 31.4, lng: -99.3 }"
+            :fallback-center="{ lat: 31.0, lng: -99.5 }"
             :bounding-padding="1.2"
             :zoom-span="{ lat: 0.15, lng: 0.2 }"
             preserve-region
@@ -723,17 +723,16 @@ useSchemaOrg([
 /* ── Floating hint chip ─────────────────────────────────────── */
 .hint-chip {
   position: absolute;
-  bottom: 18px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 12px;
+  right: 12px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
+  gap: 4px;
+  padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.55);
   color: #fff;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
   pointer-events: none;
   z-index: 10;
