@@ -134,6 +134,35 @@ function createBluebonnetPin(
   return { element: wrapper }
 }
 
+// ── Bluebonnet cluster factory ──────────────────────────────
+function createBluebonnetCluster(
+  _cluster: { memberAnnotations: unknown[]; coordinate: unknown },
+  count: number,
+): HTMLElement {
+  const el = document.createElement('div')
+  el.style.cssText = 'display:flex;align-items:center;justify-content:center;'
+
+  // Size scales slightly with count
+  const size = count > 50 ? 48 : count > 20 ? 42 : 36
+  const fontSize = count > 50 ? 15 : count > 20 ? 13 : 12
+
+  el.innerHTML = `<div style="
+    width:${size}px;height:${size}px;border-radius:50%;
+    background:linear-gradient(145deg,#6e72d4,#4a4eae);
+    box-shadow:0 2px 8px rgba(91,95,199,0.4),0 0 0 3px white,0 0 0 5px rgba(91,95,199,0.15);
+    display:flex;align-items:center;justify-content:center;
+    transition:transform 0.2s ease;
+  " onmouseover="this.style.transform='scale(1.12)'" onmouseout="this.style.transform='scale(1)'">
+    <span style="
+      font-size:${fontSize}px;font-weight:800;
+      font-family:var(--font-display);color:white;
+      line-height:1;text-shadow:0 1px 2px rgba(0,0,0,0.3);
+    ">${count}</span>
+  </div>`
+
+  return el
+}
+
 /** Format ISO date string as human-readable (e.g. "March 15, 2025") */
 function formatObsDate(iso: string): string {
   try {
@@ -173,6 +202,7 @@ useSchemaOrg([
           v-model:selected-id="selectedId"
           :items="mapItems"
           :create-pin-element="createBluebonnetPin"
+          :create-cluster-element="createBluebonnetCluster"
           clustering-identifier="bluebonnets"
           :annotation-size="{ width: 28, height: 28 }"
           :fallback-center="{ lat: 31.0, lng: -99.5 }"

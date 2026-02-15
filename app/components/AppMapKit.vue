@@ -77,6 +77,11 @@ const props = withDefaults(
     circleScaleFactor?: number
     /** When set, nearby annotations merge into cluster bubbles at low zoom. */
     clusteringIdentifier?: string
+    /** Custom factory for cluster annotation elements. Receives the cluster and its member count. */
+    createClusterElement?: (
+      cluster: { memberAnnotations: unknown[]; coordinate: unknown },
+      count: number,
+    ) => HTMLElement
     annotationSize?: { width: number; height: number }
     zoomSpan?: { lat: number; lng: number }
     boundingPadding?: number
@@ -97,6 +102,7 @@ const props = withDefaults(
     maxCircleRadius: 6000,
     circleScaleFactor: 0.004,
     clusteringIdentifier: undefined,
+    createClusterElement: undefined,
     annotationSize: () => ({ width: 100, height: 56 }),
     zoomSpan: () => ({ lat: 0.002, lng: 0.0025 }),
     boundingPadding: 0.05,
@@ -361,12 +367,20 @@ function buildPolygonRings(geometry: GeoJSONGeometry): Array<any[]> {
 
 // ── Map initialization ───────────────────────────────────────
 
-function createClusterElement(cluster: any): HTMLElement {
+function buildClusterElement(cluster: any): HTMLElement {
   const count = cluster.memberAnnotations?.length ?? 0
-  const el = document.createElement('div')
-  el.className = 'mapkit-cluster'
+
+  // Use custom factory if provided, otherwise default
+  let el: HTMLElement
+  if (props.createClusterElement) {
+    el = props.createClusterElement(cluster, count)
+  } else {
+    el = document.createElement('div')
+    el.className = 'mapkit-cluster'
+    el.innerHTML = `<div class="mapkit-cluster-bubble"><span class="mapkit-cluster-count">${count}</span></div>`
+  }
+
   el.setAttribute('data-map-pin', '')
-  el.innerHTML = `<div class="mapkit-cluster-bubble"><span class="mapkit-cluster-count">${count}</span></div>`
   el.style.cursor = 'pointer'
   el.addEventListener('click', (e) => {
     e.stopPropagation()
@@ -405,7 +419,7 @@ function initMap() {
   // Register cluster annotation factory when clustering is enabled
   if (props.clusteringIdentifier) {
     mapOpts.annotationForCluster = (cluster: any) => {
-      return new mapkit.Annotation(cluster.coordinate, () => createClusterElement(cluster), {
+      return new mapkit.Annotation(cluster.coordinate, () => buildClusterElement(cluster), {
         anchorOffset: new DOMPoint(0, 0),
         size: { width: 44, height: 44 },
         calloutEnabled: false,
