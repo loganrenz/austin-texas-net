@@ -153,13 +153,68 @@ function getTexasMaskColor(): string {
   /* eslint-enable atx/no-inline-hex */
 }
 
-// Scale a ring of MapKit Coordinates from a centroid by the given factor.
+/**
+ * Scale a ring of MapKit Coordinates from a centroid by the given factor.
+ */
 function scaleRing(ring: any[], scale: number, cLat: number, cLng: number): any[] {
   return ring.map((c: any) => {
     const lat = cLat + (c.latitude - cLat) * scale
     const lng = cLng + (c.longitude - cLng) * scale
     return new mapkit.Coordinate(lat, lng)
   })
+}
+
+/**
+ * Douglas-Peucker polygon simplification.
+ * Removes vertices closer than `tolerance` degrees to the line
+ * between their neighbors — smooths jagged edges for outer layers.
+ */
+function simplifyRing(ring: any[], tolerance: number): any[] {
+  if (ring.length <= 4) return ring
+
+  function perpDist(p: any, a: any, b: any): number {
+    const dx = b.longitude - a.longitude
+    const dy = b.latitude - a.latitude
+    const lenSq = dx * dx + dy * dy
+    if (lenSq === 0)
+      return Math.sqrt((p.longitude - a.longitude) ** 2 + (p.latitude - a.latitude) ** 2)
+    const t = Math.max(
+      0,
+      Math.min(1, ((p.longitude - a.longitude) * dx + (p.latitude - a.latitude) * dy) / lenSq),
+    )
+    const projX = a.longitude + t * dx
+    const projY = a.latitude + t * dy
+    return Math.sqrt((p.longitude - projX) ** 2 + (p.latitude - projY) ** 2)
+  }
+
+  function dp(points: any[], tol: number): any[] {
+    if (points.length <= 2) return points
+    let maxDist = 0
+    let maxIdx = 0
+    const first = points[0]
+    const last = points[points.length - 1]
+
+    for (let i = 1; i < points.length - 1; i++) {
+      const d = perpDist(points[i]!, first, last)
+      if (d > maxDist) {
+        maxDist = d
+        maxIdx = i
+      }
+    }
+
+    if (maxDist > tol) {
+      const left = dp(points.slice(0, maxIdx + 1), tol)
+      const right = dp(points.slice(maxIdx), tol)
+      return [...left.slice(0, -1), ...right]
+    }
+    return [first, last]
+  }
+
+  const result = dp(ring, tolerance)
+  if (result.length > 2 && result[0] !== result[result.length - 1]) {
+    result.push(result[0])
+  }
+  return result
 }
 
 async function addTexasMask() {
@@ -169,7 +224,7 @@ async function addTexasMask() {
   const coords = await fetchTexasCoords()
   if (!coords?.length) return
 
-  // Outer rectangle ~20° around Texas
+  // Outer rectangle covering the world
   const outerRing = [
     new mapkit.Coordinate(5, -180),
     new mapkit.Coordinate(5, 179.99),
@@ -177,33 +232,36 @@ async function addTexasMask() {
     new mapkit.Coordinate(57, -180),
   ]
 
-  // Base Texas ring in original GeoJSON winding (CCW) → MapKit hole
+  // Base Texas ring from GeoJSON (CCW winding = MapKit hole)
   const baseTexasRing = coords.map(
     ([lng, lat]: [number, number]) => new mapkit.Coordinate(lat, lng),
   )
 
-  // Approximate centroid of Texas
+  // Approximate centroid of Texas for scaling
   const cLat = 31.0
   const cLng = -99.5
 
-  // Create 4 stacked overlays with progressively scaled Texas holes.
-  // Near the border only the outermost layer shows (light), further out
-  // they accumulate to near-opaque — simulating a gradient fade.
+  // 5 layers: centroid scaling + progressive simplification.
+  // Fewer layers = no multiplicative darkening.
+  // Smaller scale range = less distortion at panhandle/Rio Grande.
+  // Outer layers get simplified to smooth jagged edges.
   const layers = [
-    { scale: 1.25, opacity: 1.0 }, // outermost — lightest, covers most area
-    { scale: 1.2, opacity: 0.8 }, // outermost — lightest, covers most area
-    { scale: 1.15, opacity: 0.6 }, // outermost — lightest, covers most area
-    { scale: 1.08, opacity: 0.35 }, // outermost — lightest, covers most area
-    { scale: 1.05, opacity: 0.35 },
-    { scale: 1.025, opacity: 0.3 },
-    { scale: 1.0, opacity: 0.3 }, // innermost — right at the Texas border
+    { scale: 1.0, simplify: 0, opacity: 0.18 },
+    { scale: 1.03, simplify: 0, opacity: 0.3 },
+    { scale: 1.06, simplify: 0.02, opacity: 0.5 },
+    { scale: 1.1, simplify: 0.05, opacity: 0.7 },
+    { scale: 1.15, simplify: 0.1, opacity: 0.92 },
   ]
 
   const fillColor = getTexasMaskColor()
 
   for (const layer of layers) {
-    const scaledHole =
+    let hole =
       layer.scale === 1.0 ? baseTexasRing : scaleRing(baseTexasRing, layer.scale, cLat, cLng)
+
+    if (layer.simplify > 0) {
+      hole = simplifyRing(hole, layer.simplify)
+    }
 
     const style = new mapkit.Style({
       fillColor,
@@ -212,7 +270,7 @@ async function addTexasMask() {
       lineWidth: 0,
     })
 
-    const overlay = new mapkit.PolygonOverlay([outerRing, scaledHole], { style })
+    const overlay = new mapkit.PolygonOverlay([outerRing, hole], { style })
     overlay.enabled = false
     map.addOverlay(overlay)
     texasMaskOverlays.push(overlay)
