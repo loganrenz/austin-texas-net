@@ -636,6 +636,8 @@ useSchemaOrg([
   padding: 1.25rem 1.25rem 1rem;
   display: flex;
   flex-direction: column;
+  order: 2;
+  overflow-y: auto;
 }
 
 @media (min-width: 1024px) {
@@ -652,12 +654,16 @@ useSchemaOrg([
 /* ── Map area ────────────────────────────────────────────────── */
 .bb-map {
   position: relative;
+  order: 1;
+  flex: 1;
+  min-height: 250px;
 }
 
 @media (min-width: 1024px) {
   .bb-map {
     flex: 1;
     min-width: 0;
+    order: unset;
   }
 
   /* Override AppMapKit height constraints for full-viewport mode */
