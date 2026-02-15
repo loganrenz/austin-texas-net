@@ -31,6 +31,9 @@ const footerLinks = [
 ]
 
 const adminLinks = [{ label: 'Admin', to: '/admin/radar' }]
+
+// Hide footer on fullscreen layout pages (e.g. bluebonnet map)
+const isFullscreen = computed(() => route.meta.layout === 'fullscreen')
 </script>
 
 <template>
@@ -42,8 +45,8 @@ const adminLinks = [{ label: 'Admin', to: '/admin/radar' }]
       </NuxtLayout>
     </UMain>
 
-    <!-- Footer -->
-    <UFooter>
+    <!-- Footer — hidden on fullscreen layout pages -->
+    <UFooter v-if="!isFullscreen">
       <template #left>
         <span class="text-xs text-muted"
           >&copy; {{ new Date().getFullYear() }} Austin-Texas.net</span

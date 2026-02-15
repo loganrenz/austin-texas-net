@@ -645,12 +645,14 @@ useSchemaOrg([
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 @media (min-width: 1024px) {
   .bb-layout {
     flex-direction: row;
+    overflow: hidden;
   }
 }
 
@@ -678,27 +680,30 @@ useSchemaOrg([
 .bb-map {
   position: relative;
   order: 1;
-  flex: 1;
-  min-height: 250px;
+  height: 55dvh;
+  min-height: 280px;
+  flex-shrink: 0;
+}
+
+/* Override AppMapKit height constraints for fullscreen mode (all viewports) */
+.bb-map :deep(.mapkit-wrapper) {
+  height: 100%;
+  max-height: none;
+  min-height: 100%;
+  border-bottom: none;
+}
+
+.bb-map :deep(.mapkit-canvas) {
+  height: 100%;
 }
 
 @media (min-width: 1024px) {
   .bb-map {
     flex: 1;
+    height: auto;
+    min-height: 0;
     min-width: 0;
     order: unset;
-  }
-
-  /* Override AppMapKit height constraints for full-viewport mode */
-  .bb-map :deep(.mapkit-wrapper) {
-    height: 100%;
-    max-height: none;
-    min-height: 100%;
-    border-bottom: none;
-  }
-
-  .bb-map :deep(.mapkit-canvas) {
-    height: 100%;
   }
 }
 
