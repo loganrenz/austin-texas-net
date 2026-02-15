@@ -15,6 +15,10 @@ useSchemaOrg([
     name: 'Austin, Texas — Live Local Intelligence',
     description: 'Real-time pollen, water temps, events, and where to go in Austin, Texas.',
   }),
+  defineWebSite({
+    name: 'Austin Texas',
+    url: 'https://austin-texas.net',
+  }),
 ])
 </script>
 
